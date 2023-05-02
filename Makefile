@@ -14,8 +14,6 @@ BUILD_TAGS = linkramsize,linkramstart,disable_fr_auth,linkprintk
 BUILD = ${BUILD_USER}@${BUILD_HOST} on ${BUILD_DATE}
 REV = $(shell git rev-parse --short HEAD 2> /dev/null)
 
-PROTOC ?= /usr/bin/protoc
-
 SHELL = /bin/bash
 
 SIGN = $(shell type -p signify || type -p signify-openbsd || type -p minisign)
@@ -46,20 +44,6 @@ all: trusted_applet witnessctl
 
 elf: $(APP).elf
 
-trusted_os: APP=trusted_os
-trusted_os: DIR=$(CURDIR)/trusted_os
-trusted_os: TEXT_START=0x80010000
-trusted_os: BUILD_TAGS := $(or $(shell ( [ ! -z "${DEBUG}" ] ) && echo "$(BUILD_TAGS),debug"),$(BUILD_TAGS))
-trusted_os: check_os_env elf imx
-	echo "signing Trusted OS"
-	@if [ "${SIGN_PWD}" != "" ]; then \
-		echo -e "${SIGN_PWD}\n" | ${SIGN} -S -s ${PRIVATE_KEY1} -m ${CURDIR}/bin/trusted_os.elf -x ${CURDIR}/bin/trusted_os.sig1; \
-		echo -e "${SIGN_PWD}\n" | ${SIGN} -S -s ${PRIVATE_KEY2} -m ${CURDIR}/bin/trusted_os.elf -x ${CURDIR}/bin/trusted_os.sig2; \
-	else \
-		${SIGN} -S -s ${PRIVATE_KEY1} -m ${CURDIR}/bin/trusted_os.elf -x ${CURDIR}/bin/trusted_os.sig1; \
-		${SIGN} -S -s ${PRIVATE_KEY2} -m ${CURDIR}/bin/trusted_os.elf -x ${CURDIR}/bin/trusted_os.sig2; \
-	fi
-
 trusted_applet: APP=trusted_applet
 trusted_applet: DIR=$(CURDIR)/trusted_applet
 trusted_applet: TEXT_START=0x90010000
@@ -73,7 +57,7 @@ trusted_applet: check_applet_env elf
 	fi
 	cp $(CURDIR)/bin/trusted_applet.elf $(CURDIR)/trusted_os/assets
 
-witnessctl: check_tamago proto
+witnessctl: check_tamago
 	@echo "building armory-witness control tool"
 	@cd $(CURDIR)/cmd/witnessctl && GOPATH="${BUILD_GOPATH}" ${TAMAGO} build -v \
 		-ldflags "-s -w -X 'main.Build=${BUILD}' -X 'main.Revision=${REV}'" \
@@ -82,11 +66,6 @@ witnessctl: check_tamago proto
 #### ARM targets ####
 
 imx: $(APP).imx
-
-proto:
-	@echo "generating protobuf classes"
-	-rm -f $(CURDIR)/api/*.pb.go
-	PATH=$(shell go env GOPATH | awk -F":" '{print $$1"/bin"}') ${PROTOC} --proto_path=$(CURDIR)/api --go_out=$(CURDIR)/api api.proto
 
 $(APP).bin: CROSS_COMPILE=arm-none-eabi-
 $(APP).bin: $(APP).elf
@@ -151,5 +130,5 @@ qemu-gdb:
 
 #### application target ####
 
-$(APP).elf: check_tamago proto
+$(APP).elf: check_tamago
 	cd $(DIR) && $(GOENV) $(TAMAGO) build -tags ${BUILD_TAGS} $(GOFLAGS) -o $(CURDIR)/bin/$(APP).elf

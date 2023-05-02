@@ -16,7 +16,7 @@ import (
 
 	"github.com/usbarmory/GoTEE/syscall"
 
-	"github.com/usbarmory/armory-witness/internal/rpc"
+	"github.com/transparency-dev/armored-witness-os/api/rpc"
 )
 
 const (

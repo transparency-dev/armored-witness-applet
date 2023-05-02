@@ -15,9 +15,9 @@ import (
 	"github.com/usbarmory/GoTEE/applet"
 	"github.com/usbarmory/GoTEE/syscall"
 
-	"github.com/usbarmory/armory-witness/api"
-	"github.com/usbarmory/armory-witness/internal/rpc"
-	"github.com/usbarmory/armory-witness/trusted_applet/cmd"
+	"github.com/transparency-dev/armored-witness-applet/trusted_applet/cmd"
+	"github.com/transparency-dev/armored-witness-os/api"
+	"github.com/transparency-dev/armored-witness-os/api/rpc"
 )
 
 var (

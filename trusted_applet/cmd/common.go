@@ -21,7 +21,7 @@ import (
 	"github.com/usbarmory/GoTEE/applet"
 	"github.com/usbarmory/GoTEE/syscall"
 
-	"github.com/usbarmory/armory-witness/api"
+	"github.com/transparency-dev/armored-witness-os/api"
 )
 
 func init() {

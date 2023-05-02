@@ -1,4 +1,4 @@
-module github.com/usbarmory/armory-witness
+module github.com/transparency-dev/armored-witness-applet
 
 go 1.19
 

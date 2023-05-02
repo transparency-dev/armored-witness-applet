@@ -21,9 +21,9 @@ import (
 	"golang.org/x/term"
 
 	"github.com/usbarmory/GoTEE/syscall"
-	"github.com/usbarmory/imx-enet"
+	enet "github.com/usbarmory/imx-enet"
 
-	"github.com/usbarmory/armory-witness/trusted_applet/cmd"
+	"github.com/transparency-dev/armored-witness-applet/trusted_applet/cmd"
 )
 
 // default Trusted Applet network settings

@@ -13,9 +13,9 @@ import (
 	"time"
 
 	"github.com/usbarmory/GoTEE/syscall"
-	"github.com/usbarmory/imx-enet"
+	enet "github.com/usbarmory/imx-enet"
 
-	"github.com/usbarmory/armory-witness/internal/rpc"
+	"github.com/transparency-dev/armored-witness-os/api/rpc"
 )
 
 func eventHandler() {

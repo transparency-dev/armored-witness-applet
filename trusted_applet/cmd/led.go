@@ -11,8 +11,8 @@ import (
 
 	"golang.org/x/term"
 
+	"github.com/transparency-dev/armored-witness-os/api/rpc"
 	"github.com/usbarmory/GoTEE/syscall"
-	"github.com/usbarmory/armory-witness/internal/rpc"
 )
 
 func init() {
