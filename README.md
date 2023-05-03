@@ -110,7 +110,7 @@ make trusted_applet && make trusted_os
 ```
 
 Final executables are created in the `bin` subdirectory, `trusted_os.elf`
-should be used for loading through `armory-witness-boot`.
+should be used for loading through `armored-witness-boot`.
 
 The following targets are available:
 
