@@ -99,6 +99,8 @@ func main() {
 		log.Fatalf("TA could not initialize networking, %v", err)
 	}
 
+	go eventHandler()
+
 	ctx := context.Background()
 	// Wait for a DHCP address to be assigned if that's what we're configured to do
 	if cfg.DHCP {
@@ -123,6 +125,6 @@ func runWithNetworking(ctx context.Context) error {
 
 	go startSSHServer(ctx, listener, addr.Address.String(), 22, cmd.Console)
 
-	// never returns
-	eventHandler()
+	<-ctx.Done()
+	return ctx.Err()
 }
