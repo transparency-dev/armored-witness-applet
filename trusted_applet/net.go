@@ -78,11 +78,15 @@ func init() {
 }
 
 // runDHCP starts the dhcp client.
-// When an IP is successully leased and configured on the iterface, f is called with a context
-// which will be Done if the leased address becomes expired.
-// This function blocks until the passed in ctx is Done.
+//
+// When an IP is successfully leased and configured on the interface, f is called with a context
+// which will become Done when the leased address expires. Callers can use this as a mechanism to
+// ensure that networking clients/services are only run while a leased IP is held.
+//
+// This function blocks until the passed-in ctx is Done.
 func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) error) {
 	childCtx, cancelChild := context.WithCancel(ctx)
+
 	acquired := func(oldAddr, newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
 		log.Printf("DHCPC: lease update - old: %v, new: %v", oldAddr.String(), newAddr.String())
 		if oldAddr.Address == newAddr.Address && oldAddr.PrefixLen == newAddr.PrefixLen {
@@ -136,6 +140,7 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 			log.Printf("DHCPC: no address acquired")
 		}
 	}
+
 	c := dhcp.NewClient(iface.Stack, nicID, iface.Link.LinkAddress(), 30*time.Second, time.Second, time.Second, acquired)
 	log.Println("Starting DHCPClient...")
 	c.Run(ctx)
