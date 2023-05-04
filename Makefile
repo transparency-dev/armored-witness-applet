@@ -46,7 +46,7 @@ RUSTFLAGS = -C linker=${RUST_LINKER} -C link-args="--Ttext=$(TEXT_START)" --targ
 
 #### primary targets ####
 
-all: trusted_applet witnessctl
+all: trusted_applet
 
 elf: $(APP).elf
 
@@ -62,12 +62,6 @@ trusted_applet: check_applet_env elf
 		${SIGN} -S -s ${PRIVATE_KEY} -m ${CURDIR}/bin/trusted_applet.elf -x ${CURDIR}/trusted_os/assets/trusted_applet.sig; \
 	fi
 	cp $(CURDIR)/bin/trusted_applet.elf $(CURDIR)/trusted_os/assets
-
-witnessctl: check_tamago
-	@echo "building armored-witness control tool"
-	@cd $(CURDIR)/cmd/witnessctl && GOPATH="${BUILD_GOPATH}" ${TAMAGO} build -v \
-		-ldflags "-s -w -X 'main.Build=${BUILD}' -X 'main.Revision=${REV}'" \
-		-o $(CURDIR)/bin/witnessctl
 
 #### ARM targets ####
 
