@@ -23,7 +23,7 @@ REV = $(shell git rev-parse --short HEAD 2> /dev/null)
 SHELL = /bin/bash
 
 SIGN = $(shell type -p signify || type -p signify-openbsd || type -p minisign)
-SIGN_PWD ?= "armory-witness"
+SIGN_PWD ?= "armored-witness"
 
 APP := ""
 TEXT_START := 0x80010000 # ramStart (defined in mem.go under relevant tamago/soc package) + 0x10000
