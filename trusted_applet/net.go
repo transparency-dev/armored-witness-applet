@@ -42,7 +42,7 @@ import (
 // default Trusted Applet network settings
 const (
 	MAC             = "1a:55:89:a2:69:41"
-	DHCP            = false
+	DHCP            = true
 	IP              = "10.0.0.1"
 	Netmask         = "255.255.255.0"
 	Gateway         = "10.0.0.2"
