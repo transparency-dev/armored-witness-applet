@@ -99,6 +99,7 @@ func main() {
 		log.Fatalf("TA could not initialize networking, %v", err)
 	}
 
+	// Register and run our RPC handler so we can receive ethernet frames.
 	go eventHandler()
 
 	ctx := context.Background()
@@ -112,6 +113,12 @@ func main() {
 	}
 }
 
+// runWithNetworking should only be called when we have an IP network configured.
+// ctx should become Done if the network becomes unconfigured for any reason (e.g.
+// DHCP lease expires).
+//
+// Everything which relies on IP networking being present should be started in
+// here, and should gracefully stop when the passed-in context is Done.
 func runWithNetworking(ctx context.Context) error {
 	addr, tcpErr := iface.Stack.GetMainNICAddress(nicID, ipv4.ProtocolNumber)
 	if tcpErr != nil {
