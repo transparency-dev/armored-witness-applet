@@ -15,6 +15,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"os"
 	"runtime"
@@ -22,6 +24,7 @@ import (
 
 	"github.com/usbarmory/GoTEE/applet"
 	"github.com/usbarmory/GoTEE/syscall"
+	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
 
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/cmd"
 	"github.com/transparency-dev/armored-witness-os/api"
@@ -58,10 +61,11 @@ func main() {
 	// its own configuration storage strategy.
 	cfg = &api.Configuration{
 		MAC:      MAC,
+		DHCP:     DHCP,
 		IP:       IP,
 		Netmask:  Netmask,
 		Gateway:  Gateway,
-		Resolver: Resolver,
+		Resolver: DefaultResolver,
 	}
 
 	// Send network configuration to Trusted OS for network initialization.
@@ -78,8 +82,6 @@ func main() {
 		log.Fatalf("TA configuration error, %v", err)
 	}
 
-	log.Printf("TA Version:%s MAC:%s IP:%s GW:%s DNS:%s", Version, cfg.MAC, cfg.IP, cfg.Gateway, cfg.Resolver)
-
 	var status api.Status
 
 	if err := syscall.Call("RPC.Status", nil, &status); err != nil {
@@ -90,24 +92,36 @@ func main() {
 		log.Print(line)
 	}
 
-	ledStatus := rpc.LEDStatus{
-		Name: "blue",
-		On:   true,
-	}
-
-	syscall.Call("RPC.LED", ledStatus, nil)
+	syscall.Call("RPC.LED", rpc.LEDStatus{Name: "blue", On: true}, nil)
+	defer syscall.Call("RPC.LED", rpc.LEDStatus{Name: "blue", On: false}, nil)
 
 	if err := startNetworking(); err != nil {
 		log.Fatalf("TA could not initialize networking, %v", err)
 	}
 
-	listener, err := iface.ListenerTCP4(22)
+	ctx := context.Background()
+	// Wait for a DHCP address to be assigned if that's what we're configured to do
+	if cfg.DHCP {
+		runDHCP(ctx, nicID, runWithNetworking)
+	} else {
+		runWithNetworking(ctx)
+	}
+}
 
+func runWithNetworking(ctx context.Context) error {
+	addr, tcpErr := iface.Stack.GetMainNICAddress(nicID, ipv4.ProtocolNumber)
+	if tcpErr != nil {
+		return fmt.Errorf("runWithNetworking has no network configured: %v", tcpErr)
+	}
+	log.Printf("TA Version:%s MAC:%s IP:%s GW:%s DNS:%s", Version, cfg.MAC, addr, iface.Stack.GetRouteTable(), resolver)
+
+	listener, err := iface.ListenerTCP4(22)
 	if err != nil {
 		log.Fatalf("TA could not initialize SSH listener, %v", err)
 	}
+	defer listener.Close()
 
-	go startSSHServer(listener, cfg.IP, 22, cmd.Console)
+	go startSSHServer(ctx, listener, addr.Address.String(), 22, cmd.Console)
 
 	// never returns
 	eventHandler()

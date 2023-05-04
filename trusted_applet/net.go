@@ -15,17 +15,22 @@
 package main
 
 import (
+	"context"
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"log"
 	"regexp"
 	"time"
 
 	"gvisor.dev/gvisor/pkg/bufferv2"
 	"gvisor.dev/gvisor/pkg/tcpip"
+	"gvisor.dev/gvisor/pkg/tcpip/header"
+	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
 
 	"github.com/miekg/dns"
+	"github.com/transparency-dev/armored-witness-applet/third_party/dhcp"
 	"golang.org/x/term"
 
 	"github.com/usbarmory/GoTEE/syscall"
@@ -36,11 +41,14 @@ import (
 
 // default Trusted Applet network settings
 const (
-	MAC      = "1a:55:89:a2:69:41"
-	IP       = "10.0.0.1"
-	Netmask  = "255.255.255.0"
-	Gateway  = "10.0.0.2"
-	Resolver = "8.8.8.8:53"
+	MAC             = "1a:55:89:a2:69:41"
+	DHCP            = false
+	IP              = "10.0.0.1"
+	Netmask         = "255.255.255.0"
+	Gateway         = "10.0.0.2"
+	DefaultResolver = "8.8.8.8:53"
+
+	nicID = tcpip.NICID(1)
 )
 
 // Trusted OS syscalls
@@ -51,7 +59,12 @@ const (
 	FREQ = 0x10000003
 )
 
-var iface *enet.Interface
+var (
+	iface *enet.Interface
+
+	// resolver is the DNS server address:port to use to resolve names
+	resolver string
+)
 
 func init() {
 	cmd.Add(cmd.Cmd{
@@ -64,6 +77,70 @@ func init() {
 	})
 }
 
+// runDHCP starts the dhcp client.
+// When an IP is successully leased and configured on the iterface, f is called with a context
+// which will be Done if the leased address becomes expired.
+// This function blocks until the passed in ctx is Done.
+func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) error) {
+	childCtx, cancelChild := context.WithCancel(ctx)
+	acquired := func(oldAddr, newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
+		log.Printf("DHCPC: lease update - old: %v, new: %v", oldAddr.String(), newAddr.String())
+		if oldAddr.Address == newAddr.Address && oldAddr.PrefixLen == newAddr.PrefixLen {
+			log.Printf("DHCPC: existing lease on %v renewed", newAddr.String())
+			return
+		}
+		newProtoAddr := tcpip.ProtocolAddress{
+			Protocol:          ipv4.ProtocolNumber,
+			AddressWithPrefix: newAddr,
+		}
+		if !oldAddr.Address.Unspecified() {
+			log.Printf("DHCPC: Releasing %v", oldAddr.String())
+			if err := iface.Stack.RemoveAddress(nicID, oldAddr.Address); err != nil {
+				log.Printf("Failed to remove expired address from stack: %v", err)
+			}
+			cancelChild()
+		}
+
+		if !newAddr.Address.Unspecified() {
+			log.Printf("DHCPC: Acquired %v", newAddr.String())
+			if err := iface.Stack.AddProtocolAddress(nicID, newProtoAddr, stack.AddressProperties{PEB: stack.FirstPrimaryEndpoint}); err != nil {
+				log.Printf("Failed to add newly acquired address to stack: %v", err)
+			} else {
+				cancelChild()
+				childCtx, cancelChild = context.WithCancel(ctx)
+				if len(cfg.DNS) > 0 {
+					resolver = fmt.Sprintf("%s:53", cfg.DNS[0].String())
+					log.Printf("DHCPC: Using DNS server %v", resolver)
+				}
+				// Set up routing for new address
+				// Start with the implicit route to local segment
+				table := []tcpip.Route{
+					{Destination: newAddr.Subnet(), NIC: nicID},
+				}
+				// add any additional routes from the DHCP server
+				if len(cfg.Router) > 0 {
+					for _, gw := range cfg.Router {
+						table = append(table, tcpip.Route{Destination: header.IPv4EmptySubnet, Gateway: gw, NIC: nicID})
+						log.Printf("DHCPC: Using Gateway %v", gw)
+					}
+				}
+				iface.Stack.SetRouteTable(table)
+
+				go func(childCtx context.Context) {
+					if err := f(childCtx); err != nil {
+						log.Printf("runDHCP f: %v", err)
+					}
+				}(childCtx)
+			}
+		} else {
+			log.Printf("DHCPC: no address acquired")
+		}
+	}
+	c := dhcp.NewClient(iface.Stack, nicID, iface.Link.LinkAddress(), 30*time.Second, time.Second, time.Second, acquired)
+	log.Println("Starting DHCPClient...")
+	c.Run(ctx)
+}
+
 func resolve(s string) (r *dns.Msg, rtt time.Duration, err error) {
 	if s[len(s)-1:] != "." {
 		s += "."
@@ -74,11 +151,11 @@ func resolve(s string) (r *dns.Msg, rtt time.Duration, err error) {
 	msg.RecursionDesired = true
 
 	msg.Question = make([]dns.Question, 1)
-	msg.Question[0] = dns.Question{s, dns.TypeANY, dns.ClassINET}
+	msg.Question[0] = dns.Question{s, dns.TypeA, dns.ClassINET}
 
 	conn := new(dns.Conn)
 
-	if conn.Conn, err = iface.DialTCP4(cfg.Resolver); err != nil {
+	if conn.Conn, err = iface.DialTCP4(resolver); err != nil {
 		return
 	}
 
@@ -160,7 +237,10 @@ func (n *txNotification) WriteNotify() {
 }
 
 func startNetworking() (err error) {
-	if iface, err = enet.Init(nil, cfg.IP, cfg.Netmask, cfg.MAC, cfg.Gateway, 1); err != nil {
+	// Set the default resolver from the config, if we're using DHCP this may be updated.
+	resolver = cfg.Resolver
+
+	if iface, err = enet.Init(nil, cfg.IP, cfg.Netmask, cfg.MAC, cfg.Gateway, int(nicID)); err != nil {
 		return
 	}
 

@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/miekg/dns v1.1.54
+	github.com/golang/glog v1.1.1
 	github.com/transparency-dev/armored-witness-os v0.0.0-20230504100200-51ba0628e5ed
 	github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa
 	github.com/usbarmory/imx-enet v0.0.0-20230210123530-18463adc40b7
@@ -13,7 +14,6 @@ require (
 )
 
 require (
-	github.com/golang/glog v1.1.1 // indirect
 	github.com/google/btree v1.1.2 // indirect
 	github.com/gsora/fidati v0.0.0-20220824075547-eeb0a5f7d6c3 // indirect
 	github.com/usbarmory/tamago v0.0.0-20230428114202-5d3b5697bb08 // indirect
