@@ -13,6 +13,7 @@ require (
 )
 
 require (
+	github.com/golang/glog v1.1.1 // indirect
 	github.com/google/btree v1.1.2 // indirect
 	github.com/gsora/fidati v0.0.0-20220824075547-eeb0a5f7d6c3 // indirect
 	github.com/usbarmory/tamago v0.0.0-20230428114202-5d3b5697bb08 // indirect
