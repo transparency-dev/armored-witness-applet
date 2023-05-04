@@ -106,7 +106,9 @@ func main() {
 	if cfg.DHCP {
 		runDHCP(ctx, nicID, runWithNetworking)
 	} else {
-		runWithNetworking(ctx)
+		if err := runWithNetworking(ctx); err != nil && err != context.Canceled {
+			log.Printf("runWithNetworking: %v", err)
+		}
 	}
 }
 
