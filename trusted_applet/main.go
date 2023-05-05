@@ -221,15 +221,11 @@ func runWithNetworking(ctx context.Context) error {
 		return fmt.Errorf("could not initialize HTTP listener: %v", err)
 	}
 
-	go func() {
-		log.Println("Starting witness...")
-		if err := omniwitness.Main(ctx, opConfig, persistence, mainListener, httpClient); err != nil {
-			// TODO: surface this
-			glog.Exitf("Main failed: %v", err)
-		}
-	}()
+	log.Println("Starting witness...")
+	if err := omniwitness.Main(ctx, opConfig, persistence, mainListener, httpClient); err != nil {
+		return fmt.Errorf("omniwitness.Main failed: %v", err)
+	}
 
-	<-ctx.Done()
 	return ctx.Err()
 }
 
