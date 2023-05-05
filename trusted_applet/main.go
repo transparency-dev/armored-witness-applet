@@ -169,7 +169,7 @@ func main() {
 		runDHCP(ctx, nicID, runWithNetworking)
 	} else {
 		if err := runWithNetworking(ctx); err != nil && err != context.Canceled {
-			log.Printf("runWithNetworking: %v", err)
+			glog.Exitf("runWithNetworking: %v", err)
 		}
 	}
 }
@@ -205,11 +205,11 @@ func runWithNetworking(ctx context.Context) error {
 
 	signer, err := note.NewSigner(signingKey)
 	if err != nil {
-		glog.Exitf("Failed to init signer: %v", err)
+		return fmt.Errorf("failed to init signer: %v", err)
 	}
 	verifier, err := note.NewVerifier(publicKey)
 	if err != nil {
-		glog.Exitf("Failed to init verifier: %v", err)
+		return fmt.Errorf("failed to init verifier: %v", err)
 	}
 	opConfig := omniwitness.OperatorConfig{
 		WitnessSigner:   signer,
@@ -218,12 +218,13 @@ func runWithNetworking(ctx context.Context) error {
 	// TODO(mhutchinson): add a second listener for an admin API.
 	mainListener, err := iface.ListenerTCP4(80)
 	if err != nil {
-		glog.Exitf("could not initialize HTTP listener: %v", err)
+		return fmt.Errorf("could not initialize HTTP listener: %v", err)
 	}
 
 	go func() {
 		log.Println("Starting witness...")
 		if err := omniwitness.Main(ctx, opConfig, persistence, mainListener, httpClient); err != nil {
+			// TODO: surface this
 			glog.Exitf("Main failed: %v", err)
 		}
 	}()
