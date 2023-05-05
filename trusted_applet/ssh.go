@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -110,7 +111,7 @@ func handleChannels(chans <-chan ssh.NewChannel, handler consoleHandler) {
 	}
 }
 
-func startSSHServer(listener net.Listener, addr string, port uint16, handler consoleHandler) {
+func startSSHServer(ctx context.Context, listener net.Listener, addr string, port uint16, handler consoleHandler) {
 	srv := &ssh.ServerConfig{
 		NoClientAuth: true,
 	}
@@ -132,6 +133,12 @@ func startSSHServer(listener net.Listener, addr string, port uint16, handler con
 	srv.AddHostKey(signer)
 
 	for {
+		select {
+		case <-ctx.Done():
+			log.Printf("SSH server exiting: %v", ctx.Err())
+			return
+		default:
+		}
 		conn, err := listener.Accept()
 
 		if err != nil {
