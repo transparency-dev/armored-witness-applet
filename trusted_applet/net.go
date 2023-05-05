@@ -17,11 +17,15 @@ package main
 import (
 	"context"
 	"crypto/rand"
+	"crypto/tls"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"log"
+	"net"
+	"net/http"
 	"regexp"
+	"strings"
 	"time"
 
 	"gvisor.dev/gvisor/pkg/bufferv2"
@@ -30,6 +34,7 @@ import (
 	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
 
+	"github.com/golang/glog"
 	"github.com/miekg/dns"
 	"github.com/transparency-dev/armored-witness-applet/third_party/dhcp"
 	"golang.org/x/term"
@@ -75,6 +80,56 @@ func init() {
 		Help:    "resolve domain (requires routing)",
 		Fn:      dnsCmd,
 	})
+}
+
+// getHttpClient returns a http.Client instance which uses the local resolver.
+func getHttpClient() *http.Client {
+	netTransport := &http.Transport{
+		DialContext: func(_ context.Context, network, add string) (net.Conn, error) {
+			glog.V(2).Infof("Resolving IP to dial %v", add)
+			parts := strings.Split(add, ":")
+			if len(parts) != 2 {
+				// Dial is only called with the host:port (no scheme, no path)
+				return nil, fmt.Errorf("expected host:port but got %q", add)
+			}
+			host, port := parts[0], parts[1]
+			// Look up the hostname
+			r, _, err := resolve(host)
+			if err != nil {
+				return nil, fmt.Errorf("failed to resolve host %q: %v", host, err)
+			}
+			if len(r.Answer) == 0 {
+				return nil, fmt.Errorf("failed to resolve A records for host %q", host)
+			}
+			var ip net.IP
+			for _, ans := range r.Answer {
+				if a, ok := ans.(*dns.A); ok {
+					log.Printf("found A record for %q: %v ", host, a)
+					ip = a.A
+					break
+				} else {
+					log.Printf("found non-A record for %q: %v ", host, ans)
+				}
+			}
+			if ip == nil {
+				return nil, fmt.Errorf("no A records for %q", host)
+			}
+			target := fmt.Sprintf("%s:%s", ip, port)
+			glog.V(2).Infof("Dialing %s", target)
+			return iface.DialTCP4(target)
+		},
+		TLSClientConfig: &tls.Config{
+			// TODO: determine some way to make client certs available
+			// This isn't horrific here, as all of the data that is fetched will be
+			// cryptographically verified at a higher layer, but still... it's nasty.
+			InsecureSkipVerify: true,
+		},
+	}
+	c := http.Client{
+		Transport: netTransport,
+		Timeout:   httpTimeout,
+	}
+	return &c
 }
 
 // runDHCP starts the dhcp client.
@@ -197,8 +252,9 @@ func resolve(s string) (r *dns.Msg, rtt time.Duration, err error) {
 	msg.Id = dns.Id()
 	msg.RecursionDesired = true
 
-	msg.Question = make([]dns.Question, 1)
-	msg.Question[0] = dns.Question{s, dns.TypeA, dns.ClassINET}
+	msg.Question = []dns.Question{
+		{Name: s, Qtype: dns.TypeA, Qclass: dns.ClassINET},
+	}
 
 	conn := new(dns.Conn)
 

@@ -21,14 +21,33 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync"
+	"time"
 
-	"github.com/transparency-dev/armored-witness-applet/trusted_applet/cmd"
-	"github.com/transparency-dev/armored-witness-os/api"
-	"github.com/transparency-dev/armored-witness-os/api/rpc"
 	"github.com/usbarmory/GoTEE/applet"
 	"github.com/usbarmory/GoTEE/syscall"
 	"google.golang.org/protobuf/proto"
 	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
+
+	"github.com/transparency-dev/armored-witness-applet/trusted_applet/cmd"
+	"github.com/transparency-dev/armored-witness-os/api"
+	"github.com/transparency-dev/armored-witness-os/api/rpc"
+
+	"github.com/golang/glog"
+	"github.com/transparency-dev/witness/omniwitness"
+	"golang.org/x/mod/sumdb/note"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
+const (
+	// Timeout for any http requests.
+	httpTimeout = 10 * time.Second
+
+	// Generated from https://go.dev/play/p/uWUKLNK6h9v
+	// TODO(mhutchinson): these need to be read from file instead of constants
+	publicKey  = "TrustMe+68958214+AQ4Ys/PsXqfhPkNK7Y7RyYUMOJvfl65PzJOEiq9VFPjF"
+	signingKey = "PRIVATE+KEY+TrustMe+68958214+AZKby3TDZizdARF975ZyLJwGbHTivd+EqbfYTN5qr2cI"
 )
 
 var (
@@ -45,6 +64,7 @@ func init() {
 }
 
 func main() {
+	ctx := context.Background()
 	defer applet.Exit()
 
 	log.Printf("%s/%s (%s) • TEE user applet • %s %s",
@@ -109,7 +129,6 @@ func main() {
 	// Register and run our RPC handler so we can receive ethernet frames.
 	go eventHandler()
 
-	ctx := context.Background()
 	// Wait for a DHCP address to be assigned if that's what we're configured to do
 	if cfg.DHCP {
 		runDHCP(ctx, nicID, runWithNetworking)
@@ -146,6 +165,114 @@ func runWithNetworking(ctx context.Context) error {
 
 	go startSSHServer(ctx, listener, addr.Address.String(), 22, cmd.Console)
 
+	// Set up and start omniwitness
+	httpClient := getHttpClient()
+
+	signer, err := note.NewSigner(signingKey)
+	if err != nil {
+		glog.Exitf("Failed to init signer: %v", err)
+	}
+	verifier, err := note.NewVerifier(publicKey)
+	if err != nil {
+		glog.Exitf("Failed to init verifier: %v", err)
+	}
+	opConfig := omniwitness.OperatorConfig{
+		WitnessSigner:   signer,
+		WitnessVerifier: verifier,
+	}
+
+	// TODO(mhutchinson): add a second listener for an admin API.
+	mainListener, err := iface.ListenerTCP4(80)
+	if err != nil {
+		glog.Exitf("could not initialize HTTP listener: %v", err)
+	}
+	p := memPersistance{}
+	p.Init()
+
+	go func() {
+		if err := omniwitness.Main(ctx, opConfig, &p, mainListener, httpClient); err != nil {
+			glog.Exitf("Main failed: %v", err)
+		}
+	}()
+
 	<-ctx.Done()
 	return ctx.Err()
+}
+
+// Temporary in-memory witness storage implementation below.
+// This will be replaced shortly.
+
+type checkpointAndProof struct {
+	checkpoint []byte
+	proof      []byte
+}
+
+type memPersistance struct {
+	mu sync.Mutex
+	fs map[string]checkpointAndProof
+}
+
+func (m *memPersistance) Init() error {
+	m.fs = make(map[string]checkpointAndProof)
+	return nil
+}
+
+func (m *memPersistance) ReadOps(id string) (omniwitness.LogStateReadOps, error) {
+	return ops{
+		id: id,
+		p:  m,
+	}, nil
+}
+
+func (m *memPersistance) Logs() ([]string, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	logs := make(map[string]bool)
+	for k := range m.fs {
+		if strings.HasPrefix(k, "/logs/") {
+			bits := strings.Split(k, "/")
+			logs[bits[1]] = true
+		}
+	}
+	ret := []string{}
+	for k := range logs {
+		ret = append(ret, k)
+	}
+	return ret, nil
+}
+
+type ops struct {
+	id string
+	p  *memPersistance
+}
+
+func (o ops) GetLatest() ([]byte, []byte, error) {
+	o.p.mu.Lock()
+	defer o.p.mu.Unlock()
+	l, ok := o.p.fs[fmt.Sprintf("/logs/%s/latest", o.id)]
+	if !ok {
+		return nil, nil, status.Error(codes.NotFound, "no checkpoint for log")
+	}
+	return l.checkpoint, l.proof, nil
+}
+
+func (o *memPersistance) WriteOps(id string) (omniwitness.LogStateWriteOps, error) {
+	return ops{
+		id: id,
+		p:  o,
+	}, nil
+}
+
+func (o ops) Set(checkpointRaw []byte, compactRange []byte) error {
+	o.p.mu.Lock()
+	o.p.fs[fmt.Sprintf("/logs/%s/latest", o.id)] = checkpointAndProof{
+		checkpoint: checkpointRaw,
+		proof:      compactRange,
+	}
+	return nil
+}
+
+func (o ops) Close() error {
+	o.p.mu.Unlock()
+	return nil
 }
