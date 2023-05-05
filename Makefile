@@ -30,19 +30,12 @@ TEXT_START := 0x80010000 # ramStart (defined in mem.go under relevant tamago/soc
 
 GOENV := GO_EXTLINK_ENABLED=0 CGO_ENABLED=0 GOOS=tamago GOARM=7 GOARCH=arm
 ENTRY_POINT := _rt0_arm_tamago
-QEMU ?= qemu-system-arm -machine mcimx6ul-evk -cpu cortex-a7 -m 512M \
-        -nographic -monitor none -serial null -serial stdio \
-        -net nic,model=imx.enet,netdev=net0 -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
-        -semihosting
 
 ARCH = "arm"
-RUST_LINKER = "arm-none-eabi-ld"
-RUST_TARGET = "armv7a-none-eabi"
 
 GOFLAGS = -tags ${BUILD_TAGS} -trimpath -ldflags "-T ${TEXT_START} -E ${ENTRY_POINT} -R 0x1000 -X 'main.Build=${BUILD}' -X 'main.Revision=${REV}' -X 'main.Version=${BUILD_EPOCH}' -X 'main.PublicKey=$(shell test ${PUBLIC_KEY} && cat ${PUBLIC_KEY} | tail -n 1)'"
-RUSTFLAGS = -C linker=${RUST_LINKER} -C link-args="--Ttext=$(TEXT_START)" --target ${RUST_TARGET}
 
-.PHONY: clean qemu qemu-gdb
+.PHONY: clean
 
 #### primary targets ####
 
@@ -54,14 +47,12 @@ trusted_applet: APP=trusted_applet
 trusted_applet: DIR=$(CURDIR)/trusted_applet
 trusted_applet: TEXT_START=0x90010000
 trusted_applet: check_applet_env elf
-	mkdir -p $(CURDIR)/trusted_os/assets
 	echo "signing Trusted Applet"
 	@if [ "${SIGN_PWD}" != "" ]; then \
-		echo -e "${SIGN_PWD}\n" | ${SIGN} -S -s ${APPLET_PRIVATE_KEY} -m ${CURDIR}/bin/trusted_applet.elf -x ${CURDIR}/trusted_os/assets/trusted_applet.sig; \
+		echo -e "${SIGN_PWD}\n" | ${SIGN} -S -s ${APPLET_PRIVATE_KEY} -m ${CURDIR}/bin/trusted_applet.elf -x ${CURDIR}/bin/trusted_applet.sig; \
 	else \
-		${SIGN} -S -s ${APPLET_PRIVATE_KEY} -m ${CURDIR}/bin/trusted_applet.elf -x ${CURDIR}/trusted_os/assets/trusted_applet.sig; \
+		${SIGN} -S -s ${APPLET_PRIVATE_KEY} -m ${CURDIR}/bin/trusted_applet.elf -x ${CURDIR}/bin/trusted_applet.sig; \
 	fi
-	cp $(CURDIR)/bin/trusted_applet.elf $(CURDIR)/trusted_os/assets
 
 #### ARM targets ####
 
@@ -106,13 +97,7 @@ dcd:
 	cp -f $(GOMODCACHE)/$(TAMAGO_PKG)/board/usbarmory/mk2/imximage.cfg $(CURDIR)/bin/$(APP).dcd
 
 clean:
-	@rm -fr $(CURDIR)/bin/* $(CURDIR)/trusted_os/assets/* $(CURDIR)/qemu.dtb
-
-qemu:
-	$(QEMU) -kernel $(CURDIR)/bin/trusted_os.elf
-
-qemu-gdb:
-	$(QEMU) -kernel $(CURDIR)/bin/trusted_os.elf -S -s
+	@rm -fr $(CURDIR)/bin/*
 
 #### application target ####
 
