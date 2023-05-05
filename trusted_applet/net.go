@@ -85,12 +85,18 @@ func init() {
 //
 // This function blocks until the passed-in ctx is Done.
 func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) error) {
-	childCtx, cancelChild := context.WithCancel(ctx)
+	var (
+		childCtx    context.Context
+		cancelChild context.CancelFunc
+	)
+	fDone := make(chan bool, 1)
 
 	acquired := func(oldAddr, newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
 		log.Printf("DHCPC: lease update - old: %v, new: %v", oldAddr.String(), newAddr.String())
 		if oldAddr.Address == newAddr.Address && oldAddr.PrefixLen == newAddr.PrefixLen {
 			log.Printf("DHCPC: existing lease on %v renewed", newAddr.String())
+			// reconfigure network stuff in-case DNS or gateway routes have changed.
+			configureNetFromDHCP(newAddr, cfg)
 			return
 		}
 		newProtoAddr := tcpip.ProtocolAddress{
@@ -98,11 +104,15 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 			AddressWithPrefix: newAddr,
 		}
 		if !oldAddr.Address.Unspecified() {
+			// Tell f to exit, and wait for it to do so
+			cancelChild()
+			log.Print("Waiting for child to complete...")
+			<-fDone
+
 			log.Printf("DHCPC: Releasing %v", oldAddr.String())
 			if err := iface.Stack.RemoveAddress(nicID, oldAddr.Address); err != nil {
 				log.Printf("Failed to remove expired address from stack: %v", err)
 			}
-			cancelChild()
 		}
 
 		if !newAddr.Address.Unspecified() {
@@ -110,27 +120,14 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 			if err := iface.Stack.AddProtocolAddress(nicID, newProtoAddr, stack.AddressProperties{PEB: stack.FirstPrimaryEndpoint}); err != nil {
 				log.Printf("Failed to add newly acquired address to stack: %v", err)
 			} else {
-				cancelChild()
+				configureNetFromDHCP(newAddr, cfg)
+
 				childCtx, cancelChild = context.WithCancel(ctx)
-				if len(cfg.DNS) > 0 {
-					resolver = fmt.Sprintf("%s:53", cfg.DNS[0].String())
-					log.Printf("DHCPC: Using DNS server %v", resolver)
-				}
-				// Set up routing for new address
-				// Start with the implicit route to local segment
-				table := []tcpip.Route{
-					{Destination: newAddr.Subnet(), NIC: nicID},
-				}
-				// add any additional routes from the DHCP server
-				if len(cfg.Router) > 0 {
-					for _, gw := range cfg.Router {
-						table = append(table, tcpip.Route{Destination: header.IPv4EmptySubnet, Gateway: gw, NIC: nicID})
-						log.Printf("DHCPC: Using Gateway %v", gw)
-					}
-				}
-				iface.Stack.SetRouteTable(table)
 
 				go func(childCtx context.Context) {
+					// Signal when we exit:
+					defer func() { fDone <- true }()
+
 					if err := f(childCtx); err != nil {
 						log.Printf("runDHCP f: %v", err)
 					}
@@ -144,6 +141,29 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 	c := dhcp.NewClient(iface.Stack, nicID, iface.Link.LinkAddress(), 30*time.Second, time.Second, time.Second, acquired)
 	log.Println("Starting DHCPClient...")
 	c.Run(ctx)
+}
+
+// configureNetFromDHCP sets up network related configuration, e.g. DNS servers,
+// gateway routes, etc. based on config received from the DHCP server.
+// Note that this function does not update the network stack's assigned IP address.
+func configureNetFromDHCP(newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
+	if len(cfg.DNS) > 0 {
+		resolver = fmt.Sprintf("%s:53", cfg.DNS[0].String())
+		log.Printf("DHCPC: Using DNS server %v", resolver)
+	}
+	// Set up routing for new address
+	// Start with the implicit route to local segment
+	table := []tcpip.Route{
+		{Destination: newAddr.Subnet(), NIC: nicID},
+	}
+	// add any additional routes from the DHCP server
+	if len(cfg.Router) > 0 {
+		for _, gw := range cfg.Router {
+			table = append(table, tcpip.Route{Destination: header.IPv4EmptySubnet, Gateway: gw, NIC: nicID})
+			log.Printf("DHCPC: Using Gateway %v", gw)
+		}
+	}
+	iface.Stack.SetRouteTable(table)
 }
 
 func resolve(s string) (r *dns.Msg, rtt time.Duration, err error) {

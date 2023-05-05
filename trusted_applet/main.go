@@ -128,9 +128,14 @@ func runWithNetworking(ctx context.Context) error {
 
 	listener, err := iface.ListenerTCP4(22)
 	if err != nil {
-		log.Fatalf("TA could not initialize SSH listener, %v", err)
+		return fmt.Errorf("TA could not initialize SSH listener, %v", err)
 	}
-	defer listener.Close()
+	defer func() {
+		log.Println("Closing ssh port")
+		if err := listener.Close(); err != nil {
+			log.Printf("Error closing ssh port: %v", err)
+		}
+	}()
 
 	go startSSHServer(ctx, listener, addr.Address.String(), 22, cmd.Console)
 

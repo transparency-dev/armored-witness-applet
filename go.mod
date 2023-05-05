@@ -3,8 +3,8 @@ module github.com/transparency-dev/armored-witness-applet
 go 1.19
 
 require (
-	github.com/miekg/dns v1.1.54
 	github.com/golang/glog v1.1.1
+	github.com/miekg/dns v1.1.54
 	github.com/transparency-dev/armored-witness-os v0.0.0-20230504100200-51ba0628e5ed
 	github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa
 	github.com/usbarmory/imx-enet v0.0.0-20230210123530-18463adc40b7
