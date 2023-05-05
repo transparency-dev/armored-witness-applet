@@ -57,9 +57,9 @@ trusted_applet: check_applet_env elf
 	mkdir -p $(CURDIR)/trusted_os/assets
 	echo "signing Trusted Applet"
 	@if [ "${SIGN_PWD}" != "" ]; then \
-		echo -e "${SIGN_PWD}\n" | ${SIGN} -S -s ${PRIVATE_KEY} -m ${CURDIR}/bin/trusted_applet.elf -x ${CURDIR}/trusted_os/assets/trusted_applet.sig; \
+		echo -e "${SIGN_PWD}\n" | ${SIGN} -S -s ${APPLET_PRIVATE_KEY} -m ${CURDIR}/bin/trusted_applet.elf -x ${CURDIR}/trusted_os/assets/trusted_applet.sig; \
 	else \
-		${SIGN} -S -s ${PRIVATE_KEY} -m ${CURDIR}/bin/trusted_applet.elf -x ${CURDIR}/trusted_os/assets/trusted_applet.sig; \
+		${SIGN} -S -s ${APPLET_PRIVATE_KEY} -m ${CURDIR}/bin/trusted_applet.elf -x ${CURDIR}/trusted_os/assets/trusted_applet.sig; \
 	fi
 	cp $(CURDIR)/bin/trusted_applet.elf $(CURDIR)/trusted_os/assets
 
@@ -91,22 +91,8 @@ $(APP).dcd: dcd
 #### utilities ####
 
 check_applet_env:
-	@if [ "${PRIVATE_KEY}" == "" ] || [ ! -f "${PRIVATE_KEY}" ]; then \
-		echo 'You need to set the PRIVATE_KEY variable to a valid signing key path'; \
-		exit 1; \
-	fi
-
-check_os_env:
-	@if [ "${PRIVATE_KEY1}" == "" ] || [ ! -f "${PRIVATE_KEY1}" ]; then \
-		echo 'You need to set the PRIVATE_KEY1 variable to a valid signing key path'; \
-		exit 1; \
-	fi
-	@if [ "${PRIVATE_KEY2}" == "" ] || [ ! -f "${PRIVATE_KEY2}" ]; then \
-		echo 'You need to set the PRIVATE_KEY2 variable to a valid signing key path'; \
-		exit 1; \
-	fi
-	@if [ "${PUBLIC_KEY}" == "" ] || [ ! -f "${PUBLIC_KEY}" ]; then \
-		echo 'You need to set the PUBLIC_KEY variable to a valid authentication key path'; \
+	@if [ "${APPLET_PRIVATE_KEY}" == "" ] || [ ! -f "${APPLET_PRIVATE_KEY}" ]; then \
+		echo 'You need to set the APPLET_PRIVATE_KEY variable to a valid signing key path'; \
 		exit 1; \
 	fi
 
