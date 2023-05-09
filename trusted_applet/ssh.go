@@ -132,6 +132,14 @@ func startSSHServer(ctx context.Context, listener net.Listener, addr string, por
 
 	srv.AddHostKey(signer)
 
+	connsToClose := []*ssh.ServerConn{}
+	defer func() {
+		for _, sc := range connsToClose {
+			log.Printf("Closing SSH connection from %s", sc.RemoteAddr())
+			sc.Close()
+		}
+	}()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -152,6 +160,7 @@ func startSSHServer(ctx context.Context, listener net.Listener, addr string, por
 			log.Printf("error accepting handshake, %v", err)
 			continue
 		}
+		connsToClose = append(connsToClose, sshConn)
 
 		log.Printf("new ssh connection from %s (%s)", sshConn.RemoteAddr(), sshConn.ClientVersion())
 
