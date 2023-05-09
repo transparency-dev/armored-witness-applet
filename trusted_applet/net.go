@@ -101,7 +101,7 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 		log.Printf("DHCPC: lease update - old: %v, new: %v", oldAddr.String(), newAddr.String())
 		// Handled renewals first, old and new addresses will be equivalent in this case.
 		// We may still have to reconfigure the networking stack, even though our assigned IP
-		// isn't changing, as the DHCP server could have changed routing or DNS info.
+		// isn't changing, the DHCP server could have changed routing or DNS info.
 		if oldAddr.Address == newAddr.Address && oldAddr.PrefixLen == newAddr.PrefixLen {
 			log.Printf("DHCPC: existing lease on %v renewed", newAddr.String())
 			// reconfigure network stuff in-case DNS or gateway routes have changed.
