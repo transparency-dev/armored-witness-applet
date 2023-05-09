@@ -85,26 +85,36 @@ func init() {
 //
 // This function blocks until the passed-in ctx is Done.
 func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) error) {
+	// This context tracks the lifetime of the IP lease we get (if any) from the DHCP server.
+	// We'll only know what that lease is once we acquire the new IP, which happens inside
+	// the aquired func below.
 	var (
 		childCtx    context.Context
 		cancelChild context.CancelFunc
 	)
+	// fDone is used to ensure that we wait for the passed-in func f to complete before
+	// make changes to the network stack or attempt to rerun f when we've acquired a new lease.
 	fDone := make(chan bool, 1)
 
+	// acquired handles our dhcp.Client events - acquiring, releasing, renewing DHCP leases.
 	acquired := func(oldAddr, newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
 		log.Printf("DHCPC: lease update - old: %v, new: %v", oldAddr.String(), newAddr.String())
+		// Handled renewals first, old and new addresses will be equivalent in this case.
+		// We may still have to reconfigure the networking stack, even though our assigned IP
+		// isn't changing, as the DHCP server could have changed routing or DNS info.
 		if oldAddr.Address == newAddr.Address && oldAddr.PrefixLen == newAddr.PrefixLen {
 			log.Printf("DHCPC: existing lease on %v renewed", newAddr.String())
 			// reconfigure network stuff in-case DNS or gateway routes have changed.
 			configureNetFromDHCP(newAddr, cfg)
+			// f should already be running, no need to interfere with it.
 			return
 		}
-		newProtoAddr := tcpip.ProtocolAddress{
-			Protocol:          ipv4.ProtocolNumber,
-			AddressWithPrefix: newAddr,
-		}
+
+		// If oldAddr is specified, then our lease on that address has experied - remove it
+		// from our stack.
 		if !oldAddr.Address.Unspecified() {
-			// Tell f to exit, and wait for it to do so
+			// Since we're changing our primary IP address we must tell f to exit,
+			// and wait for it to do so
 			cancelChild()
 			log.Print("Waiting for child to complete...")
 			<-fDone
@@ -115,15 +125,26 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 			}
 		}
 
+		// If newAddr is specified, then we've been granted a lease on a new IP address, so
+		// we'll configure our stack to use it, along with whatever routes and DNS info
+		// we've been sent.
 		if !newAddr.Address.Unspecified() {
 			log.Printf("DHCPC: Acquired %v", newAddr.String())
+
+			newProtoAddr := tcpip.ProtocolAddress{
+				Protocol:          ipv4.ProtocolNumber,
+				AddressWithPrefix: newAddr,
+			}
 			if err := iface.Stack.AddProtocolAddress(nicID, newProtoAddr, stack.AddressProperties{PEB: stack.FirstPrimaryEndpoint}); err != nil {
 				log.Printf("Failed to add newly acquired address to stack: %v", err)
 			} else {
 				configureNetFromDHCP(newAddr, cfg)
 
+				// Set up a context we'll use to control f's execution lifetime.
+				// This will get canceled above if/when our IP lease expires.
 				childCtx, cancelChild = context.WithCancel(ctx)
 
+				// And execute f in its own goroutine so we don't block the dhcp.Client.
 				go func(childCtx context.Context) {
 					// Signal when we exit:
 					defer func() { fDone <- true }()
@@ -138,6 +159,7 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 		}
 	}
 
+	// Start the DHCP client.
 	c := dhcp.NewClient(iface.Stack, nicID, iface.Link.LinkAddress(), 30*time.Second, time.Second, time.Second, acquired)
 	log.Println("Starting DHCPClient...")
 	c.Run(ctx)
