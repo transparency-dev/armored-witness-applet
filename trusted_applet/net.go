@@ -16,6 +16,7 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -41,7 +42,6 @@ import (
 
 // default Trusted Applet network settings
 const (
-	MAC             = "1a:55:89:a2:69:41"
 	DHCP            = true
 	IP              = "10.0.0.1"
 	Netmask         = "255.255.255.0"
@@ -283,11 +283,27 @@ func (n *txNotification) WriteNotify() {
 	syscall.Write(TX, buf, uint(len(buf)))
 }
 
+func mac() string {
+	m := make([]uint8, 6)
+	if _, err := rand.Read(m); err != nil {
+		panic(fmt.Sprintf("failed to read %d bytes for randomised MAC address: %v", len(m), err))
+	}
+	// The first byte of the MAC address has a couple of flags which must be set correctly:
+	// - Unicast(0)/multicast(1) in the least significant bit of the byte.
+	//   This must be set to unicast.
+	// - Universally unique(0)/Local administered(1) in the second least significant bit.
+	//   Since we're not using an organisationally unique prefix triplet, this must be set to
+	//   Locally administered
+	m[0] &= 0xfe
+	m[0] |= 0x02
+	return fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", m[0], m[1], m[2], m[3], m[4], m[5])
+}
+
 func startNetworking() (err error) {
 	// Set the default resolver from the config, if we're using DHCP this may be updated.
 	resolver = cfg.Resolver
 
-	if iface, err = enet.Init(nil, cfg.IP, cfg.Netmask, cfg.MAC, cfg.Gateway, int(nicID)); err != nil {
+	if iface, err = enet.Init(nil, cfg.IP, cfg.Netmask, mac(), cfg.Gateway, int(nicID)); err != nil {
 		return
 	}
 

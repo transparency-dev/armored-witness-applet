@@ -22,13 +22,13 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/usbarmory/GoTEE/applet"
-	"github.com/usbarmory/GoTEE/syscall"
-	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
-
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/cmd"
 	"github.com/transparency-dev/armored-witness-os/api"
 	"github.com/transparency-dev/armored-witness-os/api/rpc"
+	"github.com/usbarmory/GoTEE/applet"
+	"github.com/usbarmory/GoTEE/syscall"
+	"google.golang.org/protobuf/proto"
+	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
 )
 
 var (
@@ -60,7 +60,6 @@ func main() {
 	// Set default configuration, the applet is reponsible of implementing
 	// its own configuration storage strategy.
 	cfg = &api.Configuration{
-		MAC:      MAC,
 		DHCP:     DHCP,
 		IP:       IP,
 		Netmask:  Netmask,
@@ -78,10 +77,16 @@ func main() {
 	//
 	// In this example the sent configuration is always updated with the
 	// received one.
-	if err := syscall.Call("RPC.Config", *cfg, cfg); err != nil {
-		log.Fatalf("TA configuration error, %v", err)
+	var cfgResp []byte
+	if err := syscall.Call("RPC.Config", cfg.Bytes(), &cfgResp); err != nil {
+		log.Printf("TA configuration error, %v", err)
 	}
 
+	if cfgResp != nil {
+		if err := proto.Unmarshal(cfgResp, cfg); err != nil {
+			log.Fatalf("TA configuration invalid: %v", err)
+		}
+	}
 	var status api.Status
 
 	if err := syscall.Call("RPC.Status", nil, &status); err != nil {
@@ -124,7 +129,7 @@ func runWithNetworking(ctx context.Context) error {
 	if tcpErr != nil {
 		return fmt.Errorf("runWithNetworking has no network configured: %v", tcpErr)
 	}
-	log.Printf("TA Version:%s MAC:%s IP:%s GW:%s DNS:%s", Version, cfg.MAC, addr, iface.Stack.GetRouteTable(), resolver)
+	log.Printf("TA Version:%s MAC:%s IP:%s GW:%s DNS:%s", Version, iface.NIC.MAC.String(), addr, iface.Stack.GetRouteTable(), resolver)
 
 	listener, err := iface.ListenerTCP4(22)
 	if err != nil {
