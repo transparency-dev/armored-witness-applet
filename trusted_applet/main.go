@@ -82,7 +82,7 @@ func main() {
 		log.Printf("TA configuration error, %v", err)
 	}
 
-	if cfgResp != nil {
+	if len(cfgResp) > 0 {
 		if err := proto.Unmarshal(cfgResp, cfg); err != nil {
 			log.Fatalf("TA configuration invalid: %v", err)
 		}
