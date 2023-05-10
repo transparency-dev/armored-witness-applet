@@ -76,7 +76,9 @@ func init() {
 }
 
 func main() {
+	flag.Set("vmodule", "journal=1,slots=1")
 	flag.Set("v", "1")
+	flag.Set("logtostderr", "true")
 	flag.Parse()
 
 	ctx := context.Background()
