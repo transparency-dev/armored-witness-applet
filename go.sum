@@ -26,6 +26,8 @@ github.com/usbarmory/imx-enet v0.0.0-20230210123530-18463adc40b7/go.mod h1:oa7S6
 github.com/usbarmory/tamago v0.0.0-20220823080407-04f05cf2a5a3/go.mod h1:Lok79mjbJnhoBGqhX5cCUsZtSemsQF5FNZW+2R1dRr8=
 github.com/usbarmory/tamago v0.0.0-20230428114202-5d3b5697bb08 h1:UT09xzjcUxxwuEG2cUS8p2FXs0CycY9buDGZbFh1fyM=
 github.com/usbarmory/tamago v0.0.0-20230428114202-5d3b5697bb08/go.mod h1:uCPXcPo8SZulhZPz8irfVqzwVlPZ45w7CTJxkfxueGA=
+github.com/usbarmory/tamago v0.0.0-20230505081442-46dcfa7361d3 h1:tN+TMM1/tRdcBngzJn4S4uc6GToZXNKiArFYq8x5KQc=
+github.com/usbarmory/tamago v0.0.0-20230505081442-46dcfa7361d3/go.mod h1:uCPXcPo8SZulhZPz8irfVqzwVlPZ45w7CTJxkfxueGA=
 golang.org/x/crypto v0.9.0 h1:LF6fAI+IutBocDJ2OT0Q1g8plpYljMZ4+lty+dsqw3g=
 golang.org/x/crypto v0.9.0/go.mod h1:yrmDGqONDYtNj3tH8X9dzUun2m2lzPa9ngI6/RUPGR0=
 golang.org/x/mod v0.10.0 h1:lFO9qtOdlre5W1jxS3r/4szv2/6iXxScdzjoBMXNhYk=
