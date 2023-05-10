@@ -104,6 +104,8 @@ func main() {
 		log.Fatalf("TA could not initialize networking, %v", err)
 	}
 
+	syscall.Call("RPC.Address", iface.NIC.MAC, nil)
+
 	// Register and run our RPC handler so we can receive ethernet frames.
 	go eventHandler()
 
