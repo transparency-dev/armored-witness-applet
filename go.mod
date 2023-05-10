@@ -16,7 +16,7 @@ require (
 require (
 	github.com/google/btree v1.1.2 // indirect
 	github.com/gsora/fidati v0.0.0-20220824075547-eeb0a5f7d6c3 // indirect
-	github.com/usbarmory/tamago v0.0.0-20230428114202-5d3b5697bb08 // indirect
+	github.com/usbarmory/tamago v0.0.0-20230505081442-46dcfa7361d3 // indirect
 	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
