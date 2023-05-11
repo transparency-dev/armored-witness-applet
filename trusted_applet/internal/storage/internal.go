@@ -64,7 +64,6 @@ func (d *Device) WriteBlocks(lba uint, b []byte) error {
 			LBA:  int(lba),
 			Data: b[:bl],
 		}
-		log.Printf("syscall.Write(%d, ...)", xfer.LBA)
 		if err := syscall.Call("RPC.WriteBlocks", &xfer, nil); err != nil {
 			log.Printf("syscall.Write(%d, ...) = %v", xfer.LBA, err)
 			return err
@@ -88,15 +87,16 @@ func (d *Device) ReadBlocks(lba uint, b []byte) error {
 			bl = MaxTransferBytes
 		}
 		xfer := rpc.Read{
-			Offset: int64(int(lba)),
+			Offset: int64(int(lba) * bs),
 			Size:   int64(bl),
 		}
 
-		log.Printf("syscall.Read(%d, %d)", xfer.Offset, xfer.Size)
-		if err := syscall.Call("RPC.Read", &xfer, b[:bl]); err != nil {
+		var readBuf []byte
+		if err := syscall.Call("RPC.Read", xfer, &readBuf); err != nil {
 			log.Printf("syscall.Read(%d, %d) = %v", xfer.Offset, xfer.Size, err)
 			return err
 		}
+		copy(b, readBuf)
 		b = b[bl:]
 		lba += uint(bl / bs)
 	}

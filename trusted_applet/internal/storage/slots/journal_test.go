@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"fmt"
-	"io"
 	"strings"
 	"testing"
 
@@ -28,14 +27,6 @@ import (
 
 func magic0Hdr() [4]byte {
 	return [4]byte{magic0[0], magic0[1], magic0[2], magic0[3]}
-}
-
-func sha256Func(r io.Reader) ([32]byte, error) {
-	b, err := io.ReadAll(r)
-	if err != nil {
-		return [32]byte{}, err
-	}
-	return sha256.Sum256(b), nil
 }
 
 func TestEntryMarshal(t *testing.T) {
@@ -146,7 +137,7 @@ func TestEntryUnmarshal(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := unmarshalEntry(bytes.NewReader(test.b), sha256Func)
+			got, err := unmarshalEntry(bytes.NewReader(test.b))
 			if gotErr := err != nil; gotErr != test.wantErr {
 				t.Fatalf("unmarshalEntry: %v, wantErr %t", err, test.wantErr)
 			}
@@ -164,7 +155,7 @@ func TestEntryUnmarshal(t *testing.T) {
 func TestOpenJournal(t *testing.T) {
 	md := testonly.NewMemDev(t, 2)
 	start, length := uint(1), uint(len(md)-1)
-	j, err := OpenJournal(md, start, length, sha256Func)
+	j, err := OpenJournal(md, start, length)
 	if err != nil {
 		t.Fatalf("OpenJournal: %v", err)
 	}
@@ -181,7 +172,7 @@ func TestWriteSizeLimit(t *testing.T) {
 	md := testonly.NewMemDev(t, storageBlocks)
 	start, length := uint(1), storageBlocks
 
-	j, err := OpenJournal(md, start, length, sha256Func)
+	j, err := OpenJournal(md, start, length)
 	if err != nil {
 		t.Fatalf("OpenJournal: %v", err)
 	}
@@ -212,7 +203,7 @@ func TestPerfectlyFullJournal(t *testing.T) {
 		{data: fill(433, "Four"), expectedWriteBlock: start + 1 + 1 + 3 + 3}, // 1 block - we're full!
 	} {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			j, err := OpenJournal(md, start, length, sha256Func)
+			j, err := OpenJournal(md, start, length)
 			if err != nil {
 				t.Fatalf("OpenJournal: %v", err)
 			}
@@ -244,7 +235,7 @@ func TestPerfectlyFullJournal(t *testing.T) {
 	t.Run("final", func(t *testing.T) {
 		// Now just ensure we can successfully read from the last entry of a full journal,
 		// and that the next write position is at the start of the journal.
-		j, err := OpenJournal(md, start, length, sha256Func)
+		j, err := OpenJournal(md, start, length)
 		if err != nil {
 			t.Fatalf("OpenJournal: %v", err)
 		}
@@ -276,7 +267,7 @@ func TestRoundTrip(t *testing.T) {
 		{data: fill(20, "All done!"), expectedWriteBlock: start + 9},                   // 1 blocks
 	} {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			j, err := OpenJournal(md, start, length, sha256Func)
+			j, err := OpenJournal(md, start, length)
 			if err != nil {
 				t.Fatalf("OpenJournal: %v", err)
 			}

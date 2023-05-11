@@ -84,7 +84,7 @@ func TestOpenPartition(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			dev := testonly.NewMemDev(t, devBlockSize)
-			p, err := OpenPartition(dev, test.geo, sha256Func)
+			p, err := OpenPartition(dev, test.geo)
 			if gotErr := err != nil; gotErr != test.wantErr {
 				t.Fatalf("Got %v, wantErr %t", err, test.wantErr)
 			}
@@ -106,7 +106,7 @@ func memPartition(t *testing.T) (*Partition, testonly.MemDev) {
 		Length:      10,
 		SlotLengths: []uint{1, 1, 2, 4},
 	}
-	p, err := OpenPartition(md, geo, sha256Func)
+	p, err := OpenPartition(md, geo)
 	if err != nil {
 		t.Fatalf("Failed to create mem partition: %v", err)
 	}
