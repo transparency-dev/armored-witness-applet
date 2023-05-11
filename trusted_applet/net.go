@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	mrand "math/rand"
 	"net"
 	"net/http"
 	"regexp"
@@ -101,20 +102,22 @@ func getHttpClient() *http.Client {
 			if len(r.Answer) == 0 {
 				return nil, fmt.Errorf("failed to resolve A records for host %q", host)
 			}
-			var ip net.IP
+			// There could be multiple A records, so we'll pick one at random.
+			// TODO: consider whether or not it's a good idea to attempt browser-like
+			// client-side retry iterating through A records.
+			var ip []net.IP
 			for _, ans := range r.Answer {
 				if a, ok := ans.(*dns.A); ok {
 					log.Printf("found A record for %q: %v ", host, a)
-					ip = a.A
-					break
-				} else {
-					log.Printf("found non-A record for %q: %v ", host, ans)
+					ip = append(ip, a.A)
+					continue
 				}
+				log.Printf("found non-A record for %q: %v ", host, ans)
 			}
-			if ip == nil {
+			if len(ip) == 0 {
 				return nil, fmt.Errorf("no A records for %q", host)
 			}
-			target := fmt.Sprintf("%s:%s", ip, port)
+			target := fmt.Sprintf("%s:%s", ip[mrand.Intn(len(ip))], port)
 			glog.V(2).Infof("Dialing %s", target)
 			return iface.DialTCP4(target)
 		},
