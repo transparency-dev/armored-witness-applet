@@ -22,7 +22,6 @@ import (
 	"runtime"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/usbarmory/GoTEE/applet"
 	"github.com/usbarmory/GoTEE/syscall"
@@ -41,9 +40,6 @@ import (
 )
 
 const (
-	// Timeout for any http requests.
-	httpTimeout = 10 * time.Second
-
 	// Generated from https://go.dev/play/p/uWUKLNK6h9v
 	// TODO(mhutchinson): these need to be read from file instead of constants
 	publicKey  = "TrustMe+68958214+AQ4Ys/PsXqfhPkNK7Y7RyYUMOJvfl65PzJOEiq9VFPjF"

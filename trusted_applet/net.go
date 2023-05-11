@@ -55,6 +55,9 @@ const (
 	DefaultResolver = "8.8.8.8:53"
 
 	nicID = tcpip.NICID(1)
+
+	// Timeout for any http requests.
+	httpTimeout = 10 * time.Second
 )
 
 // Trusted OS syscalls
