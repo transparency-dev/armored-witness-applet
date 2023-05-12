@@ -41,8 +41,6 @@ github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncj
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.2 h1:+h33VjcLVPDHtOdpUCuF+7gSuG3yGIftsP1YvFihtJ8=
-github.com/transparency-dev/armored-witness-os v0.0.0-20230504100200-51ba0628e5ed h1:kIjdhnAEwGEb+Q8AFiHgmFisMPzTf5LGAsRZbK6VCqw=
-github.com/transparency-dev/armored-witness-os v0.0.0-20230504100200-51ba0628e5ed/go.mod h1:klUiZPLZc9Y4trpSEes5X/TeeJO8uJUs8qTUwqaA2R8=
 github.com/transparency-dev/armored-witness-os v0.0.0-20230512102609-3c1a04c0a007 h1:bPQG6G3in/99hrcH68bhMCMMLWWLWbORkOWWU83OrOw=
 github.com/transparency-dev/armored-witness-os v0.0.0-20230512102609-3c1a04c0a007/go.mod h1:7RRQqDznrOOSXImx8gtqQAlcqPk5dh6YVXmWZpglApo=
 github.com/transparency-dev/formats v0.0.0-20230124125735-2da9e2580a26 h1:CVoO2X5LdS4DMgC2UeRx9VzJvTV3BNuxldzvSkC9QlQ=
@@ -56,8 +54,6 @@ github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa/go.mod h1:164CE5Gb
 github.com/usbarmory/imx-enet v0.0.0-20230210123530-18463adc40b7 h1:pJnqq1l2IkRD6NIKhFbqpdAJMdsxPU5ujHxUAbFQync=
 github.com/usbarmory/imx-enet v0.0.0-20230210123530-18463adc40b7/go.mod h1:oa7S6vwmh5KtGcZDluDIZ6P2xjI/hzVTB2SNohFYd58=
 github.com/usbarmory/tamago v0.0.0-20220823080407-04f05cf2a5a3/go.mod h1:Lok79mjbJnhoBGqhX5cCUsZtSemsQF5FNZW+2R1dRr8=
-github.com/usbarmory/tamago v0.0.0-20230505081442-46dcfa7361d3 h1:tN+TMM1/tRdcBngzJn4S4uc6GToZXNKiArFYq8x5KQc=
-github.com/usbarmory/tamago v0.0.0-20230505081442-46dcfa7361d3/go.mod h1:uCPXcPo8SZulhZPz8irfVqzwVlPZ45w7CTJxkfxueGA=
 github.com/usbarmory/tamago v0.0.0-20230511143907-aa24431c1ef0 h1:TVSossQboxxqIWtnEFBNxaccZtRJv5blDIhYhwe2h/0=
 github.com/usbarmory/tamago v0.0.0-20230511143907-aa24431c1ef0/go.mod h1:uCPXcPo8SZulhZPz8irfVqzwVlPZ45w7CTJxkfxueGA=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
