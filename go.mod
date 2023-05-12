@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/golang/glog v1.1.1
 	github.com/miekg/dns v1.1.54
-	github.com/transparency-dev/armored-witness-os v0.0.0-20230504100200-51ba0628e5ed
+	github.com/transparency-dev/armored-witness-os v0.0.0-20230512102609-3c1a04c0a007
 	github.com/transparency-dev/witness v0.0.0-20230508162120-bb97910e398b
 	github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa
 	github.com/usbarmory/imx-enet v0.0.0-20230210123530-18463adc40b7
@@ -30,7 +30,7 @@ require (
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/transparency-dev/formats v0.0.0-20230124125735-2da9e2580a26 // indirect
 	github.com/transparency-dev/merkle v0.0.2 // indirect
-	github.com/usbarmory/tamago v0.0.0-20230505081442-46dcfa7361d3 // indirect
+	github.com/usbarmory/tamago v0.0.0-20230511143907-aa24431c1ef0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/oauth2 v0.7.0 // indirect
 	golang.org/x/sync v0.2.0 // indirect
