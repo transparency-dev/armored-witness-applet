@@ -41,7 +41,7 @@ Logically it can be thought of like so:
 
 ![image showing logical layout](images/logical_layout.png)
 
-Physically it may look like this on the MMC block device itself (8 sectors per journal is just an example):
+Physically it may look like this on the MMC block device itself (9 sectors per journal is just an example):
 
 ![image showing physical layout](images/physical_layout.png)
 
