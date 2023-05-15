@@ -21,6 +21,9 @@ import (
 	_ "unsafe"
 )
 
+// The following memory region is within an alias of external DDR, required
+// when memory encryption is enforced by the i.MX6UL Bus Encryption Engine
+// (BEE).
 const (
 	appletStart = 0x20000000
 	appletSize  = 0x10000000 // 256MB
