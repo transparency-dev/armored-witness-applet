@@ -35,13 +35,13 @@ Some things are explicitly out of scope for this design:
 
 A relatively simple storage API which offers a fixed number of "storage slots" to which a representation of state can be written. Slot storage will be allocated a range of the underlying storage, starting at a known byte offset and with a known length. This slot storage is also preconfigured with the number of slots that it should allocate (or alternatively/equivalently, the number of bytes to be reserved per-slot).
 
-Each slot is backed by a fixed size "journal" stored across _N_ eMMC sectors. 
+Each slot is backed by a fixed size "journal" stored across _N_ eMMC blocks. 
 
 Logically it can be thought of like so:
 
 ![image showing logical layout](images/logical_layout.png)
 
-Physically it may look like this on the MMC block device itself (9 sectors per journal is just an example):
+Physically it may look like this on the MMC block device itself (9 blocks per journal is just an example):
 
 ![image showing physical layout](images/physical_layout.png)
 
@@ -108,23 +108,23 @@ If no such record exists, then the slot has not yet been successfully written to
 
 An update to the slot causes an update record to be written to the journal starting at either:
 
-*   The first byte of the sector following the extent of the "current" update record (i.e all sectors contain header/data for at most 1 record), if there is sufficient space remaining in the journal to accommodate the entire update record without wrapping around to the first sector, or
-*   The first byte of the first sector in the journal, if there is no current record or the update record will not fit in the remaining journal space.
+*   The first byte of the blocks following the extent of the "current" update record (i.e all blocks contain header/data for at most 1 record), if there is sufficient space remaining in the journal to accommodate the entire update record without wrapping around to the first blocks, or
+*   The first byte of the first block in the journal, if there is no current record or the update record will not fit in the remaining journal space.
 
 Following a successful write to storage, the metadata associated with slot (i.e. Revision, current header location, location for next write, etc.) is updated.
 
-The diagram below shows a sequence of several update record writes of varying data sizes. These writes are taking place in a single journal, which you'll remember comprises several sectors.
+The diagram below shows a sequence of several update record writes of varying data sizes. These writes are taking place in a single journal, which you'll remember comprises several blocks.
 
-The grey boxes represent sectors containing old/previous data, green represents sectors holding the latest successful write.
+The grey boxes represent blocks containing old/previous data, green represents blocks holding the latest successful write.
 
-The numbers indicate a header with a particular `Revision`, sectors with `…` contain follow-on `RecordData`, and an x indicates invalid record header:
+The numbers indicate a header with a particular `Revision`, blocks with `…` contain follow-on `RecordData`, and an x indicates invalid record header:
 
 ```
 ⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛ - Initial state, nothing written
 🟩🟩🟩⬛⬛⬛⬛⬛⬛⬛ - First record (rev=1) has been successfully stored
 ⬜⬜⬜🟩🟩⬛⬛⬛⬛⬛ - Next record (rev=2) is stored with the next available block
 ⬜⬜⬜⬜⬜🟩🟩🟩⬛⬛ - Same again.
-🟩🟩🟩⬜⬜⬜⬜⬜⬛⬛ - The 4th record will not fit in the remaining space, so is written starting at the zeroth sector, overwriting old revision(s) - note it does not wrap around.
+🟩🟩🟩⬜⬜⬜⬜⬜⬛⬛ - The 4th record will not fit in the remaining space, so is written starting at the zeroth block, overwriting old revision(s) - note it does not wrap around.
 ⬜⬜⬜🟩🟩🟩⬜⬜⬛⬛ - Subsequent revisions continue in this vein.
 ```
 
@@ -132,7 +132,7 @@ Since record revisions should always be increasing as we scan left-to-right thro
 
 #### Failed/interrupted writes
 
-For a failed write to the storage to have any permanent effect at all, it must have succeeded in writing at least the 1st sector of the update record, and so the stored header checksum will be invalid. This allows the failure to be detected when reading back with high probability.
+For a failed write to the storage to have any permanent effect at all, it must have succeeded in writing at least the 1st block of the update record, and so the stored header checksum will be invalid. This allows the failure to be detected when reading back with high probability.
 
 The maximum permitted `RecordData` size is restricted to `(TotalSlotSize/3) - len(Header)`; this prevents a failed write obliterating all or part of the previous successful write, so unless the failed write is the first attempt to write to the slot, there will always be a valid previous record available (modulo storage fabric failure).
 
@@ -144,7 +144,7 @@ Adding records with failed writes:
 🟩🟩🟩🟩🟥🟥🟥⬜⬜⬛ - Attempt to write (rev=5) fails, corrupting (rev=2) and (rev=3), but rev=4, the current good record, is intact.
 ⬜⬜⬜⬜🟩🟩🟩⬜⬜⬛ - Application successfully writes (rev=5)...
 ⬜⬜⬜⬜⬜⬜⬜🟩🟩🟩 - ... and (rev=6)
-🟥🟥🟥⬜⬜⬜⬜🟩🟩🟩 - Fail to write (rev=7) located at the zeroth sector, but (rev=6) is intact. 
+🟥🟥🟥⬜⬜⬜⬜🟩🟩🟩 - Fail to write (rev=7) located at the zeroth block, but (rev=6) is intact. 
 ```
 
 #### Other properties
@@ -152,4 +152,4 @@ Adding records with failed writes:
 This journal type approach affords a couple of additional nice properties given the environment and use case:
 
 1. The API can provide _check-and-set_ semantics: _"Write an update record with revision X, iff the current record is revision X-1"_.
-2. A very basic notion of "wear levelling" is provided since writes are spread out across most sectors. Note that this is less important here as the ArmoredWitness has eMMC storage, which mandates that the integrated controlled performs wear-leveling transparently.
+2. A very basic notion of "wear levelling" is provided since writes are spread out across most blocks. Note that this is less important here as the ArmoredWitness has eMMC storage, which mandates that the integrated controlled performs wear-leveling transparently.
