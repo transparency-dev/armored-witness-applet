@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build !bee
-// +build !bee
+//go:build bee
+// +build bee
 
 package main
 
@@ -21,8 +21,11 @@ import (
 	_ "unsafe"
 )
 
+// The following memory region is within an alias of external DDR, required
+// when memory encryption is enforced by the i.MX6UL Bus Encryption Engine
+// (BEE).
 const (
-	appletStart = 0x90000000
+	appletStart = 0x20000000
 	appletSize  = 0x10000000 // 256MB
 )
 
@@ -31,6 +34,3 @@ var ramStart uint32 = appletStart
 
 //go:linkname ramSize runtime.ramSize
 var ramSize uint32 = appletSize
-
-//go:linkname ramStackOffset runtime.ramStackOffset
-var ramStackOffset uint32 = 0x100
