@@ -57,14 +57,18 @@ type Journal struct {
 	maxDataBytes uint
 }
 
-// entry represents an entry in the journal.
+// entry represents a single update in the journal.
+// The data contained in the highest revision, valid, entry in a journal will be
+// considered to be the current data.
 type entry struct {
 	// Magic is a 4 byte prefix which allows us to quickly filter out invalid entry records.
 	// This ie expected to contain the value in the magic0 const above.
 	Magic [4]byte
 	// Revision is an incrementing counter which tracks the total number of successful
 	// updates to a journal.
-	// Each successive entry should have a revision one greater than the previous entry.
+	// The first entry in a journal is revision 1 (not zero, in order to make it clear that
+	// the default value of an `entry` struct is not valid), and each successive entry
+	// must have a revision one greater than the previous entry.
 	Revision uint32
 	// DataLen is the length in bytes of the application data associated with this entry.
 	DataLen uint64

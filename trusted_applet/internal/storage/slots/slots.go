@@ -50,6 +50,16 @@ func (g Geometry) Validate() error {
 	return nil
 }
 
+// Partition describes the extent and layout of a single contiguous region of
+// underlying block storage.
+type Partition struct {
+	// dev provides the device-specific read/write functionality.
+	dev BlockReaderWriter
+
+	// slots describes the layout of the slot(s) stored within this partition.
+	slots []Slot
+}
+
 // OpenPartition returns a partition struct for accessing the slots described by the given
 // geometry using the provided read/write methods.
 func OpenPartition(rw BlockReaderWriter, geo Geometry) (*Partition, error) {
@@ -71,16 +81,6 @@ func OpenPartition(rw BlockReaderWriter, geo Geometry) (*Partition, error) {
 	}
 
 	return ret, nil
-}
-
-// Partition describes the extent and layout of a single contiguous region of
-// underlying block storage.
-type Partition struct {
-	// dev provides the device-specific read/write functionality.
-	dev BlockReaderWriter
-
-	// slots describes the layout of the slot(s) stored within this partition.
-	slots []Slot
 }
 
 // Erase destroys the data stores in all slots configured in this partition.
