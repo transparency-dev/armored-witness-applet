@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 
@@ -242,6 +243,9 @@ func unmarshalEntry(r io.Reader) (*entry, error) {
 	}
 	if err := binary.Read(r, binary.BigEndian, &e.Revision); err != nil {
 		return nil, fmt.Errorf("failed to read revision: %v", err)
+	}
+	if e.Revision == 0 {
+		return nil, errors.New("zero is not a valid revision")
 	}
 	if err := binary.Read(r, binary.BigEndian, &e.DataLen); err != nil {
 		return nil, fmt.Errorf("failed to read data length: %v", err)
