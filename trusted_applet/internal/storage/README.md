@@ -27,8 +27,8 @@ Some details on the requirements and design of the storage system are below.
 
 Some things are explicitly out of scope for this design:
 
-*   Protecting against an attacker modifying the data on the storage in some out-of-band fashion,
-*   Hardware failure resulting in previously readable data becoming unreadable/corrupted,
+*   Protecting against an attacker modifying the data on the storage in some out-of-band fashion.
+*   Hardware failure resulting in previously readable data becoming unreadable/corrupted.
 *   Supporting easy discovery / enumeration of data on disk, or preventing duplicate data from being written. Higher level code should be responsible for understanding what data should be in which slots.
 
 ### Design
@@ -99,8 +99,8 @@ Field Name   | Type                        | Notes
 
 An update record is considered _valid_ if its:
 
-*   `Magic` is correct,
-*   `Checksum` is correct for the `RecordData`
+*   `Magic` is correct
+*   `Checksum` is correct for the data in `RecordData[:DataLen]`
 
 The first time `Open` is called for a given slot, the slot's journal will be scanned from the beginning to look for the valid update record with the largest `Revision`. The Data from this record is the data associated with the slot. It could potentially be cached in RAM at this point if it's small enough.
 
@@ -139,12 +139,15 @@ The maximum permitted `RecordData` size is restricted to `(TotalSlotSize/3) - le
 Adding records with failed writes:
 
 ```
-⬜⬜⬜🟩🟩🟩⬜⬜⬜⬛ - Initial state, record (rev=3) is valid and current.
-🟩🟩🟩🟩⬜⬜⬜⬜⬜⬛ - Update to (rev=4).
-🟩🟩🟩🟩🟥🟥🟥⬜⬜⬛ - Attempt to write (rev=5) fails, corrupting (rev=2) and (rev=3), but rev=4, the current good record, is intact.
-⬜⬜⬜⬜🟩🟩🟩⬜⬜⬛ - Application successfully writes (rev=5)...
-⬜⬜⬜⬜⬜⬜⬜🟩🟩🟩 - ... and (rev=6)
-🟥🟥🟥⬜⬜⬜⬜🟩🟩🟩 - Fail to write (rev=7) located at the zeroth block, but (rev=6) is intact. 
+⬛⬛⬛⬛⬛⬛⬛⬛⬛ - Initial state, nothing written
+🟩🟩⬜⬜⬜⬜⬜⬜⬛ - First record (rev=1) stored successfully
+⬜⬜🟩🟩🟩⬜⬜⬜⬛ - Second write (rev=2) is successful too.
+⬜⬜⬜⬜⬜🟥🟥🟥⬛ - Third write fails
+⬜⬜⬜⬜⬜🟩🟩🟩⬛ - Application retries, record (rev=3) is written successfully this time.
+🟩🟩⬜⬜⬜⬜⬜⬜⬛ - Application succesfully retries and writes (rev=4)
+⬜⬜🟩🟩🟩⬜⬜⬜⬛ - and (rev=5)
+⬜⬜⬜⬜⬜🟩🟩🟩⬛ - and (rev=6), too
+🟥🟥🟥⬜⬜🟩🟩🟩⬛ - Attempt to write (rev=7), located at the zeroth block, fails, corrupting (rev=4) and (rev=5), but rev=6, the current good record, is intact.
 ```
 
 #### Other properties
