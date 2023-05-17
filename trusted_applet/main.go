@@ -16,27 +16,28 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"os"
 	"runtime"
 	"strings"
-	"sync"
 
 	"github.com/usbarmory/GoTEE/applet"
 	"github.com/usbarmory/GoTEE/syscall"
+	"github.com/usbarmory/tamago/soc/nxp/usdhc"
 	"google.golang.org/protobuf/proto"
 	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
 
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/cmd"
+	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/storage"
+	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/storage/slots"
 	"github.com/transparency-dev/armored-witness-os/api"
 	"github.com/transparency-dev/armored-witness-os/api/rpc"
 
 	"github.com/golang/glog"
 	"github.com/transparency-dev/witness/omniwitness"
 	"golang.org/x/mod/sumdb/note"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 const (
@@ -44,6 +45,19 @@ const (
 	// TODO(mhutchinson): these need to be read from file instead of constants
 	publicKey  = "TrustMe+68958214+AQ4Ys/PsXqfhPkNK7Y7RyYUMOJvfl65PzJOEiq9VFPjF"
 	signingKey = "PRIVATE+KEY+TrustMe+68958214+AZKby3TDZizdARF975ZyLJwGbHTivd+EqbfYTN5qr2cI"
+
+	// slotsPartitionOffsetBytes defines where our witness data storage partition starts.
+	// Changing this location is overwhelmingly likely to result in data loss.
+	slotsPartitionOffsetBytes = 1 << 30
+	// slotsPartitionLengthBytes specifies the size of the slots partition.
+	// Increasing this value is relatively safe, if you're sure there is no data
+	// stored in blocks which follow the current partition.
+	//
+	// We're starting with enough space for 1024 slots of 1MB each.
+	slotsPartitionLengthBytes = 1024 * slotSizeBytes
+
+	// slotSizeBytes is the size of each individual slot in the partition.
+	slotSizeBytes = 1 << 20
 )
 
 var (
@@ -52,6 +66,8 @@ var (
 	Version  string
 
 	cfg *api.Configuration
+
+	persistence *storage.SlotPersistence
 )
 
 func init() {
@@ -60,6 +76,9 @@ func init() {
 }
 
 func main() {
+	flag.Set("v", "1")
+	flag.Parse()
+
 	ctx := context.Background()
 	defer applet.Exit()
 
@@ -72,7 +91,6 @@ func main() {
 	if err := syscall.Call("RPC.Version", Version, nil); err != nil {
 		log.Fatalf("TA version check error, %v", err)
 	}
-
 	// Set default configuration, the applet is reponsible of implementing
 	// its own configuration storage strategy.
 	cfg = &api.Configuration{
@@ -121,6 +139,27 @@ func main() {
 	}
 
 	syscall.Call("RPC.Address", iface.NIC.MAC, nil)
+
+	glog.Infof("Opening storage...")
+	part := openStorage()
+	glog.Infof("Storage opened.")
+
+	// Set this to true to "wipe" the storage.
+	// Currently this simply force-writes an entry with zero bytes to
+	// each known slot.
+	// If the journal(s) become corrupt a larger hammer will be required.
+	reinit := false
+	if reinit {
+		if err := part.Erase(); err != nil {
+			glog.Exitf("Failed to erase partition: %v", err)
+		}
+	}
+
+	persistence = storage.NewSlotPersistence(part)
+	if err := persistence.Init(); err != nil {
+		glog.Exitf("Failed to create persistence layer: %v", err)
+	}
+	persistence.Init()
 
 	// Register and run our RPC handler so we can receive ethernet frames.
 	go eventHandler()
@@ -176,17 +215,15 @@ func runWithNetworking(ctx context.Context) error {
 		WitnessSigner:   signer,
 		WitnessVerifier: verifier,
 	}
-
 	// TODO(mhutchinson): add a second listener for an admin API.
 	mainListener, err := iface.ListenerTCP4(80)
 	if err != nil {
 		glog.Exitf("could not initialize HTTP listener: %v", err)
 	}
-	p := memPersistance{}
-	p.Init()
 
 	go func() {
-		if err := omniwitness.Main(ctx, opConfig, &p, mainListener, httpClient); err != nil {
+		log.Println("Starting witness...")
+		if err := omniwitness.Main(ctx, opConfig, persistence, mainListener, httpClient); err != nil {
 			glog.Exitf("Main failed: %v", err)
 		}
 	}()
@@ -195,80 +232,27 @@ func runWithNetworking(ctx context.Context) error {
 	return ctx.Err()
 }
 
-// Temporary in-memory witness storage implementation below.
-// This will be replaced shortly.
-
-type checkpointAndProof struct {
-	checkpoint []byte
-	proof      []byte
-}
-
-type memPersistance struct {
-	mu sync.Mutex
-	fs map[string]checkpointAndProof
-}
-
-func (m *memPersistance) Init() error {
-	m.fs = make(map[string]checkpointAndProof)
-	return nil
-}
-
-func (m *memPersistance) ReadOps(id string) (omniwitness.LogStateReadOps, error) {
-	return ops{
-		id: id,
-		p:  m,
-	}, nil
-}
-
-func (m *memPersistance) Logs() ([]string, error) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	logs := make(map[string]bool)
-	for k := range m.fs {
-		if strings.HasPrefix(k, "/logs/") {
-			bits := strings.Split(k, "/")
-			logs[bits[1]] = true
-		}
+func openStorage() *slots.Partition {
+	var info usdhc.CardInfo
+	if err := syscall.Call("RPC.CardInfo", nil, &info); err != nil {
+		glog.Exitf("Failed to get cardinfo: %v", err)
 	}
-	ret := []string{}
-	for k := range logs {
-		ret = append(ret, k)
+	log.Printf("CardInfo: %+v", info)
+	// dev is our access to the MMC storage.
+	dev := &storage.Device{CardInfo: &info}
+	bs := dev.BlockSize()
+	geo := slots.Geometry{
+		Start:  slotsPartitionOffsetBytes / bs,
+		Length: slotsPartitionLengthBytes / bs,
 	}
-	return ret, nil
-}
-
-type ops struct {
-	id string
-	p  *memPersistance
-}
-
-func (o ops) GetLatest() ([]byte, []byte, error) {
-	o.p.mu.Lock()
-	defer o.p.mu.Unlock()
-	l, ok := o.p.fs[fmt.Sprintf("/logs/%s/latest", o.id)]
-	if !ok {
-		return nil, nil, status.Error(codes.NotFound, "no checkpoint for log")
+	sl := slotSizeBytes / bs
+	for i := uint(0); i < geo.Length; i += sl {
+		geo.SlotLengths = append(geo.SlotLengths, sl)
 	}
-	return l.checkpoint, l.proof, nil
-}
 
-func (o *memPersistance) WriteOps(id string) (omniwitness.LogStateWriteOps, error) {
-	return ops{
-		id: id,
-		p:  o,
-	}, nil
-}
-
-func (o ops) Set(checkpointRaw []byte, compactRange []byte) error {
-	o.p.mu.Lock()
-	o.p.fs[fmt.Sprintf("/logs/%s/latest", o.id)] = checkpointAndProof{
-		checkpoint: checkpointRaw,
-		proof:      compactRange,
+	p, err := slots.OpenPartition(dev, geo)
+	if err != nil {
+		glog.Exitf("Failed to open partition: %v", err)
 	}
-	return nil
-}
-
-func (o ops) Close() error {
-	o.p.mu.Unlock()
-	return nil
+	return p
 }
