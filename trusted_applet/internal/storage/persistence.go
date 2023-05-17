@@ -41,14 +41,14 @@ type SlotPersistence struct {
 	// data.
 	part *slots.Partition
 
-	// mapSlot is a reference to the zeroth slot in a partition.
+	// directorySlot is a reference to the zeroth slot in a partition.
 	// This slot is used to maintain a mapping of log ID to slot index
 	// where state for that log is stored.
-	mapSlot *slots.Slot
-	// mapWriteToken is the token received when we read the mapping config
+	directorySlot *slots.Slot
+	// directoryWriteToken is the token received when we read the mapping config
 	// from the mapSlot above. It'll be used when we want to store an updated
 	// mapping config.
-	mapWriteToken uint32
+	directoryWriteToken uint32
 
 	// idToSlot maintains the mapping from LogID to slot index used to store
 	// checkpoints from that log.
@@ -81,7 +81,7 @@ func (p *SlotPersistence) Init() error {
 	if err != nil {
 		return fmt.Errorf("failed to open mapping slot: %v", err)
 	}
-	p.mapSlot = s
+	p.directorySlot = s
 	if err := p.populateMap(); err != nil {
 		return fmt.Errorf("failed to populate logID → slot map: %v", err)
 	}
@@ -230,16 +230,16 @@ func (s *slotOps) Close() error {
 // populateMap reads the logID -> slot mapping from storage.
 // Must be called with p.mu write-locked.
 func (p *SlotPersistence) populateMap() error {
-	b, t, err := p.mapSlot.Read()
+	b, t, err := p.directorySlot.Read()
 	if err != nil {
 		return fmt.Errorf("failed to read persistence mapping: %v", err)
 	}
 	if err := yaml.Unmarshal(b, &p.idToSlot); err != nil {
 		return fmt.Errorf("failed to unmarshal persistence mapping: %v", err)
 	}
-	// We read the mapping config, so save the token for if/when we want to
+	// We read the logID<->Slot config, so save the token for if/when we want to
 	// store an updated mapping.
-	p.mapWriteToken = t
+	p.directoryWriteToken = t
 
 	// Precalculate the list of available slots.
 	slotState := make([]bool, p.part.NumSlots())
@@ -262,19 +262,19 @@ func (p *SlotPersistence) populateMap() error {
 	return nil
 }
 
-// storeMap writes the current logID -> slot map to storage.
+// storeDirectory writes the current logID -> slot map to storage.
 // Must be called with p.mu at leaest read-locked.
-func (p *SlotPersistence) storeMap() error {
+func (p *SlotPersistence) storeDirectory() error {
 	smRaw, err := yaml.Marshal(p.idToSlot)
 	if err != nil {
 		return fmt.Errorf("failed to marshal mapping: %v", err)
 	}
-	if err := p.mapSlot.CheckAndWrite(p.mapWriteToken, smRaw); err != nil {
+	if err := p.directorySlot.CheckAndWrite(p.directoryWriteToken, smRaw); err != nil {
 		return fmt.Errorf("failed to store mapping: %v", err)
 	}
 	// TODO(al): CheckAndWrite should return the next token rather than us knowing
 	// how the token changes after a successful write.
-	p.mapWriteToken++
+	p.directoryWriteToken++
 	return nil
 }
 
@@ -290,7 +290,7 @@ func (p *SlotPersistence) addLog(id string) (uint, error) {
 	f := p.freeSlots[0]
 	p.freeSlots = p.freeSlots[1:]
 	p.idToSlot[id] = f
-	if err := p.storeMap(); err != nil {
+	if err := p.storeDirectory(); err != nil {
 		return 0, fmt.Errorf("failed to storeMap: %v", err)
 	}
 	glog.V(1).Infof("Added new mapping %q -> %d", id, f)
