@@ -21,6 +21,7 @@ require (
 )
 
 require (
+	github.com/beevik/ntp v1.0.1-0.20230531043453-c527eb76fb9a // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/btree v1.1.2 // indirect
