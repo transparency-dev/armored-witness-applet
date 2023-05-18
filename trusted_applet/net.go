@@ -89,7 +89,7 @@ func init() {
 // getHttpClient returns a http.Client instance which uses the local resolver.
 func getHttpClient() *http.Client {
 	netTransport := &http.Transport{
-		DialContext: func(_ context.Context, network, add string) (net.Conn, error) {
+		DialContext: func(ctx context.Context, network, add string) (net.Conn, error) {
 			glog.V(2).Infof("Resolving IP to dial %v", add)
 			parts := strings.Split(add, ":")
 			if len(parts) != 2 {
@@ -98,7 +98,7 @@ func getHttpClient() *http.Client {
 			}
 			host, port := parts[0], parts[1]
 			// Look up the hostname
-			r, _, err := resolve(host)
+			r, _, err := resolve(ctx, host)
 			if err != nil {
 				return nil, fmt.Errorf("failed to resolve host %q: %v", host, err)
 			}
@@ -122,7 +122,7 @@ func getHttpClient() *http.Client {
 			}
 			target := fmt.Sprintf("%s:%s", ip[mrand.Intn(len(ip))], port)
 			glog.V(2).Infof("Dialing %s", target)
-			return iface.DialTCP4(target)
+			return iface.DialContextTCP4(ctx, target)
 		},
 		TLSClientConfig: &tls.Config{
 			// TODO: determine some way to make client certs available
@@ -156,6 +156,7 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 	// fDone is used to ensure that we wait for the passed-in func f to complete before
 	// make changes to the network stack or attempt to rerun f when we've acquired a new lease.
 	fDone := make(chan bool, 1)
+	defer close(fDone)
 
 	// acquired handles our dhcp.Client events - acquiring, releasing, renewing DHCP leases.
 	acquired := func(oldAddr, newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
@@ -210,9 +211,11 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 					// Signal when we exit:
 					defer func() { fDone <- true }()
 
+					log.Println("DHCP: running f")
 					if err := f(childCtx); err != nil {
 						log.Printf("runDHCP f: %v", err)
 					}
+					log.Println("DHCP: f exited")
 				}(childCtx)
 			}
 		} else {
@@ -249,7 +252,7 @@ func configureNetFromDHCP(newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
 	iface.Stack.SetRouteTable(table)
 }
 
-func resolve(s string) (r *dns.Msg, rtt time.Duration, err error) {
+func resolve(ctx context.Context, s string) (r *dns.Msg, rtt time.Duration, err error) {
 	if s[len(s)-1:] != "." {
 		s += "."
 	}
@@ -264,7 +267,7 @@ func resolve(s string) (r *dns.Msg, rtt time.Duration, err error) {
 
 	conn := new(dns.Conn)
 
-	if conn.Conn, err = iface.DialTCP4(resolver); err != nil {
+	if conn.Conn, err = iface.DialContextTCP4(ctx, resolver); err != nil {
 		return
 	}
 
@@ -278,7 +281,7 @@ func dnsCmd(_ *term.Terminal, arg []string) (res string, err error) {
 		return "", errors.New("network is unavailable")
 	}
 
-	r, _, err := resolve(arg[0])
+	r, _, err := resolve(context.Background(), arg[0])
 
 	if err != nil {
 		return fmt.Sprintf("query error: %v", err), nil
