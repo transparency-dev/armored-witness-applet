@@ -35,11 +35,13 @@ import (
 	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
 
+	"github.com/beevik/ntp"
 	"github.com/golang/glog"
 	"github.com/miekg/dns"
 	"github.com/transparency-dev/armored-witness-applet/third_party/dhcp"
 	"golang.org/x/term"
 
+	"github.com/usbarmory/GoTEE/applet"
 	"github.com/usbarmory/GoTEE/syscall"
 	enet "github.com/usbarmory/imx-enet"
 
@@ -53,6 +55,7 @@ const (
 	Netmask         = "255.255.255.0"
 	Gateway         = "10.0.0.2"
 	DefaultResolver = "8.8.8.8:53"
+	DefaultNTP      = "time.google.com"
 
 	nicID = tcpip.NICID(1)
 
@@ -250,6 +253,22 @@ func configureNetFromDHCP(newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
 		}
 	}
 	iface.Stack.SetRouteTable(table)
+}
+
+func runNTP(ctx context.Context) {
+	for {
+		t, err := ntp.Time(DefaultNTP)
+		if err != nil {
+			log.Printf("Failed to get NTP time: %v", err)
+		}
+		applet.ARM.SetTimer(t.UnixNano())
+
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(time.Hour):
+		}
+	}
 }
 
 func resolve(ctx context.Context, s string) (r *dns.Msg, rtt time.Duration, err error) {
