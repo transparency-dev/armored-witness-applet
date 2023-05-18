@@ -9,7 +9,7 @@ require (
 	github.com/transparency-dev/armored-witness-os v0.0.0-20230512102609-3c1a04c0a007
 	github.com/transparency-dev/witness v0.0.0-20230508162120-bb97910e398b
 	github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa
-	github.com/usbarmory/imx-enet v0.0.0-20230210123530-18463adc40b7
+	github.com/usbarmory/imx-enet v0.0.0-20230518121845-309cac367c72
 	github.com/usbarmory/tamago v0.0.0-20230511143907-aa24431c1ef0
 	golang.org/x/crypto v0.9.0
 	golang.org/x/mod v0.10.0
