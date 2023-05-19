@@ -96,7 +96,7 @@ func (p *Partition) Erase() error {
 		length := p.slots[i].journal.length
 		start := p.slots[i].journal.start
 		b := make([]byte, length)
-		if err := p.dev.WriteBlocks(start, b); err != nil {
+		if _, err := p.dev.WriteBlocks(start, b); err != nil {
 			glog.Warningf("Failed to wipe slot %d occupying blocks [%d, %d): %v", i, start, start+length, err)
 			borked = true
 		}

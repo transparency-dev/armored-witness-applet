@@ -43,7 +43,8 @@ type BlockReaderWriter interface {
 	// WriteBlocks writes len(b) bytes from b to contiguous storage blocks starting
 	// at the given block address.
 	// b must be an integer multiple of the device's block size.
-	WriteBlocks(lba uint, b []byte) error
+	// Returns the number of blocks written, or an error.
+	WriteBlocks(lba uint, b []byte) (uint, error)
 }
 
 // Journal implements a record-based format which provides a resilient storage.

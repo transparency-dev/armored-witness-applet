@@ -52,9 +52,9 @@ func (md MemDev) ReadBlocks(lba uint, b []byte) error {
 // WriteBlocks writes len(b) bytes from b to contiguous storage blocks starting
 // at the given block address.
 // b must be an integer multiple of the device's block size.
-func (md MemDev) WriteBlocks(lba uint, b []byte) error {
+func (md MemDev) WriteBlocks(lba uint, b []byte) (uint, error) {
 	if lba >= uint(len(md)) {
-		return fmt.Errorf("lba (%d) >= device blocks (%d)", lba, len(md))
+		return 0, fmt.Errorf("lba (%d) >= device blocks (%d)", lba, len(md))
 	}
 	// If the data isn't a multiple of the blocksize, pad it up
 	// so that it is.
@@ -69,7 +69,7 @@ func (md MemDev) WriteBlocks(lba uint, b []byte) error {
 	for i := uint(0); i < bl; i++ {
 		copy(md[lba+i][:], b[i*MemBlockSize:])
 	}
-	return nil
+	return bl, nil
 }
 
 // NewMemDev creates a new in-memory block device.
