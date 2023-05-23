@@ -98,7 +98,7 @@ func TestOpenPartition(t *testing.T) {
 	}
 }
 
-func memPartition(t *testing.T) (*Partition, testonly.MemDev) {
+func memPartition(t *testing.T) (*Partition, *testonly.MemDev) {
 	t.Helper()
 	md := testonly.NewMemDev(t, 32)
 	geo := Geometry{

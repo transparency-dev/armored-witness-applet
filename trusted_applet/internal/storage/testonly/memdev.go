@@ -24,7 +24,12 @@ import (
 const MemBlockSize = 512
 
 // MemDev is a simple in-memory block device.
-type MemDev [][MemBlockSize]byte
+type MemDev struct {
+	Storage [][MemBlockSize]byte
+
+	// OnBlockWritten is called just after a mem block has been written.
+	OnBlockWritten func(lba uint)
+}
 
 // BlockSize returns the block size of the underlying storage system.
 func (md MemDev) BlockSize() uint {
@@ -35,16 +40,16 @@ func (md MemDev) BlockSize() uint {
 // at the given block address.
 // b must be an integer multiple of the device's block size.
 func (md MemDev) ReadBlocks(lba uint, b []byte) error {
-	if lba >= uint(len(md)) {
-		return fmt.Errorf("lba (%d) >= device blocks (%d)", lba, len(md))
+	if lba >= uint(len(md.Storage)) {
+		return fmt.Errorf("lba (%d) >= device blocks (%d)", lba, len(md.Storage))
 	}
 	lenB := uint(len(b))
 	bl := lenB / MemBlockSize
-	if l := uint(len(md)); lba+bl > l {
+	if l := uint(len(md.Storage)); lba+bl > l {
 		bl = l - lba
 	}
 	for i := uint(0); i < bl; i++ {
-		copy(b[i*MemBlockSize:], md[lba+i][:])
+		copy(b[i*MemBlockSize:], md.Storage[lba+i][:])
 	}
 	return nil
 }
@@ -52,9 +57,11 @@ func (md MemDev) ReadBlocks(lba uint, b []byte) error {
 // WriteBlocks writes len(b) bytes from b to contiguous storage blocks starting
 // at the given block address.
 // b must be an integer multiple of the device's block size.
-func (md MemDev) WriteBlocks(lba uint, b []byte) error {
-	if lba >= uint(len(md)) {
-		return fmt.Errorf("lba (%d) >= device blocks (%d)", lba, len(md))
+//
+// Returns the number of blocks written, or an error.
+func (md MemDev) WriteBlocks(lba uint, b []byte) (uint, error) {
+	if lba >= uint(len(md.Storage)) {
+		return 0, fmt.Errorf("lba (%d) >= device blocks (%d)", lba, len(md.Storage))
 	}
 	// If the data isn't a multiple of the blocksize, pad it up
 	// so that it is.
@@ -63,17 +70,20 @@ func (md MemDev) WriteBlocks(lba uint, b []byte) error {
 	}
 	lenB := uint(len(b))
 	bl := lenB / MemBlockSize
-	if l := uint(len(md)); lba+bl > l {
+	if l := uint(len(md.Storage)); lba+bl > l {
 		bl = l - lba
 	}
 	for i := uint(0); i < bl; i++ {
-		copy(md[lba+i][:], b[i*MemBlockSize:])
+		copy(md.Storage[lba+i][:], b[i*MemBlockSize:])
+		if md.OnBlockWritten != nil {
+			md.OnBlockWritten(lba + i)
+		}
 	}
-	return nil
+	return bl, nil
 }
 
 // NewMemDev creates a new in-memory block device.
-func NewMemDev(t *testing.T, numBlocks uint) MemDev {
+func NewMemDev(t *testing.T, numBlocks uint) *MemDev {
 	t.Helper()
-	return make(MemDev, numBlocks)
+	return &MemDev{Storage: make([][MemBlockSize]byte, numBlocks)}
 }

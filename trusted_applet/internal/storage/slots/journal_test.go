@@ -154,7 +154,7 @@ func TestEntryUnmarshal(t *testing.T) {
 
 func TestOpenJournal(t *testing.T) {
 	md := testonly.NewMemDev(t, 2)
-	start, length := uint(1), uint(len(md)-1)
+	start, length := uint(1), uint(len(md.Storage)-1)
 	j, err := OpenJournal(md, start, length)
 	if err != nil {
 		t.Fatalf("OpenJournal: %v", err)
@@ -294,6 +294,32 @@ func TestRoundTrip(t *testing.T) {
 				t.Fatalf("Update: %v", err)
 			}
 		})
+	}
+}
+
+func TestUpdateVerifies(t *testing.T) {
+	storageBlocks := uint(20)
+	md := testonly.NewMemDev(t, storageBlocks)
+	start, length := uint(1), storageBlocks-1
+
+	j, err := OpenJournal(md, start, length)
+	if err != nil {
+		t.Fatalf("OpenJournal: %v", err)
+	}
+
+	didCorrupt := false
+	// Set a hook to corrupt writes
+	md.OnBlockWritten = func(lba uint) {
+		md.Storage[lba][0] ^= 0x23
+		didCorrupt = true
+	}
+
+	// Write some updated data, the write itself should succeed but
+	if err := j.Update(fill(1000, "some data")); err == nil {
+		t.Fatal("Update want error, got nil")
+	}
+	if !didCorrupt {
+		t.Fatal("Update failed as expected, but we didn't corrupt data?!")
 	}
 }
 

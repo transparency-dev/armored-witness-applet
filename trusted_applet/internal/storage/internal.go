@@ -47,14 +47,16 @@ func (d *Device) BlockSize() uint {
 // WriteBlocks writes the data in b to the device blocks starting at the given block address.
 // If the final block to be written is partial, it will be padded with zeroes to ensure that
 // full blocks are written.
-func (d *Device) WriteBlocks(lba uint, b []byte) error {
+// Returns the number of blocks written, or an error.
+func (d *Device) WriteBlocks(lba uint, b []byte) (uint, error) {
 	if len(b) == 0 {
-		return nil
+		return 0, nil
 	}
 	bs := int(d.BlockSize())
 	if r := len(b) % bs; r != 0 {
 		b = append(b, make([]byte, bs-r)...)
 	}
+	numBlocks := uint(len(b) / bs)
 	for len(b) > 0 {
 		bl := len(b)
 		if bl > MaxTransferBytes {
@@ -66,12 +68,12 @@ func (d *Device) WriteBlocks(lba uint, b []byte) error {
 		}
 		if err := syscall.Call("RPC.WriteBlocks", &xfer, nil); err != nil {
 			log.Printf("syscall.Write(%d, ...) = %v", xfer.LBA, err)
-			return err
+			return 0, err
 		}
 		b = b[bl:]
 		lba += uint(bl / bs)
 	}
-	return nil
+	return numBlocks, nil
 }
 
 // ReadBlocks reads data from the storage device at the given address into b.
