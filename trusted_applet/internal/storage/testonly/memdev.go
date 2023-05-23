@@ -52,6 +52,8 @@ func (md MemDev) ReadBlocks(lba uint, b []byte) error {
 // WriteBlocks writes len(b) bytes from b to contiguous storage blocks starting
 // at the given block address.
 // b must be an integer multiple of the device's block size.
+//
+// Returns the number of blocks written, or an error.
 func (md MemDev) WriteBlocks(lba uint, b []byte) (uint, error) {
 	if lba >= uint(len(md)) {
 		return 0, fmt.Errorf("lba (%d) >= device blocks (%d)", lba, len(md))
