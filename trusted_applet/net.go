@@ -101,27 +101,9 @@ func getHttpClient() *http.Client {
 			}
 			host, port := parts[0], parts[1]
 			// Look up the hostname
-			r, _, err := resolve(ctx, host)
+			ip, err := resolveHost(ctx, host)
 			if err != nil {
-				return nil, fmt.Errorf("failed to resolve host %q: %v", host, err)
-			}
-			if len(r.Answer) == 0 {
-				return nil, fmt.Errorf("failed to resolve A records for host %q", host)
-			}
-			// There could be multiple A records, so we'll pick one at random.
-			// TODO: consider whether or not it's a good idea to attempt browser-like
-			// client-side retry iterating through A records.
-			var ip []net.IP
-			for _, ans := range r.Answer {
-				if a, ok := ans.(*dns.A); ok {
-					log.Printf("found A record for %q: %v ", host, a)
-					ip = append(ip, a.A)
-					continue
-				}
-				log.Printf("found non-A record for %q: %v ", host, ans)
-			}
-			if len(ip) == 0 {
-				return nil, fmt.Errorf("no A records for %q", host)
+				return nil, err
 			}
 			target := fmt.Sprintf("%s:%s", ip[mrand.Intn(len(ip))], port)
 			glog.V(2).Infof("Dialing %s", target)
@@ -271,7 +253,7 @@ func runNTP(ctx context.Context) {
 	}
 }
 
-func resolve(ctx context.Context, s string) (r *dns.Msg, rtt time.Duration, err error) {
+func resolve(ctx context.Context, s string, qType uint16) (r *dns.Msg, rtt time.Duration, err error) {
 	if s[len(s)-1:] != "." {
 		s += "."
 	}
@@ -281,7 +263,7 @@ func resolve(ctx context.Context, s string) (r *dns.Msg, rtt time.Duration, err 
 	msg.RecursionDesired = true
 
 	msg.Question = []dns.Question{
-		{Name: s, Qtype: dns.TypeA, Qclass: dns.ClassINET},
+		{Name: s, Qtype: qType, Qclass: dns.ClassINET},
 	}
 
 	conn := new(dns.Conn)
@@ -295,12 +277,38 @@ func resolve(ctx context.Context, s string) (r *dns.Msg, rtt time.Duration, err 
 	return c.ExchangeWithConn(msg, conn)
 }
 
+func resolveHost(ctx context.Context, host string) ([]net.IP, error) {
+	r, _, err := resolve(ctx, host, dns.TypeA)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to resolve A record for %q: %v", host, err)
+	}
+	if len(r.Answer) == 0 {
+		return nil, fmt.Errorf("failed to resolve A records for host %q", host)
+	}
+	// There could be multiple A records, so we'll pick one at random.
+	// TODO: consider whether or not it's a good idea to attempt browser-like
+	// client-side retry iterating through A records.
+	var ip []net.IP
+	for _, ans := range r.Answer {
+		if a, ok := ans.(*dns.A); ok {
+			log.Printf("found A record for %q: %v ", host, a)
+			ip = append(ip, a.A)
+			continue
+		}
+		log.Printf("found non-A record for %q: %v ", host, ans)
+	}
+	if len(ip) == 0 {
+		return ip, fmt.Errorf("no A records for %q", host)
+	}
+	return ip, nil
+}
+
 func dnsCmd(_ *term.Terminal, arg []string) (res string, err error) {
 	if iface == nil {
 		return "", errors.New("network is unavailable")
 	}
 
-	r, _, err := resolve(context.Background(), arg[0])
+	r, _, err := resolve(context.Background(), arg[0], dns.TypeANY)
 
 	if err != nil {
 		return fmt.Sprintf("query error: %v", err), nil
