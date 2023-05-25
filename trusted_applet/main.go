@@ -189,8 +189,7 @@ func runWithNetworking(ctx context.Context) error {
 	}
 	log.Printf("TA Version:%s MAC:%s IP:%s GW:%s DNS:%s", Version, iface.NIC.MAC.String(), addr, iface.Stack.GetRouteTable(), resolver)
 
-	/*<-*/
-	runNTP(ctx)
+	<-runNTP(ctx)
 
 	listener, err := iface.ListenerTCP4(22)
 	if err != nil {

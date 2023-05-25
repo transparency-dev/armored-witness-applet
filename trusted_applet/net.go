@@ -237,20 +237,49 @@ func configureNetFromDHCP(newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
 	iface.Stack.SetRouteTable(table)
 }
 
-func runNTP(ctx context.Context) {
-	for {
-		t, err := ntp.Time(DefaultNTP)
-		if err != nil {
-			log.Printf("Failed to get NTP time: %v", err)
-		}
-		applet.ARM.SetTimer(t.UnixNano())
+// runNTP starts periodically attempting to sync the system time with NTP.
+// Returns a channel which become closed once we have obtained an initial time.
+func runNTP(ctx context.Context) chan bool {
+	r := make(chan bool)
 
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(time.Hour):
+	go func(ctx context.Context) {
+		// i specifies the interval between checking in with the NTP server.
+		// Initially we'll check in more frequently until we have set a time.
+		i := time.Second * 10
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(i):
+			}
+
+			ip, err := resolveHost(ctx, DefaultNTP)
+			if err != nil {
+				log.Printf("Failed to resolve NTP server %q: %v", DefaultNTP, err)
+			}
+
+			t, err := ntp.TimeWithOptions(
+				ip[0].String(),
+				ntp.QueryOptions{
+					Dial: iface.DialUDP4,
+				})
+			if err != nil {
+				log.Printf("Failed to get NTP time: %v", err)
+			} else {
+				applet.ARM.SetTimer(t.UnixNano())
+				// We've got some sort of sensible time set now, so check in with NTP
+				// much less frequently.
+				i = time.Hour
+				if r != nil {
+					// Signal that we've got an initial time.
+					close(r)
+					r = nil
+				}
+			}
 		}
-	}
+	}(ctx)
+
+	return r
 }
 
 func resolve(ctx context.Context, s string, qType uint16) (r *dns.Msg, rtt time.Duration, err error) {
