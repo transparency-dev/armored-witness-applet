@@ -8,7 +8,7 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/miekg/dns v1.1.54
 	github.com/transparency-dev/armored-witness-os v0.0.0-20230512102609-3c1a04c0a007
-	github.com/transparency-dev/witness v0.0.0-20230508162120-bb97910e398b
+	github.com/transparency-dev/witness v0.0.0-20230607113817-0b70a97dae5f
 	github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa
 	github.com/usbarmory/imx-enet v0.0.0-20230525204907-2882ea9be008
 	github.com/usbarmory/tamago v0.0.0-20230511143907-aa24431c1ef0
@@ -35,7 +35,7 @@ require (
 	github.com/transparency-dev/formats v0.0.0-20230124125735-2da9e2580a26 // indirect
 	github.com/transparency-dev/merkle v0.0.2 // indirect
 	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/oauth2 v0.7.0 // indirect
+	golang.org/x/oauth2 v0.8.0 // indirect
 	golang.org/x/sync v0.2.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
