@@ -77,7 +77,7 @@ environment variables must be set to the path of either
 Example key generation (signify):
 
 ```
-signify -G -n -p armored-witness-applet.pub -s armores-witness-applet.sec
+signify -G -n -p armored-witness-applet.pub -s armored-witness-applet.sec
 ```
 
 Example key generation (minisign):
