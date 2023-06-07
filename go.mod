@@ -3,13 +3,14 @@ module github.com/transparency-dev/armored-witness-applet
 go 1.19
 
 require (
+	github.com/beevik/ntp v1.0.1-0.20230531043453-c527eb76fb9a
 	github.com/golang/glog v1.1.1
 	github.com/google/go-cmp v0.5.9
 	github.com/miekg/dns v1.1.54
 	github.com/transparency-dev/armored-witness-os v0.0.0-20230512102609-3c1a04c0a007
 	github.com/transparency-dev/witness v0.0.0-20230508162120-bb97910e398b
 	github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa
-	github.com/usbarmory/imx-enet v0.0.0-20230518121845-309cac367c72
+	github.com/usbarmory/imx-enet v0.0.0-20230525204907-2882ea9be008
 	github.com/usbarmory/tamago v0.0.0-20230511143907-aa24431c1ef0
 	golang.org/x/crypto v0.9.0
 	golang.org/x/mod v0.10.0
@@ -21,7 +22,6 @@ require (
 )
 
 require (
-	github.com/beevik/ntp v1.0.1-0.20230531043453-c527eb76fb9a // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/btree v1.1.2 // indirect
