@@ -26,6 +26,7 @@ import (
 	"net"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -35,11 +36,13 @@ import (
 	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
 
+	"github.com/beevik/ntp"
 	"github.com/golang/glog"
 	"github.com/miekg/dns"
 	"github.com/transparency-dev/armored-witness-applet/third_party/dhcp"
 	"golang.org/x/term"
 
+	"github.com/usbarmory/GoTEE/applet"
 	"github.com/usbarmory/GoTEE/syscall"
 	enet "github.com/usbarmory/imx-enet"
 
@@ -53,6 +56,7 @@ const (
 	Netmask         = "255.255.255.0"
 	Gateway         = "10.0.0.2"
 	DefaultResolver = "8.8.8.8:53"
+	DefaultNTP      = "time.google.com"
 
 	nicID = tcpip.NICID(1)
 
@@ -98,27 +102,9 @@ func getHttpClient() *http.Client {
 			}
 			host, port := parts[0], parts[1]
 			// Look up the hostname
-			r, _, err := resolve(ctx, host)
+			ip, err := resolveHost(ctx, host)
 			if err != nil {
-				return nil, fmt.Errorf("failed to resolve host %q: %v", host, err)
-			}
-			if len(r.Answer) == 0 {
-				return nil, fmt.Errorf("failed to resolve A records for host %q", host)
-			}
-			// There could be multiple A records, so we'll pick one at random.
-			// TODO: consider whether or not it's a good idea to attempt browser-like
-			// client-side retry iterating through A records.
-			var ip []net.IP
-			for _, ans := range r.Answer {
-				if a, ok := ans.(*dns.A); ok {
-					log.Printf("found A record for %q: %v ", host, a)
-					ip = append(ip, a.A)
-					continue
-				}
-				log.Printf("found non-A record for %q: %v ", host, ans)
-			}
-			if len(ip) == 0 {
-				return nil, fmt.Errorf("no A records for %q", host)
+				return nil, err
 			}
 			target := fmt.Sprintf("%s:%s", ip[mrand.Intn(len(ip))], port)
 			glog.V(2).Infof("Dialing %s", target)
@@ -252,7 +238,65 @@ func configureNetFromDHCP(newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
 	iface.Stack.SetRouteTable(table)
 }
 
-func resolve(ctx context.Context, s string) (r *dns.Msg, rtt time.Duration, err error) {
+// runNTP starts periodically attempting to sync the system time with NTP.
+// Returns a channel which become closed once we have obtained an initial time.
+func runNTP(ctx context.Context) chan bool {
+	r := make(chan bool)
+
+	// dialFunc is a custom dialer for the ntp package.
+	dialFunc := func(lHost string, lPort int, rHost string, rPort int) (net.Conn, error) {
+		lAddr := ""
+		if lHost != "" {
+			lAddr = net.JoinHostPort(lHost, strconv.Itoa(lPort))
+		}
+		return iface.DialUDP4(lAddr, net.JoinHostPort(rHost, strconv.Itoa(rPort)))
+	}
+
+	go func(ctx context.Context) {
+		// i specifies the interval between checking in with the NTP server.
+		// Initially we'll check in more frequently until we have set a time.
+		i := time.Second * 10
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(i):
+			}
+
+			ip, err := resolveHost(ctx, DefaultNTP)
+			if err != nil {
+				log.Printf("Failed to resolve NTP server %q: %v", DefaultNTP, err)
+				continue
+			}
+			ntpR, err := ntp.QueryWithOptions(
+				ip[0].String(),
+				ntp.QueryOptions{Dial: dialFunc},
+			)
+			if err != nil {
+				log.Printf("Failed to get NTP time: %v", err)
+				continue
+			}
+			if err := ntpR.Validate(); err != nil {
+				log.Printf("got invalid time from NTP server: %v", err)
+				continue
+			}
+			applet.ARM.SetTimer(ntpR.Time.UnixNano())
+
+			// We've got some sort of sensible time set now, so check in with NTP
+			// much less frequently.
+			i = time.Hour
+			if r != nil {
+				// Signal that we've got an initial time.
+				close(r)
+				r = nil
+			}
+		}
+	}(ctx)
+
+	return r
+}
+
+func resolve(ctx context.Context, s string, qType uint16) (r *dns.Msg, rtt time.Duration, err error) {
 	if s[len(s)-1:] != "." {
 		s += "."
 	}
@@ -262,7 +306,7 @@ func resolve(ctx context.Context, s string) (r *dns.Msg, rtt time.Duration, err 
 	msg.RecursionDesired = true
 
 	msg.Question = []dns.Question{
-		{Name: s, Qtype: dns.TypeA, Qclass: dns.ClassINET},
+		{Name: s, Qtype: qType, Qclass: dns.ClassINET},
 	}
 
 	conn := new(dns.Conn)
@@ -276,12 +320,38 @@ func resolve(ctx context.Context, s string) (r *dns.Msg, rtt time.Duration, err 
 	return c.ExchangeWithConn(msg, conn)
 }
 
+func resolveHost(ctx context.Context, host string) ([]net.IP, error) {
+	r, _, err := resolve(ctx, host, dns.TypeA)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to resolve A record for %q: %v", host, err)
+	}
+	if len(r.Answer) == 0 {
+		return nil, fmt.Errorf("failed to resolve A records for host %q", host)
+	}
+	// There could be multiple A records, so we'll pick one at random.
+	// TODO: consider whether or not it's a good idea to attempt browser-like
+	// client-side retry iterating through A records.
+	var ip []net.IP
+	for _, ans := range r.Answer {
+		if a, ok := ans.(*dns.A); ok {
+			log.Printf("found A record for %q: %v ", host, a)
+			ip = append(ip, a.A)
+			continue
+		}
+		log.Printf("found non-A record for %q: %v ", host, ans)
+	}
+	if len(ip) == 0 {
+		return ip, fmt.Errorf("no A records for %q", host)
+	}
+	return ip, nil
+}
+
 func dnsCmd(_ *term.Terminal, arg []string) (res string, err error) {
 	if iface == nil {
 		return "", errors.New("network is unavailable")
 	}
 
-	r, _, err := resolve(context.Background(), arg[0])
+	r, _, err := resolve(context.Background(), arg[0], dns.TypeANY)
 
 	if err != nil {
 		return fmt.Sprintf("query error: %v", err), nil

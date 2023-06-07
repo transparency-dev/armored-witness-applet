@@ -189,6 +189,8 @@ func runWithNetworking(ctx context.Context) error {
 	}
 	log.Printf("TA Version:%s MAC:%s IP:%s GW:%s DNS:%s", Version, iface.NIC.MAC.String(), addr, iface.Stack.GetRouteTable(), resolver)
 
+	<-runNTP(ctx)
+
 	listener, err := iface.ListenerTCP4(22)
 	if err != nil {
 		return fmt.Errorf("TA could not initialize SSH listener, %v", err)
