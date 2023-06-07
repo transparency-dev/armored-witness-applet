@@ -238,18 +238,19 @@ func configureNetFromDHCP(newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
 	iface.Stack.SetRouteTable(table)
 }
 
-func ntpDialUDP(lHost string, lPort int, rHost string, rPort int) (net.Conn, error) {
-	lAddr := ""
-	if lHost != "" {
-		lAddr = net.JoinHostPort(lHost, strconv.Itoa(lPort))
-	}
-	return iface.DialUDP4(lAddr, net.JoinHostPort(rHost, strconv.Itoa(rPort)))
-}
-
 // runNTP starts periodically attempting to sync the system time with NTP.
 // Returns a channel which become closed once we have obtained an initial time.
 func runNTP(ctx context.Context) chan bool {
 	r := make(chan bool)
+
+	// dialFunc is a custom dialer for the ntp package.
+	dialFunc := func(lHost string, lPort int, rHost string, rPort int) (net.Conn, error) {
+		lAddr := ""
+		if lHost != "" {
+			lAddr = net.JoinHostPort(lHost, strconv.Itoa(lPort))
+		}
+		return iface.DialUDP4(lAddr, net.JoinHostPort(rHost, strconv.Itoa(rPort)))
+	}
 
 	go func(ctx context.Context) {
 		// i specifies the interval between checking in with the NTP server.
@@ -269,7 +270,7 @@ func runNTP(ctx context.Context) chan bool {
 			}
 			ntpR, err := ntp.QueryWithOptions(
 				ip[0].String(),
-				ntp.QueryOptions{Dial: ntpDialUDP},
+				ntp.QueryOptions{Dial: dialFunc},
 			)
 			if err != nil {
 				log.Printf("Failed to get NTP time: %v", err)
