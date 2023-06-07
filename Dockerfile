@@ -7,7 +7,7 @@ WORKDIR /build
 COPY Makefile .
 COPY . .
 
-ENV TAMAGO=/usr/local/tamago-go/bin/go
+ENV TAMAGO=/bin/tamago-go/go
 RUN signify-openbsd -G -n -p armored-witness-applet.pub -s armored-witness-applet.sec
 RUN echo $_APPLET_PRIVATE_KEY > armored-witness-applet.sec
 ENV APPLET_PRIVATE_KEY=armored-witness-applet.sec
