@@ -56,6 +56,8 @@ github.com/transparency-dev/merkle v0.0.2 h1:Q9nBoQcZcgPamMkGn7ghV8XiTZ/kRxn1yCG
 github.com/transparency-dev/merkle v0.0.2/go.mod h1:pqSy+OXefQ1EDUVmAJ8MUhHB9TXGuzVAT58PqBoHz1A=
 github.com/transparency-dev/witness v0.0.0-20230508162120-bb97910e398b h1:DU6lGGvZVBmPEtqXDRlLgsICoC3ZEDGJY1t5EjLfZDk=
 github.com/transparency-dev/witness v0.0.0-20230508162120-bb97910e398b/go.mod h1:wjvpKAegMlRDqqEfKyGAADSBM4XGJe+uFee1Zkh1WbY=
+github.com/transparency-dev/witness v0.0.0-20230607113817-0b70a97dae5f h1:0XvcmcjPU4kF67/ExSCN5mUPB3e5UYnzw/BZu4QJIAw=
+github.com/transparency-dev/witness v0.0.0-20230607113817-0b70a97dae5f/go.mod h1:lTrWJdOAx9Ler8DcL8PmrNfMEBDNE3qQUAGItNZtDsY=
 github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa h1:iWvxAk3sE4mvCYVkMET6nhu2RbJcPToCjXlqHn8T+f8=
 github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa/go.mod h1:164CE5Gb+PiM6cxhYpyPg9FlpqttRFwUZ+KiTonK4Ak=
 github.com/usbarmory/imx-enet v0.0.0-20230525204907-2882ea9be008 h1:l5lO1CrlMbW35ee1bPOe2zTN+t7YFgF9oNYvRIo7Cqc=
@@ -85,6 +87,7 @@ golang.org/x/net v0.10.0/go.mod h1:0qNGK6F8kojg2nk9dLZ2mShWaEBan6FAoqfSigmmuDg=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/oauth2 v0.7.0 h1:qe6s0zUXlPX80/dITx3440hWZ7GwMwgDDyrSGTPJG/g=
 golang.org/x/oauth2 v0.7.0/go.mod h1:hPLQkd9LyjfXTiRohC/41GhcFqxisoUQ99sCUOHO9x4=
+golang.org/x/oauth2 v0.8.0/go.mod h1:yr7u4HXZRm1R1kBWqr/xKNqewf0plRYoB7sla+BCIXE=
 golang.org/x/sync v0.0.0-20190423024810-112230192c58/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.1.0/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
