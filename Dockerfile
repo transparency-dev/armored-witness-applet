@@ -19,6 +19,7 @@ ENV TAMAGO=/usr/local/tamago-go/bin/go
 
 # Set signing key path for Make rule.
 RUN echo 'untrusted comment: signify secret key' > armored-witness-applet.sec
+# TODO(jayhou): replace signing with signify-openbsd here with a more secure environment.
 RUN echo $_APPLET_PRIVATE_KEY >> armored-witness-applet.sec
 ENV APPLET_PRIVATE_KEY=armored-witness-applet.sec
 
