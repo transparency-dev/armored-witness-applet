@@ -38,7 +38,11 @@ ENTRY_POINT := _rt0_arm_tamago
 
 ARCH = "arm"
 
-GOFLAGS = -tags ${BUILD_TAGS} -trimpath -ldflags "-T ${TEXT_START} -E ${ENTRY_POINT} -R 0x1000 -X 'main.Build=${BUILD}' -X 'main.Revision=${REV}' -X 'main.Version=${BUILD_EPOCH}' -X 'main.PublicKey=$(shell test ${PUBLIC_KEY} && cat ${PUBLIC_KEY} | tail -n 1)'"
+GOFLAGS = -tags ${BUILD_TAGS} -trimpath \
+        -ldflags "-T ${TEXT_START} -E ${ENTRY_POINT} -R 0x1000 \
+                  -X 'main.Build=${BUILD}' -X 'main.Revision=${REV}' -X 'main.Version=${BUILD_EPOCH}' \
+		          -X 'main.PublicKey=$(shell test ${PUBLIC_KEY} && cat ${PUBLIC_KEY} | tail -n 1)' \
+		          -X 'main.GitHubUser=${GITHUB_USER}' -X 'main.GitHubEmail=${GITHUB_EMAIL}' -X 'main.GitHubToken=${GITHUB_TOKEN}'"
 
 .PHONY: clean
 
