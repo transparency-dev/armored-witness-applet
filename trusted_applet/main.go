@@ -66,6 +66,8 @@ var (
 	Revision string
 	Version  string
 
+	GitHubUser, GitHubEmail, GitHubToken string
+
 	cfg *api.Configuration
 
 	persistence *storage.SlotPersistence
@@ -229,6 +231,9 @@ func runWithNetworking(ctx context.Context) error {
 	opConfig := omniwitness.OperatorConfig{
 		WitnessSigner:   signer,
 		WitnessVerifier: verifier,
+		GithubUser:      GitHubUser,
+		GithubEmail:     GitHubEmail,
+		GithubToken:     GitHubToken,
 	}
 	// TODO(mhutchinson): add a second listener for an admin API.
 	mainListener, err := iface.ListenerTCP4(80)
