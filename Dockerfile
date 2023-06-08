@@ -1,5 +1,8 @@
 FROM amd64/ubuntu:latest
 
+# Get env variable from host.
+ARG _APPLET_PRIVATE_KEY
+
 # Install dependencies.
 RUN apt-get update && apt-get install -y make
 RUN apt-get install -y signify-openbsd
@@ -12,7 +15,7 @@ WORKDIR /build
 COPY . .
 
 # Set Tamago path for Make rule.
-ENV TAMAGO=usr/local/tamago-go/bin/go
+ENV TAMAGO=/usr/local/tamago-go/bin/go
 
 # Set signing key path for Make rule.
 RUN echo 'untrusted comment: signify secret key' > armored-witness-applet.sec
