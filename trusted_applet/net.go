@@ -241,6 +241,11 @@ func configureNetFromDHCP(newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
 // runNTP starts periodically attempting to sync the system time with NTP.
 // Returns a channel which become closed once we have obtained an initial time.
 func runNTP(ctx context.Context) chan bool {
+	if cfg.NTPServer == "" {
+		log.Println("NTP disabled.")
+		return nil
+	}
+
 	r := make(chan bool)
 
 	// dialFunc is a custom dialer for the ntp package.
@@ -263,7 +268,7 @@ func runNTP(ctx context.Context) chan bool {
 			case <-time.After(i):
 			}
 
-			ip, err := resolveHost(ctx, DefaultNTP)
+			ip, err := resolveHost(ctx, cfg.NTPServer)
 			if err != nil {
 				log.Printf("Failed to resolve NTP server %q: %v", DefaultNTP, err)
 				continue
