@@ -22,6 +22,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/usbarmory/GoTEE/applet"
 	"github.com/usbarmory/GoTEE/syscall"
@@ -135,6 +136,15 @@ func main() {
 
 	syscall.Call("RPC.LED", rpc.LEDStatus{Name: "blue", On: true}, nil)
 	defer syscall.Call("RPC.LED", rpc.LEDStatus{Name: "blue", On: false}, nil)
+
+	go func() {
+		l := true
+		for {
+			syscall.Call("RPC.LED", rpc.LEDStatus{Name: "blue", On: l}, nil)
+			l = !l
+			time.Sleep(500 * time.Millisecond)
+		}
+	}()
 
 	if err := startNetworking(); err != nil {
 		log.Fatalf("TA could not initialize networking, %v", err)
