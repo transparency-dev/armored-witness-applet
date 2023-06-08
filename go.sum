@@ -48,8 +48,6 @@ github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.2 h1:+h33VjcLVPDHtOdpUCuF+7gSuG3yGIftsP1YvFihtJ8=
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
-github.com/transparency-dev/armored-witness-os v0.0.0-20230512102609-3c1a04c0a007 h1:bPQG6G3in/99hrcH68bhMCMMLWWLWbORkOWWU83OrOw=
-github.com/transparency-dev/armored-witness-os v0.0.0-20230512102609-3c1a04c0a007/go.mod h1:7RRQqDznrOOSXImx8gtqQAlcqPk5dh6YVXmWZpglApo=
 github.com/transparency-dev/armored-witness-os v0.0.0-20230608161615-85a962a3140d h1:5Zli63Rka2mpwtWjo+v6+XXq/2uL0FZLyWtTzmMkm9g=
 github.com/transparency-dev/armored-witness-os v0.0.0-20230608161615-85a962a3140d/go.mod h1:i5M4CBJcbYWhjWV1Oa9O8mLH/CK8BIEuHq8Bq8I5O6c=
 github.com/transparency-dev/formats v0.0.0-20230124125735-2da9e2580a26 h1:CVoO2X5LdS4DMgC2UeRx9VzJvTV3BNuxldzvSkC9QlQ=
@@ -63,8 +61,7 @@ github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa/go.mod h1:164CE5Gb
 github.com/usbarmory/imx-enet v0.0.0-20230525204907-2882ea9be008 h1:l5lO1CrlMbW35ee1bPOe2zTN+t7YFgF9oNYvRIo7Cqc=
 github.com/usbarmory/imx-enet v0.0.0-20230525204907-2882ea9be008/go.mod h1:oa7S6vwmh5KtGcZDluDIZ6P2xjI/hzVTB2SNohFYd58=
 github.com/usbarmory/tamago v0.0.0-20220823080407-04f05cf2a5a3/go.mod h1:Lok79mjbJnhoBGqhX5cCUsZtSemsQF5FNZW+2R1dRr8=
-github.com/usbarmory/tamago v0.0.0-20230511143907-aa24431c1ef0 h1:TVSossQboxxqIWtnEFBNxaccZtRJv5blDIhYhwe2h/0=
-github.com/usbarmory/tamago v0.0.0-20230511143907-aa24431c1ef0/go.mod h1:uCPXcPo8SZulhZPz8irfVqzwVlPZ45w7CTJxkfxueGA=
+github.com/usbarmory/tamago v0.0.0-20230529110145-b8025086bb9f h1:2nCLV3Jp6rFZC6fk34ClkqBTF1IpWBm5dI+bPHxBQkE=
 github.com/usbarmory/tamago v0.0.0-20230529110145-b8025086bb9f/go.mod h1:uCPXcPo8SZulhZPz8irfVqzwVlPZ45w7CTJxkfxueGA=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
