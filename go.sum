@@ -36,6 +36,8 @@ github.com/google/go-querystring v1.1.0 h1:AnCroh3fv4ZBgVIf1Iwtovgjaw/GiKJo8M8yD
 github.com/google/go-querystring v1.1.0/go.mod h1:Kcdr2DB4koayq7X8pmAG4sNG59So17icRSOU623lUBU=
 github.com/google/trillian-examples v0.0.0-20230419170052-1d4b6bbacc57 h1:zSMxiN70oz/O4HMBr+Iu8hrNAvXSzG9q5cML1jKk00E=
 github.com/google/trillian-examples v0.0.0-20230419170052-1d4b6bbacc57/go.mod h1:dJrNRA0spf31+GXhcQ/kDn3W7TwDt6Niv7ZvIm/vji8=
+github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e h1:XmA6L9IPRdUr28a+SK/oMchGgQy159wvzXA5tJ7l+40=
+github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e/go.mod h1:AFIo+02s+12CEg8Gzz9kzhCbmbq6JcKNrhHffCGA9z4=
 github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
 github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
 github.com/gsora/fidati v0.0.0-20220824075547-eeb0a5f7d6c3 h1:klG3scbSLaGIvJO1p9wdTaHonsCSAcvNrX8vfa8LRd4=

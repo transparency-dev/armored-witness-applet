@@ -16,6 +16,9 @@ package main
 
 import (
 	"context"
+	"crypto/aes"
+	"crypto/sha256"
+	"encoding/binary"
 	"flag"
 	"fmt"
 	"log"
@@ -27,6 +30,8 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"golang.org/x/crypto/hkdf"
+
 	"github.com/usbarmory/GoTEE/applet"
 	"github.com/usbarmory/GoTEE/syscall"
 	"github.com/usbarmory/tamago/soc/nxp/usdhc"
@@ -39,6 +44,8 @@ import (
 	"github.com/transparency-dev/armored-witness-os/api"
 	"github.com/transparency-dev/armored-witness-os/api/rpc"
 
+	"github.com/goombaio/namegenerator"
+
 	"github.com/golang/glog"
 	"github.com/transparency-dev/witness/monitoring"
 	"github.com/transparency-dev/witness/monitoring/prometheus"
@@ -49,11 +56,6 @@ import (
 )
 
 const (
-	// Generated from https://go.dev/play/p/uWUKLNK6h9v
-	// TODO(mhutchinson): these need to be read from file instead of constants
-	publicKey  = "TrustMe+68958214+AQ4Ys/PsXqfhPkNK7Y7RyYUMOJvfl65PzJOEiq9VFPjF"
-	signingKey = "PRIVATE+KEY+TrustMe+68958214+AZKby3TDZizdARF975ZyLJwGbHTivd+EqbfYTN5qr2cI"
-
 	// slotsPartitionOffsetBytes defines where our witness data storage partition starts.
 	// Changing this location is overwhelmingly likely to result in data loss.
 	slotsPartitionOffsetBytes = 1 << 30
@@ -78,11 +80,64 @@ var (
 	cfg *api.Configuration
 
 	persistence *storage.SlotPersistence
+
+	witnessPublicKey  string
+	witnessSigningKey string
 )
 
 func init() {
 	log.SetFlags(log.Ltime)
 	log.SetOutput(os.Stdout)
+}
+
+// deriveWitnessKey creates this witness' signing identity by deriving a key
+// based on the hardware's unique internal secret key.
+//
+// TODO(al): The derived key should change if the device is wiped.
+//
+// Since we never store this derived key anywhere, for any given device this
+// function MUST reproduce the same key on each boot (until the device is wiped,
+// at which point a new stable key should be returned).
+func deriveWitnessKey(uniqueID string) error {
+	// TODO(al): We'll switch to using a counter from the RPMB to ensure we get a fresh key
+	// whenever the device is wiped. For now we'll just use a static diversifier:
+	diversifierPreimage := "WitnessKey-test"
+
+	// We want an Ed25519 keypair, but the h/w doesn't support that directly - it
+	// generates an AES256 key so some hoop jumping is necessary.
+
+	// We'll use the provided RPC call to do the derivation in h/w, but since this is based on
+	// AES it expects the diversifier to be 16 bytes long. We'll hash our diversifier text above
+	// and truncate to 16 bytes, and use that:
+	diversifierHash := sha256.Sum256([]byte(diversifierPreimage))
+	var aesKey []byte
+	if err := syscall.Call("RPC.DeriveKey", diversifierHash[:aes.BlockSize], &aesKey); err != nil {
+		return fmt.Errorf("TA failed to derive h/w key, %v", err)
+	}
+	if l := len(aesKey); l != 32 {
+		return fmt.Errorf("expected 32 bytes of aesKey, got %d", l)
+	}
+
+	salt := []byte(fmt.Sprintf("armoredwitness-%s", uniqueID))
+	r := hkdf.New(sha256.New, aesKey, salt, nil)
+
+	// Figure out our name
+	nSeed := make([]byte, 8)
+	if _, err := r.Read(nSeed); err != nil {
+		return fmt.Errorf("failed to read name entropy: %v", err)
+	}
+
+	ng := namegenerator.NewNameGenerator(int64(binary.LittleEndian.Uint64(nSeed)))
+	witnessName := fmt.Sprintf("ArmoredWitness-%s", ng.Generate())
+
+	// And finally generate our note keypair
+	sec, pub, err := note.GenerateKey(r, witnessName)
+	if err != nil {
+		return fmt.Errorf("failed to generate derived witness key: %v", err)
+	}
+	witnessSigningKey, witnessPublicKey = sec, pub
+
+	return nil
 }
 
 func main() {
@@ -151,6 +206,11 @@ func main() {
 
 	syscall.Call("RPC.LED", rpc.LEDStatus{Name: "blue", On: true}, nil)
 	defer syscall.Call("RPC.LED", rpc.LEDStatus{Name: "blue", On: false}, nil)
+
+	// (Re-)create our witness identity based on the device's internal secret key.
+	if err := deriveWitnessKey(status.Serial); err != nil {
+		glog.Fatalf("Failed to derive witness key: %v", err)
+	}
 
 	go func() {
 		l := true
@@ -265,11 +325,11 @@ func runWithNetworking(ctx context.Context) error {
 	}()
 
 	// Set up and start omniwitness
-	signer, err := note.NewSigner(signingKey)
+	signer, err := note.NewSigner(witnessSigningKey)
 	if err != nil {
 		return fmt.Errorf("failed to init signer: %v", err)
 	}
-	verifier, err := note.NewVerifier(publicKey)
+	verifier, err := note.NewVerifier(witnessPublicKey)
 	if err != nil {
 		return fmt.Errorf("failed to init verifier: %v", err)
 	}
@@ -292,6 +352,7 @@ func runWithNetworking(ctx context.Context) error {
 	}()
 
 	log.Println("Starting witness...")
+	log.Printf("I am %q", witnessPublicKey)
 	if err := omniwitness.Main(ctx, opConfig, persistence, mainListener, http.DefaultClient); err != nil {
 		return fmt.Errorf("omniwitness.Main failed: %v", err)
 	}
