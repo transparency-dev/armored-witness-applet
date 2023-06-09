@@ -97,11 +97,12 @@ func main() {
 	// Set default configuration, the applet is reponsible of implementing
 	// its own configuration storage strategy.
 	cfg = &api.Configuration{
-		DHCP:     DHCP,
-		IP:       IP,
-		Netmask:  Netmask,
-		Gateway:  Gateway,
-		Resolver: DefaultResolver,
+		DHCP:      DHCP,
+		IP:        IP,
+		Netmask:   Netmask,
+		Gateway:   Gateway,
+		Resolver:  DefaultResolver,
+		NTPServer: DefaultNTP,
 	}
 
 	// Send network configuration to Trusted OS for network initialization.
