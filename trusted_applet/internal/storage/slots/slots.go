@@ -17,7 +17,6 @@ package slots
 import (
 	"errors"
 	"fmt"
-	"runtime"
 	"sync"
 
 	"github.com/golang/glog"
@@ -90,22 +89,26 @@ func (p *Partition) Erase() error {
 	glog.Info("Erasing partition")
 	borked := false
 	for i := range p.slots {
-		p.slots[i].mu.Lock()
-		defer p.slots[i].mu.Unlock()
-
-		glog.Infof("Erasing partition slot %d @ block %d", i, p.slots[i].start)
-		length := p.slots[i].length
-		start := p.slots[i].start
-		b := make([]byte, length)
-		if _, err := p.dev.WriteBlocks(start, b); err != nil {
-			glog.Warningf("Failed to wipe slot %d occupying blocks [%d, %d): %v", i, start, start+length, err)
-			borked = true
+		if err := p.eraseSlot(i); err != nil {
+			glog.Warningf("Failed to erase slot %d: %v", i, err)
 		}
-		// Since this is a long-running operation, we need to play nice with the scheduler.
-		runtime.Gosched()
 	}
 	if borked {
 		return errors.New("failed to erase one or more slots in partition")
+	}
+	return nil
+}
+
+func (p *Partition) eraseSlot(i int) error {
+	p.slots[i].mu.Lock()
+	defer p.slots[i].mu.Unlock()
+
+	glog.Infof("Erasing partition slot %d @ block %d", i, p.slots[i].start)
+	length := p.slots[i].length
+	start := p.slots[i].start
+	b := make([]byte, length)
+	if _, err := p.dev.WriteBlocks(start, b); err != nil {
+		return fmt.Errorf("slot %d occupying blocks [%d, %d): %v", i, start, start+length, err)
 	}
 	return nil
 }

@@ -20,6 +20,7 @@ package storage
 
 import (
 	"log"
+	"runtime"
 
 	"github.com/transparency-dev/armored-witness-os/api/rpc"
 	"github.com/usbarmory/GoTEE/syscall"
@@ -66,6 +67,10 @@ func (d *Device) WriteBlocks(lba uint, b []byte) (uint, error) {
 			LBA:  int(lba),
 			Data: b[:bl],
 		}
+
+		// Since this could be a long-running operation, we need to play nice with the scheduler.
+		runtime.Gosched()
+
 		if err := syscall.Call("RPC.WriteBlocks", &xfer, nil); err != nil {
 			log.Printf("syscall.Write(%d, ...) = %v", xfer.LBA, err)
 			return 0, err
@@ -92,6 +97,9 @@ func (d *Device) ReadBlocks(lba uint, b []byte) error {
 			Offset: int64(int(lba) * bs),
 			Size:   int64(bl),
 		}
+
+		// Since this could be a long-running operation, we need to play nice with the scheduler.
+		runtime.Gosched()
 
 		var readBuf []byte
 		if err := syscall.Call("RPC.Read", xfer, &readBuf); err != nil {
