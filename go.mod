@@ -14,7 +14,7 @@ require (
 	github.com/usbarmory/tamago v0.0.0-20230529110145-b8025086bb9f
 	golang.org/x/crypto v0.9.0
 	golang.org/x/mod v0.10.0
-	golang.org/x/term v0.8.0
+	golang.org/x/term v0.9.0
 	google.golang.org/grpc v1.55.0
 	google.golang.org/protobuf v1.30.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -37,7 +37,7 @@ require (
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
 	golang.org/x/sync v0.2.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.8.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
