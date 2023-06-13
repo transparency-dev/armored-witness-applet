@@ -83,26 +83,32 @@ func OpenPartition(rw BlockReaderWriter, geo Geometry) (*Partition, error) {
 	return ret, nil
 }
 
-// Erase destroys the data stores in all slots configured in this partition.
+// Erase destroys the data stored in all slots configured in this partition.
 // WARNING: Data Loss!
 func (p *Partition) Erase() error {
 	glog.Info("Erasing partition")
 	borked := false
 	for i := range p.slots {
-		glog.Infof("Erasing partition slot %d", i)
-		p.slots[i].mu.Lock()
-		defer p.slots[i].mu.Unlock()
-
-		length := p.slots[i].journal.length
-		start := p.slots[i].journal.start
-		b := make([]byte, length)
-		if _, err := p.dev.WriteBlocks(start, b); err != nil {
-			glog.Warningf("Failed to wipe slot %d occupying blocks [%d, %d): %v", i, start, start+length, err)
-			borked = true
+		if err := p.eraseSlot(i); err != nil {
+			glog.Warningf("Failed to erase slot %d: %v", i, err)
 		}
 	}
 	if borked {
 		return errors.New("failed to erase one or more slots in partition")
+	}
+	return nil
+}
+
+func (p *Partition) eraseSlot(i int) error {
+	p.slots[i].mu.Lock()
+	defer p.slots[i].mu.Unlock()
+
+	glog.Infof("Erasing partition slot %d @ block %d", i, p.slots[i].start)
+	length := p.slots[i].length
+	start := p.slots[i].start
+	b := make([]byte, length)
+	if _, err := p.dev.WriteBlocks(start, b); err != nil {
+		return fmt.Errorf("slot %d occupying blocks [%d, %d): %v", i, start, start+length, err)
 	}
 	return nil
 }

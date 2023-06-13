@@ -79,7 +79,7 @@ func init() {
 }
 
 func main() {
-	flag.Set("vmodule", "journal=1,slots=1")
+	flag.Set("vmodule", "journal=1,slots=1,storage=1")
 	flag.Set("v", "1")
 	flag.Set("logtostderr", "true")
 	flag.Parse()
@@ -155,6 +155,9 @@ func main() {
 
 	syscall.Call("RPC.Address", iface.NIC.MAC, nil)
 
+	// Register and run our RPC handler so we can receive ethernet frames.
+	go eventHandler()
+
 	glog.Infof("Opening storage...")
 	part := openStorage()
 	glog.Infof("Storage opened.")
@@ -165,9 +168,14 @@ func main() {
 	// If the journal(s) become corrupt a larger hammer will be required.
 	reinit := false
 	if reinit {
+		for i := 10; i > 0; i-- {
+			log.Printf("Erasing in %ds", i)
+			time.Sleep(time.Second)
+		}
 		if err := part.Erase(); err != nil {
 			glog.Exitf("Failed to erase partition: %v", err)
 		}
+		glog.Exit("Erase completed")
 	}
 
 	persistence = storage.NewSlotPersistence(part)
@@ -175,9 +183,6 @@ func main() {
 		glog.Exitf("Failed to create persistence layer: %v", err)
 	}
 	persistence.Init()
-
-	// Register and run our RPC handler so we can receive ethernet frames.
-	go eventHandler()
 
 	// Wait for a DHCP address to be assigned if that's what we're configured to do
 	if cfg.DHCP {
