@@ -18,7 +18,7 @@ require (
 	google.golang.org/grpc v1.55.0
 	google.golang.org/protobuf v1.30.0
 	gopkg.in/yaml.v3 v3.0.1
-	gvisor.dev/gvisor v0.0.0-20230315045701-8b73c1d89ca8
+	gvisor.dev/gvisor v0.0.0-20230614011150-2ccb90afa11e
 )
 
 require (
