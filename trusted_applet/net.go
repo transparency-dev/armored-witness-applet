@@ -30,7 +30,7 @@ import (
 	"strings"
 	"time"
 
-	"gvisor.dev/gvisor/pkg/bufferv2"
+	"gvisor.dev/gvisor/pkg/buffer"
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/header"
 	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
@@ -386,7 +386,7 @@ func rx(buf []byte) {
 
 	pkt := stack.NewPacketBuffer(stack.PacketBufferOptions{
 		ReserveHeaderBytes: len(hdr),
-		Payload:            bufferv2.MakeWithData(payload),
+		Payload:            buffer.MakeWithData(payload),
 	})
 
 	copy(pkt.LinkHeader().Push(len(hdr)), hdr)
