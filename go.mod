@@ -12,7 +12,7 @@ require (
 	github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa
 	github.com/usbarmory/imx-enet v0.0.0-20230525204907-2882ea9be008
 	github.com/usbarmory/tamago v0.0.0-20230529110145-b8025086bb9f
-	golang.org/x/crypto v0.9.0
+	golang.org/x/crypto v0.10.0
 	golang.org/x/mod v0.10.0
 	golang.org/x/term v0.9.0
 	google.golang.org/grpc v1.55.0
