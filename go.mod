@@ -3,7 +3,7 @@ module github.com/transparency-dev/armored-witness-applet
 go 1.19
 
 require (
-	github.com/beevik/ntp v1.0.1-0.20230531043453-c527eb76fb9a
+	github.com/beevik/ntp v1.1.1
 	github.com/golang/glog v1.1.1
 	github.com/google/go-cmp v0.5.9
 	github.com/miekg/dns v1.1.54
