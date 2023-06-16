@@ -320,7 +320,9 @@ func resolve(ctx context.Context, s string, qType uint16) (r *dns.Msg, rtt time.
 		return
 	}
 
-	c := new(dns.Client)
+	c := &dns.Client{
+		Timeout: 5 * time.Second,
+	}
 
 	return c.ExchangeWithConn(msg, conn)
 }
