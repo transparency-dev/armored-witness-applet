@@ -60,6 +60,8 @@ github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa h1:iWvxAk3sE4mvCYV
 github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa/go.mod h1:164CE5Gb+PiM6cxhYpyPg9FlpqttRFwUZ+KiTonK4Ak=
 github.com/usbarmory/imx-enet v0.0.0-20230525204907-2882ea9be008 h1:l5lO1CrlMbW35ee1bPOe2zTN+t7YFgF9oNYvRIo7Cqc=
 github.com/usbarmory/imx-enet v0.0.0-20230525204907-2882ea9be008/go.mod h1:oa7S6vwmh5KtGcZDluDIZ6P2xjI/hzVTB2SNohFYd58=
+github.com/usbarmory/imx-enet v0.0.0-20230615131844-0373d79f7198 h1:g5J22Bwmvr9zJHw3mkTsNmzayu/Sv1TGpKwjQsyExME=
+github.com/usbarmory/imx-enet v0.0.0-20230615131844-0373d79f7198/go.mod h1:T7T/0Fejbnj4y/uIVDcNPT1gnKNMmPsYnnshdWFuz+o=
 github.com/usbarmory/tamago v0.0.0-20220823080407-04f05cf2a5a3/go.mod h1:Lok79mjbJnhoBGqhX5cCUsZtSemsQF5FNZW+2R1dRr8=
 github.com/usbarmory/tamago v0.0.0-20230529110145-b8025086bb9f h1:2nCLV3Jp6rFZC6fk34ClkqBTF1IpWBm5dI+bPHxBQkE=
 github.com/usbarmory/tamago v0.0.0-20230529110145-b8025086bb9f/go.mod h1:uCPXcPo8SZulhZPz8irfVqzwVlPZ45w7CTJxkfxueGA=
@@ -138,3 +140,7 @@ gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 gvisor.dev/gvisor v0.0.0-20230315045701-8b73c1d89ca8 h1:vh1Ek1+dC8oCgLixyCRnNxcMOIBwQV59vkD6JeTyoQI=
 gvisor.dev/gvisor v0.0.0-20230315045701-8b73c1d89ca8/go.mod h1:pzr6sy8gDLfVmDAg8OYrlKvGEHw5C3PGTiBXBTCx76Q=
+gvisor.dev/gvisor v0.0.0-20230614011150-2ccb90afa11e h1:eJ7mQJJ1ifUJKoVuJd9QozB3kqxB/Qtw8Fm+3zN5Gdg=
+gvisor.dev/gvisor v0.0.0-20230614011150-2ccb90afa11e/go.mod h1:sQuqOkxbfJq/GS2uSnqHphtXclHyk/ZrAGhZBxxsq6g=
+gvisor.dev/gvisor v0.0.0-20230614190805-57027c7d31f8 h1:cycLSWR8fzi6P+jQ9vaD82frUFZ0UU1kDZt1YPWFFhA=
+gvisor.dev/gvisor v0.0.0-20230614190805-57027c7d31f8/go.mod h1:sQuqOkxbfJq/GS2uSnqHphtXclHyk/ZrAGhZBxxsq6g=

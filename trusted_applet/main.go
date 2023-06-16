@@ -209,6 +209,8 @@ func runWithNetworking(ctx context.Context) error {
 
 	<-runNTP(ctx)
 
+	time.Sleep(5 * time.Second)
+
 	listener, err := iface.ListenerTCP4(22)
 	if err != nil {
 		return fmt.Errorf("TA could not initialize SSH listener, %v", err)

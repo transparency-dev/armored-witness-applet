@@ -10,7 +10,7 @@ require (
 	github.com/transparency-dev/armored-witness-os v0.0.0-20230608161615-85a962a3140d
 	github.com/transparency-dev/witness v0.0.0-20230607113817-0b70a97dae5f
 	github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa
-	github.com/usbarmory/imx-enet v0.0.0-20230525204907-2882ea9be008
+	github.com/usbarmory/imx-enet v0.0.0-20230615131844-0373d79f7198
 	github.com/usbarmory/tamago v0.0.0-20230529110145-b8025086bb9f
 	golang.org/x/crypto v0.10.0
 	golang.org/x/mod v0.11.0
@@ -18,7 +18,7 @@ require (
 	google.golang.org/grpc v1.56.0
 	google.golang.org/protobuf v1.30.0
 	gopkg.in/yaml.v3 v3.0.1
-	gvisor.dev/gvisor v0.0.0-20230315045701-8b73c1d89ca8
+	gvisor.dev/gvisor v0.0.0-20230614190805-57027c7d31f8
 )
 
 require (

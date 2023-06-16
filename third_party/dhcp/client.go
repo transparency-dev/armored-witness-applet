@@ -482,8 +482,8 @@ func acquire(ctx context.Context, c *Client, info *Info) (Config, error) {
 		discOpts := append(options{
 			{optDHCPMsgType, []byte{byte(dhcpDISCOVER)}},
 		}, commonOpts...)
-		if len(requestedAddr.Address) != 0 {
-			discOpts = append(discOpts, option{optReqIPAddr, []byte(requestedAddr.Address)})
+		if requestedAddr.Address.Len() != 0 {
+			discOpts = append(discOpts, option{optReqIPAddr, []byte(requestedAddr.Address.AsSlice())})
 		}
 		// TODO(fxbug.dev/38166): Refactor retransmitDiscover and retransmitRequest
 
@@ -545,11 +545,12 @@ func acquire(ctx context.Context, c *Client, info *Info) (Config, error) {
 				// select the first valid offer we receive.
 				info.Server = cfg.ServerAddress
 
-				if len(cfg.SubnetMask) == 0 {
-					cfg.SubnetMask = tcpip.AddressMask(net.IP(info.Addr.Address).DefaultMask())
+				if cfg.SubnetMask.Len() == 0 {
+					sn := info.Addr.Subnet()
+					cfg.SubnetMask = sn.Mask()
 				}
 
-				prefixLen, _ := net.IPMask(cfg.SubnetMask).Size()
+				prefixLen, _ := net.IPMask(cfg.SubnetMask.AsSlice()).Size()
 				requestedAddr = tcpip.AddressWithPrefix{
 					Address:   addr,
 					PrefixLen: prefixLen,
@@ -568,8 +569,8 @@ func acquire(ctx context.Context, c *Client, info *Info) (Config, error) {
 	if info.State == initSelecting {
 		reqOpts = append(reqOpts,
 			options{
-				{optDHCPServer, []byte(info.Server)},
-				{optReqIPAddr, []byte(requestedAddr.Address)},
+				{optDHCPServer, info.Server.AsSlice()},
+				{optReqIPAddr, requestedAddr.Address.AsSlice()},
 			}...)
 	}
 
@@ -615,7 +616,7 @@ retransmitRequest:
 					c.stats.RecvAckOptsDecodeErrors.Increment()
 					return Config{}, fmt.Errorf("%s decode: %w", typ, err)
 				}
-				prefixLen, _ := net.IPMask(cfg.SubnetMask).Size()
+				prefixLen, _ := net.IPMask(cfg.SubnetMask.AsSlice()).Size()
 				addr := tcpip.AddressWithPrefix{
 					Address:   addr,
 					PrefixLen: prefixLen,
@@ -655,7 +656,7 @@ func (c *Client) send(ctx context.Context, info *Info, ep tcpip.Endpoint, opts o
 		h.setBroadcast()
 	}
 	if ciaddr {
-		copy(h.ciaddr(), info.Addr.Address)
+		copy(h.ciaddr(), info.Addr.Address.AsSlice())
 	}
 
 	copy(h.chaddr(), info.LinkAddr)
@@ -703,23 +704,23 @@ func (c *Client) recv(ctx context.Context, ep tcpip.Endpoint, ch <-chan struct{}
 			case <-ch:
 				continue
 			case <-timeoutCh:
-				return tcpip.FullAddress{}, "", nil, 0, true, nil
+				return tcpip.FullAddress{}, tcpip.Address{}, nil, 0, true, nil
 			case <-ctx.Done():
-				return tcpip.FullAddress{}, "", nil, 0, true, fmt.Errorf("read: %w", ctx.Err())
+				return tcpip.FullAddress{}, tcpip.Address{}, nil, 0, true, fmt.Errorf("read: %w", ctx.Err())
 			}
 		}
 		if err != nil {
-			return tcpip.FullAddress{}, "", nil, 0, false, fmt.Errorf("read: %s", err)
+			return tcpip.FullAddress{}, tcpip.Address{}, nil, 0, false, fmt.Errorf("read: %s", err)
 		}
 
 		h := hdr(buf.Bytes())
 
 		if !h.isValid() {
-			return tcpip.FullAddress{}, "", nil, 0, false, fmt.Errorf("invalid hdr: %x", h)
+			return tcpip.FullAddress{}, tcpip.Address{}, nil, 0, false, fmt.Errorf("invalid hdr: %x", h)
 		}
 
 		if op := h.op(); op != opReply {
-			return tcpip.FullAddress{}, "", nil, 0, false, fmt.Errorf("op-code=%s, want=%s", h, opReply)
+			return tcpip.FullAddress{}, tcpip.Address{}, nil, 0, false, fmt.Errorf("op-code=%s, want=%s", h, opReply)
 		}
 
 		if !bytes.Equal(h.xidbytes(), xid[:]) {
@@ -730,15 +731,15 @@ func (c *Client) recv(ctx context.Context, ep tcpip.Endpoint, ch <-chan struct{}
 		{
 			opts, err := h.options()
 			if err != nil {
-				return tcpip.FullAddress{}, "", nil, 0, false, fmt.Errorf("invalid options: %w", err)
+				return tcpip.FullAddress{}, tcpip.Address{}, nil, 0, false, fmt.Errorf("invalid options: %w", err)
 			}
 
 			typ, err := opts.dhcpMsgType()
 			if err != nil {
-				return tcpip.FullAddress{}, "", nil, 0, false, fmt.Errorf("invalid type: %w", err)
+				return tcpip.FullAddress{}, tcpip.Address{}, nil, 0, false, fmt.Errorf("invalid type: %w", err)
 			}
 
-			return rRes.RemoteAddr, tcpip.Address(h.yiaddr()), opts, typ, false, nil
+			return rRes.RemoteAddr, tcpip.AddrFromSlice(h.yiaddr()), opts, typ, false, nil
 		}
 	}
 }
