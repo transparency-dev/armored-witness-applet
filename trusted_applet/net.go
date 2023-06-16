@@ -17,16 +17,12 @@ package main
 import (
 	"context"
 	"crypto/rand"
-	"crypto/tls"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"log"
-	mrand "math/rand"
 	"net"
-	"net/http"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -37,8 +33,6 @@ import (
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
 
 	"github.com/beevik/ntp"
-	"github.com/golang/glog"
-	"github.com/miekg/dns"
 	"github.com/transparency-dev/armored-witness-applet/third_party/dhcp"
 	"golang.org/x/term"
 
@@ -88,7 +82,11 @@ func init() {
 		Help:    "resolve domain (requires routing)",
 		Fn:      dnsCmd,
 	})
+
+	net.DefaultNS = []string{DefaultResolver}
 }
+
+/*
 
 // getHttpClient returns a http.Client instance which uses the local resolver.
 func getHttpClient() *http.Client {
@@ -123,6 +121,7 @@ func getHttpClient() *http.Client {
 	}
 	return &c
 }
+*/
 
 // runDHCP starts the dhcp client.
 //
@@ -248,14 +247,16 @@ func runNTP(ctx context.Context) chan bool {
 
 	r := make(chan bool)
 
-	// dialFunc is a custom dialer for the ntp package.
-	dialFunc := func(lHost string, lPort int, rHost string, rPort int) (net.Conn, error) {
-		lAddr := ""
-		if lHost != "" {
-			lAddr = net.JoinHostPort(lHost, strconv.Itoa(lPort))
+	/*
+		// dialFunc is a custom dialer for the ntp package.
+		dialFunc := func(lHost string, lPort int, rHost string, rPort int) (net.Conn, error) {
+			lAddr := ""
+			if lHost != "" {
+				lAddr = net.JoinHostPort(lHost, strconv.Itoa(lPort))
+			}
+			return iface.DialUDP4(lAddr, net.JoinHostPort(rHost, strconv.Itoa(rPort)))
 		}
-		return iface.DialUDP4(lAddr, net.JoinHostPort(rHost, strconv.Itoa(rPort)))
-	}
+	*/
 
 	go func(ctx context.Context) {
 		// i specifies the interval between checking in with the NTP server.
@@ -268,14 +269,14 @@ func runNTP(ctx context.Context) chan bool {
 			case <-time.After(i):
 			}
 
-			ip, err := resolveHost(ctx, cfg.NTPServer)
+			ip, err := net.LookupIP(cfg.NTPServer)
 			if err != nil {
 				log.Printf("Failed to resolve NTP server %q: %v", DefaultNTP, err)
 				continue
 			}
 			ntpR, err := ntp.QueryWithOptions(
 				ip[0].String(),
-				ntp.QueryOptions{Dial: dialFunc},
+				ntp.QueryOptions{},
 			)
 			if err != nil {
 				log.Printf("Failed to get NTP time: %v", err)
@@ -301,6 +302,7 @@ func runNTP(ctx context.Context) chan bool {
 	return r
 }
 
+/*
 func resolve(ctx context.Context, s string, qType uint16) (r *dns.Msg, rtt time.Duration, err error) {
 	if s[len(s)-1:] != "." {
 		s += "."
@@ -352,19 +354,23 @@ func resolveHost(ctx context.Context, host string) ([]net.IP, error) {
 	}
 	return ip, nil
 }
+*/
 
 func dnsCmd(_ *term.Terminal, arg []string) (res string, err error) {
 	if iface == nil {
 		return "", errors.New("network is unavailable")
 	}
 
-	r, _, err := resolve(context.Background(), arg[0], dns.TypeANY)
+	r, err := net.LookupHost(arg[0])
 
 	if err != nil {
 		return fmt.Sprintf("query error: %v", err), nil
 	}
+	if len(r) == 0 {
+		return "", errors.New("no results returned")
+	}
 
-	return fmt.Sprintf("%+v", r), nil
+	return strings.Join(r, ", "), nil
 }
 
 func rxFromEth(buf []byte) int {

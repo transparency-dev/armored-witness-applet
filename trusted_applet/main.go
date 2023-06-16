@@ -19,6 +19,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"runtime"
 	"strings"
@@ -232,7 +233,7 @@ func runWithNetworking(ctx context.Context) error {
 	go startSSHServer(ctx, listener, addr.Address.String(), 22, cmd.Console)
 
 	// Set up and start omniwitness
-	httpClient := getHttpClient()
+	httpClient := http.DefaultClient // getHttpClient()
 
 	signer, err := note.NewSigner(signingKey)
 	if err != nil {
