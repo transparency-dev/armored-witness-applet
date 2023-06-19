@@ -1,0 +1,46 @@
+steps:
+  # Build an image containing the trusted applet artifacts with the Dockerfile.
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_BUILDER_IMAGE_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/trusted-applet-build-${TAG_NAME}
+      - .
+      - --build-arg
+      - _APPLET_PRIVATE_KEY=${_APPLET_PRIVATE_KEY}
+  # Prepare a container with a copy of the artifacts.
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - create
+      - --name
+      - scratch
+      - ${_BUILDER_IMAGE_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/trusted-applet-build-${TAG_NAME}
+  # Copy the artifacts from the container to the Cloud Build VM.
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - cp
+      - scratch:/build/bin
+      - build_output
+  # List the artifacts.
+  - name: bash
+    args:
+      - ls
+      - build_output
+  # Copy the artifacts from the Cloud Build VM to GCS.
+  - name: gcr.io/cloud-builders/gcloud
+    args:
+      - storage
+      - cp
+      - build_output/trusted_applet.elf
+      - gs://${_TRUSTED_APPLET_BUCKET}/${TAG_NAME}/trusted_applet.elf
+  - name: gcr.io/cloud-builders/gcloud
+    args:
+      - storage
+      - cp
+      - build_output/trusted_applet.sig
+      - gs://${_TRUSTED_APPLET_BUCKET}/${TAG_NAME}/trusted_applet.sig
+
+substitutions:
+  _ARTIFACT_REGISTRY_REPO: trusted-applet-builder
+  _BUILDER_IMAGE_REGION: europe-west2
+  _TRUSTED_APPLET_BUCKET: trusted-applet-artifacts
