@@ -6,6 +6,7 @@ require (
 	github.com/beevik/ntp v1.1.1
 	github.com/golang/glog v1.1.1
 	github.com/google/go-cmp v0.5.9
+	github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e
 	github.com/miekg/dns v1.1.54
 	github.com/transparency-dev/armored-witness-os v0.0.0-20230608161615-85a962a3140d
 	github.com/transparency-dev/witness v0.0.0-20230607113817-0b70a97dae5f
