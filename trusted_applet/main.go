@@ -233,8 +233,6 @@ func runWithNetworking(ctx context.Context) error {
 	go startSSHServer(ctx, listener, addr.Address.String(), 22, cmd.Console)
 
 	// Set up and start omniwitness
-	httpClient := http.DefaultClient // getHttpClient()
-
 	signer, err := note.NewSigner(signingKey)
 	if err != nil {
 		return fmt.Errorf("failed to init signer: %v", err)
@@ -262,7 +260,7 @@ func runWithNetworking(ctx context.Context) error {
 	}()
 
 	log.Println("Starting witness...")
-	if err := omniwitness.Main(ctx, opConfig, persistence, mainListener, httpClient); err != nil {
+	if err := omniwitness.Main(ctx, opConfig, persistence, mainListener, http.DefaultClient); err != nil {
 		return fmt.Errorf("omniwitness.Main failed: %v", err)
 	}
 

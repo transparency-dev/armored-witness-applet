@@ -17,11 +17,13 @@ package main
 import (
 	"context"
 	"crypto/rand"
+	"crypto/tls"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"regexp"
 	"strings"
 	"time"
@@ -457,6 +459,21 @@ func startNetworking() (err error) {
 
 	iface.EnableICMP()
 	iface.Link.AddNotify(&txNotification{})
+
+	// hook interface into Go runtime
+	net.SocketFunc = iface.Socket
+
+	http.DefaultClient = &http.Client{
+		Transport: &http.Transport{
+			ForceAttemptHTTP2:     true,
+			MaxIdleConns:          100,
+			IdleConnTimeout:       90 * time.Second,
+			TLSHandshakeTimeout:   5 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
+			TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
+		},
+		Timeout: httpTimeout,
+	}
 
 	return
 }
