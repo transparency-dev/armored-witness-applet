@@ -6,7 +6,6 @@ require (
 	github.com/beevik/ntp v1.1.1
 	github.com/golang/glog v1.1.1
 	github.com/google/go-cmp v0.5.9
-	github.com/miekg/dns v1.1.55
 	github.com/transparency-dev/armored-witness-os v0.0.0-20230608161615-85a962a3140d
 	github.com/transparency-dev/witness v0.0.0-20230626144711-b66989be47f9
 	github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa
@@ -38,7 +37,6 @@ require (
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.9.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	golang.org/x/tools v0.8.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 )
