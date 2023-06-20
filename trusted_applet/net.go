@@ -88,43 +88,6 @@ func init() {
 	net.DefaultNS = []string{DefaultResolver}
 }
 
-/*
-
-// getHttpClient returns a http.Client instance which uses the local resolver.
-func getHttpClient() *http.Client {
-	netTransport := &http.Transport{
-		DialContext: func(ctx context.Context, network, add string) (net.Conn, error) {
-			glog.V(2).Infof("Resolving IP to dial %v", add)
-			parts := strings.Split(add, ":")
-			if len(parts) != 2 {
-				// Dial is only called with the host:port (no scheme, no path)
-				return nil, fmt.Errorf("expected host:port but got %q", add)
-			}
-			host, port := parts[0], parts[1]
-			// Look up the hostname
-			ip, err := resolveHost(ctx, host)
-			if err != nil {
-				return nil, err
-			}
-			target := fmt.Sprintf("%s:%s", ip[mrand.Intn(len(ip))], port)
-			glog.V(2).Infof("Dialing %s", target)
-			return iface.DialContextTCP4(ctx, target)
-		},
-		TLSClientConfig: &tls.Config{
-			// TODO: determine some way to make client certs available
-			// This isn't horrific here, as all of the data that is fetched will be
-			// cryptographically verified at a higher layer, but still... it's nasty.
-			InsecureSkipVerify: true,
-		},
-	}
-	c := http.Client{
-		Transport: netTransport,
-		Timeout:   httpTimeout,
-	}
-	return &c
-}
-*/
-
 // runDHCP starts the dhcp client.
 //
 // When an IP is successfully leased and configured on the interface, f is called with a context
@@ -249,17 +212,6 @@ func runNTP(ctx context.Context) chan bool {
 
 	r := make(chan bool)
 
-	/*
-		// dialFunc is a custom dialer for the ntp package.
-		dialFunc := func(lHost string, lPort int, rHost string, rPort int) (net.Conn, error) {
-			lAddr := ""
-			if lHost != "" {
-				lAddr = net.JoinHostPort(lHost, strconv.Itoa(lPort))
-			}
-			return iface.DialUDP4(lAddr, net.JoinHostPort(rHost, strconv.Itoa(rPort)))
-		}
-	*/
-
 	go func(ctx context.Context) {
 		// i specifies the interval between checking in with the NTP server.
 		// Initially we'll check in more frequently until we have set a time.
@@ -303,60 +255,6 @@ func runNTP(ctx context.Context) chan bool {
 
 	return r
 }
-
-/*
-func resolve(ctx context.Context, s string, qType uint16) (r *dns.Msg, rtt time.Duration, err error) {
-	if s[len(s)-1:] != "." {
-		s += "."
-	}
-
-	msg := new(dns.Msg)
-	msg.Id = dns.Id()
-	msg.RecursionDesired = true
-
-	msg.Question = []dns.Question{
-		{Name: s, Qtype: qType, Qclass: dns.ClassINET},
-	}
-
-	conn := new(dns.Conn)
-
-	if conn.Conn, err = iface.DialContextTCP4(ctx, resolver); err != nil {
-		return
-	}
-
-	c := &dns.Client{
-		Timeout: 5 * time.Second,
-	}
-
-	return c.ExchangeWithConn(msg, conn)
-}
-
-func resolveHost(ctx context.Context, host string) ([]net.IP, error) {
-	r, _, err := resolve(ctx, host, dns.TypeA)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to resolve A record for %q: %v", host, err)
-	}
-	if len(r.Answer) == 0 {
-		return nil, fmt.Errorf("failed to resolve A records for host %q", host)
-	}
-	// There could be multiple A records, so we'll pick one at random.
-	// TODO: consider whether or not it's a good idea to attempt browser-like
-	// client-side retry iterating through A records.
-	var ip []net.IP
-	for _, ans := range r.Answer {
-		if a, ok := ans.(*dns.A); ok {
-			log.Printf("found A record for %q: %v ", host, a)
-			ip = append(ip, a.A)
-			continue
-		}
-		log.Printf("found non-A record for %q: %v ", host, ans)
-	}
-	if len(ip) == 0 {
-		return ip, fmt.Errorf("no A records for %q", host)
-	}
-	return ip, nil
-}
-*/
 
 func dnsCmd(_ *term.Terminal, arg []string) (res string, err error) {
 	if iface == nil {
