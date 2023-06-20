@@ -59,6 +59,12 @@ github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa h1:iWvxAk3sE4mvCYV
 github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa/go.mod h1:164CE5Gb+PiM6cxhYpyPg9FlpqttRFwUZ+KiTonK4Ak=
 github.com/usbarmory/imx-enet v0.0.0-20230615131844-0373d79f7198 h1:g5J22Bwmvr9zJHw3mkTsNmzayu/Sv1TGpKwjQsyExME=
 github.com/usbarmory/imx-enet v0.0.0-20230615131844-0373d79f7198/go.mod h1:T7T/0Fejbnj4y/uIVDcNPT1gnKNMmPsYnnshdWFuz+o=
+github.com/usbarmory/imx-enet v0.0.0-20230620161218-9e5516130140 h1:Dxg6yfsYtCfmsqJXXxsVPB2+cz4M3cBZYcQmL6qHGYU=
+github.com/usbarmory/imx-enet v0.0.0-20230620161218-9e5516130140/go.mod h1:T7T/0Fejbnj4y/uIVDcNPT1gnKNMmPsYnnshdWFuz+o=
+github.com/usbarmory/imx-enet v0.0.0-20230621181825-c19b07d03de0 h1:Mak3SLSNh+/54giT93ElDCKOCcQMprAqBrrLG6oUxvY=
+github.com/usbarmory/imx-enet v0.0.0-20230621181825-c19b07d03de0/go.mod h1:T7T/0Fejbnj4y/uIVDcNPT1gnKNMmPsYnnshdWFuz+o=
+github.com/usbarmory/imx-enet v0.0.0-20230622162703-9eec0bcf6bb4 h1:qdV3sa9B6hXs9W8mNhlpR5AW/VC1La1ytrt5ddHQx34=
+github.com/usbarmory/imx-enet v0.0.0-20230622162703-9eec0bcf6bb4/go.mod h1:T7T/0Fejbnj4y/uIVDcNPT1gnKNMmPsYnnshdWFuz+o=
 github.com/usbarmory/tamago v0.0.0-20220823080407-04f05cf2a5a3/go.mod h1:Lok79mjbJnhoBGqhX5cCUsZtSemsQF5FNZW+2R1dRr8=
 github.com/usbarmory/tamago v0.0.0-20230529110145-b8025086bb9f h1:2nCLV3Jp6rFZC6fk34ClkqBTF1IpWBm5dI+bPHxBQkE=
 github.com/usbarmory/tamago v0.0.0-20230529110145-b8025086bb9f/go.mod h1:uCPXcPo8SZulhZPz8irfVqzwVlPZ45w7CTJxkfxueGA=
