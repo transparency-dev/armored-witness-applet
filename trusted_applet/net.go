@@ -269,7 +269,7 @@ func runNTP(ctx context.Context) chan bool {
 			case <-time.After(i):
 			}
 
-			ip, err := net.LookupIP(cfg.NTPServer)
+			ip, err := net.DefaultResolver.LookupIP(ctx, "ip4", cfg.NTPServer)
 			if err != nil {
 				log.Printf("Failed to resolve NTP server %q: %v", DefaultNTP, err)
 				continue
