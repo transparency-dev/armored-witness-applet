@@ -4,7 +4,7 @@ steps:
     args:
       - build
       - -t
-      - ${_BUILDER_IMAGE_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/trusted-applet-build-${TAG_NAME}
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/trusted-applet-build-${TAG_NAME}
       - .
   # Prepare a container with a copy of the artifacts.
   - name: gcr.io/cloud-builders/docker
@@ -12,7 +12,7 @@ steps:
       - create
       - --name
       - scratch
-      - ${_BUILDER_IMAGE_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/trusted-applet-build-${TAG_NAME}
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/trusted-applet-build-${TAG_NAME}
   # Copy the artifacts from the container to the Cloud Build VM.
   - name: gcr.io/cloud-builders/docker
     args:
@@ -32,13 +32,13 @@ steps:
       - --digest-algorithm
       - sha256
       - --version
-      - '1'
+      - ${_KMS_KEY_VERSION}
       - --key
-      - trusted-applet
+      - ${_KMS_KEY}
       - --keyring
-      - armored-witness
+      - ${_KMS_KEYRING}
       - --location
-      - europe-west2
+      - ${_REGION}
       - --input-file
       - output/trusted_applet.elf
       - --signature-file
@@ -59,6 +59,9 @@ steps:
 
 substitutions:
   _ARTIFACT_REGISTRY_REPO: trusted-applet-builder
-  _BUILDER_IMAGE_REGION: europe-west2
+  _KMS_KEY: trusted-applet
+  _KMS_KEYRING: armored-witness
+  _KMS_KEY_VERSION: '1'
+  _REGION: europe-west2
   _TRUSTED_APPLET_BUCKET: trusted-applet-artifacts
 
