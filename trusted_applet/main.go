@@ -37,7 +37,7 @@ import (
 	"github.com/transparency-dev/armored-witness-os/api/rpc"
 
 	"github.com/golang/glog"
-	"github.com/transparency-dev/witness/internal/monitoring"
+	"github.com/transparency-dev/witness/monitoring"
 	"github.com/transparency-dev/witness/omniwitness"
 	"golang.org/x/mod/sumdb/note"
 )
