@@ -4,44 +4,64 @@ steps:
     args:
       - build
       - -t
-      - ${_BUILDER_IMAGE_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/trusted-applet-build-${TAG_NAME}
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/trusted-applet-build-${TAG_NAME}
       - .
-      - --build-arg
-      - _APPLET_PRIVATE_KEY=${_APPLET_PRIVATE_KEY}
   # Prepare a container with a copy of the artifacts.
   - name: gcr.io/cloud-builders/docker
     args:
       - create
       - --name
       - scratch
-      - ${_BUILDER_IMAGE_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/trusted-applet-build-${TAG_NAME}
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/trusted-applet-build-${TAG_NAME}
   # Copy the artifacts from the container to the Cloud Build VM.
   - name: gcr.io/cloud-builders/docker
     args:
       - cp
       - scratch:/build/bin
-      - build_output
+      - output
   # List the artifacts.
   - name: bash
     args:
       - ls
-      - build_output
+      - output
+  # Sign the built applet.
+  - name: gcr.io/cloud-builders/gcloud
+    args:
+      - kms
+      - asymmetric-sign
+      - --digest-algorithm
+      - sha256
+      - --version
+      - ${_KMS_KEY_VERSION}
+      - --key
+      - ${_KMS_KEY}
+      - --keyring
+      - ${_KMS_KEYRING}
+      - --location
+      - ${_REGION}
+      - --input-file
+      - output/trusted_applet.elf
+      - --signature-file
+      - output/trusted-applet.sig
   # Copy the artifacts from the Cloud Build VM to GCS.
   - name: gcr.io/cloud-builders/gcloud
     args:
       - storage
       - cp
-      - build_output/trusted_applet.elf
+      - output/trusted_applet.elf
       - gs://${_TRUSTED_APPLET_BUCKET}/${TAG_NAME}/trusted_applet.elf
   - name: gcr.io/cloud-builders/gcloud
     args:
       - storage
       - cp
-      - build_output/trusted_applet.sig
+      - output/trusted_applet.sig
       - gs://${_TRUSTED_APPLET_BUCKET}/${TAG_NAME}/trusted_applet.sig
 
 substitutions:
   _ARTIFACT_REGISTRY_REPO: trusted-applet-builder
-  _BUILDER_IMAGE_REGION: europe-west2
+  _KMS_KEY: trusted-applet
+  _KMS_KEYRING: armored-witness
+  _KMS_KEY_VERSION: '1'
+  _REGION: europe-west2
   _TRUSTED_APPLET_BUCKET: trusted-applet-artifacts
 
