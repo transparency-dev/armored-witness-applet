@@ -31,7 +31,6 @@ require (
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gsora/fidati v0.0.0-20220824075547-eeb0a5f7d6c3 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/transparency-dev/formats v0.0.0-20230607101544-c064fae4cff6 // indirect
 	github.com/transparency-dev/merkle v0.0.2 // indirect
 	golang.org/x/net v0.11.0 // indirect
