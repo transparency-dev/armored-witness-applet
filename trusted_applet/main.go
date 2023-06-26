@@ -207,7 +207,11 @@ func runWithNetworking(ctx context.Context) error {
 	}
 	log.Printf("TA Version:%s MAC:%s IP:%s GW:%s DNS:%s", Version, iface.NIC.MAC.String(), addr, iface.Stack.GetRouteTable(), resolver)
 
-	<-runNTP(ctx)
+	select {
+	case <-runNTP(ctx):
+	case <-ctx.Done():
+		return ctx.Err()
+	}
 
 	time.Sleep(5 * time.Second)
 
@@ -247,6 +251,11 @@ func runWithNetworking(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("could not initialize HTTP listener: %v", err)
 	}
+	defer func() {
+		if err := mainListener.Close(); err != nil {
+			log.Printf("mainListener: %v", err)
+		}
+	}()
 
 	log.Println("Starting witness...")
 	if err := omniwitness.Main(ctx, opConfig, persistence, mainListener, httpClient); err != nil {
