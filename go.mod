@@ -8,7 +8,7 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/miekg/dns v1.1.55
 	github.com/transparency-dev/armored-witness-os v0.0.0-20230608161615-85a962a3140d
-	github.com/transparency-dev/witness v0.0.0-20230607113817-0b70a97dae5f
+	github.com/transparency-dev/witness v0.0.0-20230626144711-b66989be47f9
 	github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa
 	github.com/usbarmory/imx-enet v0.0.0-20230615131844-0373d79f7198
 	github.com/usbarmory/tamago v0.0.0-20230529110145-b8025086bb9f
@@ -32,11 +32,11 @@ require (
 	github.com/gsora/fidati v0.0.0-20220824075547-eeb0a5f7d6c3 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
-	github.com/transparency-dev/formats v0.0.0-20230124125735-2da9e2580a26 // indirect
+	github.com/transparency-dev/formats v0.0.0-20230607101544-c064fae4cff6 // indirect
 	github.com/transparency-dev/merkle v0.0.2 // indirect
-	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/oauth2 v0.8.0 // indirect
-	golang.org/x/sync v0.2.0 // indirect
+	golang.org/x/net v0.11.0 // indirect
+	golang.org/x/oauth2 v0.9.0 // indirect
+	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.9.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.8.0 // indirect
