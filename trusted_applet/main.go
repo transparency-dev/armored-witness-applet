@@ -19,6 +19,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"runtime"
@@ -219,7 +220,9 @@ func runWithNetworking(ctx context.Context) error {
 
 	time.Sleep(5 * time.Second)
 
-	listener, err := iface.ListenerTCP4(22)
+	listenCfg := &net.ListenConfig{}
+
+	listener, err := listenCfg.Listen(ctx, "tcp", ":22")
 	if err != nil {
 		return fmt.Errorf("TA could not initialize SSH listener, %v", err)
 	}
@@ -249,7 +252,7 @@ func runWithNetworking(ctx context.Context) error {
 		GithubToken:     GitHubToken,
 	}
 	// TODO(mhutchinson): add a second listener for an admin API.
-	mainListener, err := iface.ListenerTCP4(80)
+	mainListener, err := listenCfg.Listen(ctx, "tcp", ":80")
 	if err != nil {
 		return fmt.Errorf("could not initialize HTTP listener: %v", err)
 	}
