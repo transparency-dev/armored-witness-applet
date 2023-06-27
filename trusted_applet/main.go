@@ -37,6 +37,7 @@ import (
 	"github.com/transparency-dev/armored-witness-os/api/rpc"
 
 	"github.com/golang/glog"
+	"github.com/transparency-dev/witness/monitoring"
 	"github.com/transparency-dev/witness/omniwitness"
 	"golang.org/x/mod/sumdb/note"
 )
@@ -86,6 +87,8 @@ func main() {
 
 	ctx := context.Background()
 	defer applet.Exit()
+
+	monitoring.SetMetricFactory(monitoring.InertMetricFactory{})
 
 	log.Printf("%s/%s (%s) • TEE user applet • %s %s",
 		runtime.GOOS, runtime.GOARCH, runtime.Version(),
