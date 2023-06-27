@@ -7,7 +7,7 @@ require (
 	github.com/golang/glog v1.1.1
 	github.com/google/go-cmp v0.5.9
 	github.com/transparency-dev/armored-witness-os v0.0.0-20230608161615-85a962a3140d
-	github.com/transparency-dev/witness v0.0.0-20230626144711-b66989be47f9
+	github.com/transparency-dev/witness v0.0.0-20230626165226-5051f84409bc
 	github.com/usbarmory/GoTEE v0.0.0-20230127101228-519e560d69aa
 	github.com/usbarmory/imx-enet v0.0.0-20230622162703-9eec0bcf6bb4
 	github.com/usbarmory/tamago v0.0.0-20230529110145-b8025086bb9f
