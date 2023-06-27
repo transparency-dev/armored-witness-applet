@@ -368,7 +368,8 @@ func startNetworking() (err error) {
 			IdleConnTimeout:       90 * time.Second,
 			TLSHandshakeTimeout:   5 * time.Second,
 			ExpectContinueTimeout: 1 * time.Second,
-			TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
+			// TODO: bake-in a set of trusted roots
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
 		Timeout: httpTimeout,
 	}
