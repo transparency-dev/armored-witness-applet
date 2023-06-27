@@ -22,11 +22,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	mrand "math/rand"
 	"net"
 	"net/http"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -37,8 +35,6 @@ import (
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
 
 	"github.com/beevik/ntp"
-	"github.com/golang/glog"
-	"github.com/miekg/dns"
 	"github.com/transparency-dev/armored-witness-applet/third_party/dhcp"
 	"golang.org/x/term"
 
@@ -88,40 +84,8 @@ func init() {
 		Help:    "resolve domain (requires routing)",
 		Fn:      dnsCmd,
 	})
-}
 
-// getHttpClient returns a http.Client instance which uses the local resolver.
-func getHttpClient() *http.Client {
-	netTransport := &http.Transport{
-		DialContext: func(ctx context.Context, network, add string) (net.Conn, error) {
-			glog.V(2).Infof("Resolving IP to dial %v", add)
-			parts := strings.Split(add, ":")
-			if len(parts) != 2 {
-				// Dial is only called with the host:port (no scheme, no path)
-				return nil, fmt.Errorf("expected host:port but got %q", add)
-			}
-			host, port := parts[0], parts[1]
-			// Look up the hostname
-			ip, err := resolveHost(ctx, host)
-			if err != nil {
-				return nil, err
-			}
-			target := fmt.Sprintf("%s:%s", ip[mrand.Intn(len(ip))], port)
-			glog.V(2).Infof("Dialing %s", target)
-			return iface.DialContextTCP4(ctx, target)
-		},
-		TLSClientConfig: &tls.Config{
-			// TODO: determine some way to make client certs available
-			// This isn't horrific here, as all of the data that is fetched will be
-			// cryptographically verified at a higher layer, but still... it's nasty.
-			InsecureSkipVerify: true,
-		},
-	}
-	c := http.Client{
-		Transport: netTransport,
-		Timeout:   httpTimeout,
-	}
-	return &c
+	net.DefaultNS = []string{DefaultResolver}
 }
 
 // runDHCP starts the dhcp client.
@@ -248,15 +212,6 @@ func runNTP(ctx context.Context) chan bool {
 
 	r := make(chan bool)
 
-	// dialFunc is a custom dialer for the ntp package.
-	dialFunc := func(lHost string, lPort int, rHost string, rPort int) (net.Conn, error) {
-		lAddr := ""
-		if lHost != "" {
-			lAddr = net.JoinHostPort(lHost, strconv.Itoa(lPort))
-		}
-		return iface.DialUDP4(lAddr, net.JoinHostPort(rHost, strconv.Itoa(rPort)))
-	}
-
 	go func(ctx context.Context) {
 		// i specifies the interval between checking in with the NTP server.
 		// Initially we'll check in more frequently until we have set a time.
@@ -268,14 +223,14 @@ func runNTP(ctx context.Context) chan bool {
 			case <-time.After(i):
 			}
 
-			ip, err := resolveHost(ctx, cfg.NTPServer)
+			ip, err := net.DefaultResolver.LookupIP(ctx, "ip4", cfg.NTPServer)
 			if err != nil {
 				log.Printf("Failed to resolve NTP server %q: %v", DefaultNTP, err)
 				continue
 			}
 			ntpR, err := ntp.QueryWithOptions(
 				ip[0].String(),
-				ntp.QueryOptions{Dial: dialFunc},
+				ntp.QueryOptions{},
 			)
 			if err != nil {
 				log.Printf("Failed to get NTP time: %v", err)
@@ -301,70 +256,21 @@ func runNTP(ctx context.Context) chan bool {
 	return r
 }
 
-func resolve(ctx context.Context, s string, qType uint16) (r *dns.Msg, rtt time.Duration, err error) {
-	if s[len(s)-1:] != "." {
-		s += "."
-	}
-
-	msg := new(dns.Msg)
-	msg.Id = dns.Id()
-	msg.RecursionDesired = true
-
-	msg.Question = []dns.Question{
-		{Name: s, Qtype: qType, Qclass: dns.ClassINET},
-	}
-
-	conn := new(dns.Conn)
-
-	if conn.Conn, err = iface.DialContextTCP4(ctx, resolver); err != nil {
-		return
-	}
-
-	c := &dns.Client{
-		Timeout: 5 * time.Second,
-	}
-
-	return c.ExchangeWithConn(msg, conn)
-}
-
-func resolveHost(ctx context.Context, host string) ([]net.IP, error) {
-	r, _, err := resolve(ctx, host, dns.TypeA)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to resolve A record for %q: %v", host, err)
-	}
-	if len(r.Answer) == 0 {
-		return nil, fmt.Errorf("failed to resolve A records for host %q", host)
-	}
-	// There could be multiple A records, so we'll pick one at random.
-	// TODO: consider whether or not it's a good idea to attempt browser-like
-	// client-side retry iterating through A records.
-	var ip []net.IP
-	for _, ans := range r.Answer {
-		if a, ok := ans.(*dns.A); ok {
-			log.Printf("found A record for %q: %v ", host, a)
-			ip = append(ip, a.A)
-			continue
-		}
-		log.Printf("found non-A record for %q: %v ", host, ans)
-	}
-	if len(ip) == 0 {
-		return ip, fmt.Errorf("no A records for %q", host)
-	}
-	return ip, nil
-}
-
 func dnsCmd(_ *term.Terminal, arg []string) (res string, err error) {
 	if iface == nil {
 		return "", errors.New("network is unavailable")
 	}
 
-	r, _, err := resolve(context.Background(), arg[0], dns.TypeANY)
+	r, err := net.LookupHost(arg[0])
 
 	if err != nil {
 		return fmt.Sprintf("query error: %v", err), nil
 	}
+	if len(r) == 0 {
+		return "", errors.New("no results returned")
+	}
 
-	return fmt.Sprintf("%+v", r), nil
+	return strings.Join(r, ", "), nil
 }
 
 func rxFromEth(buf []byte) int {
@@ -451,6 +357,22 @@ func startNetworking() (err error) {
 
 	iface.EnableICMP()
 	iface.Link.AddNotify(&txNotification{})
+
+	// hook interface into Go runtime
+	net.SocketFunc = iface.Socket
+
+	http.DefaultClient = &http.Client{
+		Transport: &http.Transport{
+			ForceAttemptHTTP2:     true,
+			MaxIdleConns:          100,
+			IdleConnTimeout:       90 * time.Second,
+			TLSHandshakeTimeout:   5 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
+			// TODO: bake-in a set of trusted roots
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+		Timeout: httpTimeout,
+	}
 
 	return
 }

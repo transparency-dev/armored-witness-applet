@@ -19,6 +19,8 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
+	"net/http"
 	"os"
 	"runtime"
 	"strings"
@@ -218,7 +220,9 @@ func runWithNetworking(ctx context.Context) error {
 
 	time.Sleep(5 * time.Second)
 
-	listener, err := iface.ListenerTCP4(22)
+	listenCfg := &net.ListenConfig{}
+
+	listener, err := listenCfg.Listen(ctx, "tcp", ":22")
 	if err != nil {
 		return fmt.Errorf("TA could not initialize SSH listener, %v", err)
 	}
@@ -232,8 +236,6 @@ func runWithNetworking(ctx context.Context) error {
 	go startSSHServer(ctx, listener, addr.Address.String(), 22, cmd.Console)
 
 	// Set up and start omniwitness
-	httpClient := getHttpClient()
-
 	signer, err := note.NewSigner(signingKey)
 	if err != nil {
 		return fmt.Errorf("failed to init signer: %v", err)
@@ -250,7 +252,7 @@ func runWithNetworking(ctx context.Context) error {
 		GithubToken:     GitHubToken,
 	}
 	// TODO(mhutchinson): add a second listener for an admin API.
-	mainListener, err := iface.ListenerTCP4(80)
+	mainListener, err := listenCfg.Listen(ctx, "tcp", ":80")
 	if err != nil {
 		return fmt.Errorf("could not initialize HTTP listener: %v", err)
 	}
@@ -261,7 +263,7 @@ func runWithNetworking(ctx context.Context) error {
 	}()
 
 	log.Println("Starting witness...")
-	if err := omniwitness.Main(ctx, opConfig, persistence, mainListener, httpClient); err != nil {
+	if err := omniwitness.Main(ctx, opConfig, persistence, mainListener, http.DefaultClient); err != nil {
 		return fmt.Errorf("omniwitness.Main failed: %v", err)
 	}
 
