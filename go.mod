@@ -32,6 +32,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/transparency-dev/formats v0.0.0-20230607101544-c064fae4cff6 // indirect
 	github.com/transparency-dev/merkle v0.0.2 // indirect
+	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0 // indirect
 	golang.org/x/net v0.11.0 // indirect
 	golang.org/x/oauth2 v0.9.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
