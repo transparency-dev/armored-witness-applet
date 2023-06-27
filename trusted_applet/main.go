@@ -42,6 +42,8 @@ import (
 	"github.com/transparency-dev/witness/monitoring"
 	"github.com/transparency-dev/witness/omniwitness"
 	"golang.org/x/mod/sumdb/note"
+
+	_ "golang.org/x/crypto/x509roots/fallback"
 )
 
 const (
