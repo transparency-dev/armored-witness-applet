@@ -4,6 +4,8 @@ steps:
     args:
       - build
       - -t
+      - --build-arg
+      - TAMAGO_VERSION=${_TAMAGO_VERSION}
       - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/trusted-applet-build-${TAG_NAME}
       - .
   # Prepare a container with a copy of the artifacts.
@@ -64,4 +66,4 @@ substitutions:
   _KMS_KEY_VERSION: '1'
   _REGION: europe-west2
   _TRUSTED_APPLET_BUCKET: trusted-applet-artifacts
-
+  _TAMAGO_VERSION: '1.20.5'
