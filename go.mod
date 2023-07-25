@@ -10,7 +10,7 @@ require (
 	github.com/transparency-dev/witness v0.0.0-20230626165226-5051f84409bc
 	github.com/usbarmory/GoTEE v0.0.0-20230717085113-1beadf7e5429
 	github.com/usbarmory/imx-enet v0.0.0-20230622162703-9eec0bcf6bb4
-	github.com/usbarmory/tamago v0.0.0-20230529110145-b8025086bb9f
+	github.com/usbarmory/tamago v0.0.0-20230724190245-6f2dec2f8412
 	golang.org/x/crypto v0.11.0
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
 	golang.org/x/mod v0.12.0
