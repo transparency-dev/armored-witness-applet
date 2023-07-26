@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/usbarmory/GoTEE/applet"
 	"github.com/usbarmory/GoTEE/syscall"
 	"github.com/usbarmory/tamago/soc/nxp/usdhc"
@@ -40,6 +41,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/transparency-dev/witness/monitoring"
+	"github.com/transparency-dev/witness/monitoring/prometheus"
 	"github.com/transparency-dev/witness/omniwitness"
 	"golang.org/x/mod/sumdb/note"
 
@@ -92,7 +94,10 @@ func main() {
 	ctx := context.Background()
 	defer applet.Exit()
 
-	monitoring.SetMetricFactory(monitoring.InertMetricFactory{})
+	mf := prometheus.MetricFactory{
+		Prefix: "omniwitness_",
+	}
+	monitoring.SetMetricFactory(mf)
 
 	log.Printf("%s/%s (%s) • TEE user applet • %s %s",
 		runtime.GOOS, runtime.GOARCH, runtime.Version(),
@@ -224,18 +229,40 @@ func runWithNetworking(ctx context.Context) error {
 
 	listenCfg := &net.ListenConfig{}
 
-	listener, err := listenCfg.Listen(ctx, "tcp", ":22")
+	sshListener, err := listenCfg.Listen(ctx, "tcp", ":22")
 	if err != nil {
 		return fmt.Errorf("TA could not initialize SSH listener, %v", err)
 	}
 	defer func() {
 		log.Println("Closing ssh port")
-		if err := listener.Close(); err != nil {
+		if err := sshListener.Close(); err != nil {
 			log.Printf("Error closing ssh port: %v", err)
 		}
 	}()
+	go startSSHServer(ctx, sshListener, addr.Address.String(), 22, cmd.Console)
 
-	go startSSHServer(ctx, listener, addr.Address.String(), 22, cmd.Console)
+	metricsListener, err := listenCfg.Listen(ctx, "tcp", ":8081")
+	if err != nil {
+		return fmt.Errorf("TA could not initialize metrics listener, %v", err)
+	}
+	defer func() {
+		log.Println("Closing metrics port (8081)")
+		if err := metricsListener.Close(); err != nil {
+			log.Printf("Error closing ssh port: %v", err)
+		}
+	}()
+	go func() {
+		srvMux := http.NewServeMux()
+		srvMux.Handle("/metrics", promhttp.Handler())
+		srv := &http.Server{
+			ReadTimeout:  5 * time.Second,
+			WriteTimeout: 10 * time.Second,
+			Handler:      srvMux,
+		}
+		if err := srv.Serve(metricsListener); err != http.ErrServerClosed {
+			glog.Errorf("Error serving metrics: %v", err)
+		}
+	}()
 
 	// Set up and start omniwitness
 	signer, err := note.NewSigner(signingKey)

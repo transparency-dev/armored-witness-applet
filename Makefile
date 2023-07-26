@@ -16,7 +16,7 @@ BUILD_USER ?= $(shell whoami)
 BUILD_HOST ?= $(shell hostname)
 BUILD_DATE ?= $(shell /bin/date -u "+%Y-%m-%d %H:%M:%S")
 BUILD_EPOCH := $(shell /bin/date -u "+%s")
-BUILD_TAGS = linkramsize,linkramstart,disable_fr_auth,linkprintk
+BUILD_TAGS = linkramsize,linkramstart,disable_fr_auth,linkprintk,nostatfs
 BUILD = ${BUILD_USER}@${BUILD_HOST} on ${BUILD_DATE}
 REV = $(shell git rev-parse --short HEAD 2> /dev/null)
 
