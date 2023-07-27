@@ -16,6 +16,9 @@ github.com/golang/glog v1.1.2 h1:DVjP2PbBOzHyzA+dn3WhHIq4NdVu3Q+pvivFICf/7fo=
 github.com/golang/glog v1.1.2/go.mod h1:zR+okUeTbrL6EL3xHUDxZuEtGv04p5shwip1+mL/rLQ=
 github.com/golang/mock v1.6.0 h1:ErTB+efbowRARo13NNdxyJji2egdxLGQhRaY+DUumQc=
 github.com/golang/mock v1.6.0/go.mod h1:p6yTPP+5HYm5mzsMV8JkE6ZKdX+/wYM6Hr+LicevLPs=
+github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
+github.com/golang/glog v1.1.1 h1:jxpi2eWoU84wbX9iIEyAeeoac3FLuifZpY9tcNUD9kw=
+github.com/golang/glog v1.1.1/go.mod h1:zR+okUeTbrL6EL3xHUDxZuEtGv04p5shwip1+mL/rLQ=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/golang/protobuf v1.3.1/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/golang/protobuf v1.3.2/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
@@ -43,6 +46,7 @@ github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB7
 github.com/gsora/fidati v0.0.0-20220824075547-eeb0a5f7d6c3 h1:klG3scbSLaGIvJO1p9wdTaHonsCSAcvNrX8vfa8LRd4=
 github.com/gsora/fidati v0.0.0-20220824075547-eeb0a5f7d6c3/go.mod h1:pqELFmXT+lU57T8pIGwPSOODIvRv/r/lwxlJX0UupvY=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
+github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
 github.com/kr/text v0.2.0/go.mod h1:eLer722TekiGuMkidMxC/pM04lWEeraHUUmBw8l2grE=
 github.com/mattn/go-sqlite3 v1.14.17 h1:mCRHCLDUBXgpKAqIKsaAaAsrAlbkeomtRFKXh2L6YIM=
@@ -69,6 +73,8 @@ github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcU
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/transparency-dev/armored-witness-os v0.0.0-20230608161615-85a962a3140d h1:5Zli63Rka2mpwtWjo+v6+XXq/2uL0FZLyWtTzmMkm9g=
 github.com/transparency-dev/armored-witness-os v0.0.0-20230608161615-85a962a3140d/go.mod h1:i5M4CBJcbYWhjWV1Oa9O8mLH/CK8BIEuHq8Bq8I5O6c=
+github.com/transparency-dev/armored-witness-os v0.0.0-20230727144007-820f2b6c57f7 h1:zZg3JBgPBHtmGFmugCZa2sMtQGnS8Fp4mbFsghq3jjs=
+github.com/transparency-dev/armored-witness-os v0.0.0-20230727144007-820f2b6c57f7/go.mod h1:MKQb71O9KPQ4ZH2z4hlo8ADyyuXRMJttL7g+nB2RCYA=
 github.com/transparency-dev/formats v0.0.0-20230607101544-c064fae4cff6 h1:Mjc7czQhATVAWBRZecClSQlWFMiW/42AZdYzp4qRnqQ=
 github.com/transparency-dev/formats v0.0.0-20230607101544-c064fae4cff6/go.mod h1:Nb+V5XS9fhtScBd8Zb7BmCywNSu1eGQvJqGXodST9cw=
 github.com/transparency-dev/merkle v0.0.2 h1:Q9nBoQcZcgPamMkGn7ghV8XiTZ/kRxn1yCG81+twTK4=
