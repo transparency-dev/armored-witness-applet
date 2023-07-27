@@ -110,8 +110,8 @@ func deriveWitnessKey(uniqueID string) error {
 	// AES it expects the diversifier to be 16 bytes long. We'll hash our diversifier text above
 	// and truncate to 16 bytes, and use that:
 	diversifierHash := sha256.Sum256([]byte(diversifierPreimage))
-	var aesKey []byte
-	if err := syscall.Call("RPC.DeriveKey", diversifierHash[:aes.BlockSize], &aesKey); err != nil {
+	var aesKey [sha256.Size]byte
+	if err := syscall.Call("RPC.DeriveKey", ([aes.BlockSize]byte)(diversifierHash[:aes.BlockSize]), &aesKey); err != nil {
 		return fmt.Errorf("TA failed to derive h/w key, %v", err)
 	}
 	if l := len(aesKey); l != 32 {
@@ -119,7 +119,7 @@ func deriveWitnessKey(uniqueID string) error {
 	}
 
 	salt := []byte(fmt.Sprintf("armoredwitness-%s", uniqueID))
-	r := hkdf.New(sha256.New, aesKey, salt, nil)
+	r := hkdf.New(sha256.New, aesKey[:], salt, nil)
 
 	// Figure out our name
 	nSeed := make([]byte, 8)
