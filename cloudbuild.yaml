@@ -64,7 +64,7 @@ steps:
     args:
       - '-c'
       - |
-        echo -e "{\n  \"sha256_digest\": \"$(sha256sum -b output/trusted_applet.elf | cut -d " " -f1)\"\n  \"tag_name\": \"${TAG_NAME}\"\n  \"tamago_version\": \"${_TAMAGO_VERSION}\"\n}" > output/applet_log_entry
+        echo -e "{\n  \"revision_id\": \"${REVISION_ID}\"\n  \"commit_sha\": \"${COMMIT_SHA}\"\n \"sha256_digest\": \"$(sha256sum -b output/trusted_applet.elf | cut -d " " -f1)\"\n  \"tag_name\": \"${TAG_NAME}\"\n  \"tamago_version\": \"${_TAMAGO_VERSION}\"\n  \"component\": \"TRUSTED_APPLET\"\n"}" > output/applet_log_entry
   # Copy log entry to the sequence bucket, preparing to write to log.
   - name: gcr.io/cloud-builders/gcloud
     args:
