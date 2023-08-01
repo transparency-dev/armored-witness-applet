@@ -103,8 +103,8 @@ func (p *Partition) eraseSlot(i int) error {
 	p.slots[i].mu.Lock()
 	defer p.slots[i].mu.Unlock()
 
-	glog.Infof("Erasing partition slot %d @ block %d", i, p.slots[i].start)
-	length := p.slots[i].length
+	glog.Infof("Erasing partition slot %d @ block %d len %d blocks", i, p.slots[i].start, p.slots[1].length)
+	length := p.slots[i].length * p.dev.BlockSize()
 	start := p.slots[i].start
 	b := make([]byte, length)
 	if _, err := p.dev.WriteBlocks(start, b); err != nil {
