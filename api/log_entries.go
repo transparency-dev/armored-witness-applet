@@ -30,7 +30,7 @@ type FirmwareRelease struct {
 	Component string `json:"component"`
 
 	// TagName identifies the version of this release, e.g. "0.1.2"
-	TagName string `json:"tag_name"`
+	TagName string `json:"git_tag_name"`
 
 	// CommitHash contains the hex-encoded SHA-1 commit hash of the git repository when checked
 	// out at TagName. Committing to this information allows verifiers that cannot
@@ -41,13 +41,13 @@ type FirmwareRelease struct {
 	//  - if the CommitHash is the same, then they have the same code checked out but
 	//    there is a problem with the build toolchain (different tooling or non-reproducible
 	//    builds).
-	CommitHash string `json:"commit_sha"`
+	CommitHash string `json:"git_commit_sha"`
 
 	// Sha256Digest is the hash of the compiled firmware binary. Believers that are
 	// installing a firmware release must check that the firmware data they are going to
 	// believe has a fingerprint matching this hash. Verifiers that check out the correct
 	// source repo & version must be able to reproducibly build a binary that has this fingerprint.
-	Sha256Digest []byte `json:"sha256_digest"`
+	Sha256Digest []byte `json:"firmware_digest_sha256"`
 
 	// TamagoVersion identifies the version of [Tamago] that the builder used to compile
 	// the binary with Sha256Digest.
