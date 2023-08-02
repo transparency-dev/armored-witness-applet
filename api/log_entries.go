@@ -15,6 +15,8 @@
 // Package api contains public structures related to the log contents.
 package api
 
+import "github.com/coreos/go-semver/semver"
+
 const (
 	// Component name for the applet used in FirmwareRelease.Component.
 	ComponentApplet = "TRUSTED_APPLET"
@@ -30,7 +32,7 @@ type FirmwareRelease struct {
 	Component string `json:"component"`
 
 	// GitTagName identifies the version of this release, e.g. "0.1.2"
-	GitTagName string `json:"git_tag_name"`
+	GitTagName semver.Version `json:"git_tag_name"`
 
 	// GitCommitFingerprint contains the hex-encoded SHA-1 commit hash of the git repository when checked
 	// out at TagName. Committing to this information allows verifiers that cannot
@@ -53,5 +55,5 @@ type FirmwareRelease struct {
 	// the binary with FirmwareDigestSha256.
 	//
 	// [Tamago]: https://github.com/usbarmory/tamago
-	TamagoVersion string `json:"tamago_version"`
+	TamagoVersion semver.Version `json:"tamago_version"`
 }
