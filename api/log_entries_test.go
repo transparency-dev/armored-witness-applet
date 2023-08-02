@@ -21,6 +21,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/coreos/go-semver/semver"
 	"github.com/transparency-dev/armored-witness-applet/api"
 )
 
@@ -37,7 +38,7 @@ func TestParseFirmwareRelease(t *testing.T) {
 	if got, want := r.Component, api.ComponentApplet; got != want {
 		t.Errorf("Got %q, want %q", got, want)
 	}
-	if got, want := r.GitTagName, "0.1.2"; got != want {
+	if got, want := r.GitTagName, *semver.New("0.1.2"); got != want {
 		t.Errorf("Got %q, want %q", got, want)
 	}
 	if got, want := len(r.GitCommitFingerprint), 40; got != want {
@@ -52,7 +53,7 @@ func TestParseFirmwareRelease(t *testing.T) {
 	if got, want := r.FirmwareDigestSha256, mustDecode("8l4TaroPsSq+zwG+XMPZw+EdpUoXH0IT4cKM2RmFyNE="); !bytes.Equal(got, want) {
 		t.Errorf("Got %x, want %x", got, want)
 	}
-	if got, want := r.TamagoVersion, "1.20.6"; got != want {
+	if got, want := r.TamagoVersion, *semver.New("1.20.6"); got != want {
 		t.Errorf("Got %q, want %q", got, want)
 	}
 }
