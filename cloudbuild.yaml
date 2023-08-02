@@ -3,9 +3,9 @@ steps:
   - name: gcr.io/cloud-builders/docker
     args:
       - build
-      - -t
       - --build-arg
       - TAMAGO_VERSION=${_TAMAGO_VERSION}
+      - -t
       - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/trusted-applet-build-${TAG_NAME}
       - .
   # Prepare a container with a copy of the artifacts.
