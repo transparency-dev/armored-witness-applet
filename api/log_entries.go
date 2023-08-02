@@ -32,7 +32,7 @@ type FirmwareRelease struct {
 	// TagName identifies the version of this release, e.g. "0.1.2"
 	TagName string `json:"tag_name"`
 
-	// CommitHash contains the SHA256 commit hash of the git repository when checked
+	// CommitHash contains the hex-encoded SHA-1 commit hash of the git repository when checked
 	// out at TagName. Committing to this information allows verifiers that cannot
 	// reproduce a build to quickly narrow down the problem space:
 	//  - if this CommitHash is different then they have checked out different code
@@ -41,7 +41,7 @@ type FirmwareRelease struct {
 	//  - if the CommitHash is the same, then they have the same code checked out but
 	//    there is a problem with the build toolchain (different tooling or non-reproducible
 	//    builds).
-	CommitHash []byte `json:"commit_sha"`
+	CommitHash string `json:"commit_sha"`
 
 	// Sha256Digest is the hash of the compiled firmware binary. Believers that are
 	// installing a firmware release must check that the firmware data they are going to
