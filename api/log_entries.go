@@ -29,28 +29,28 @@ type FirmwareRelease struct {
 	// build.
 	Component string `json:"component"`
 
-	// TagName identifies the version of this release, e.g. "0.1.2"
-	TagName string `json:"git_tag_name"`
+	// GitTagName identifies the version of this release, e.g. "0.1.2"
+	GitTagName string `json:"git_tag_name"`
 
-	// CommitHash contains the hex-encoded SHA-1 commit hash of the git repository when checked
+	// GitCommitFingerprint contains the hex-encoded SHA-1 commit hash of the git repository when checked
 	// out at TagName. Committing to this information allows verifiers that cannot
 	// reproduce a build to quickly narrow down the problem space:
-	//  - if this CommitHash is different then they have checked out different code
+	//  - if this GitCommitFingerprint is different then they have checked out different code
 	//    than was used to build the binary. This could happen if the wrong repo was
 	//    used, or because the TagName was changed to a different commit
-	//  - if the CommitHash is the same, then they have the same code checked out but
+	//  - if the GitCommitFingerprint is the same, then they have the same code checked out but
 	//    there is a problem with the build toolchain (different tooling or non-reproducible
 	//    builds).
-	CommitHash string `json:"git_commit_sha"`
+	GitCommitFingerprint string `json:"git_commit_fingerprint"`
 
-	// Sha256Digest is the hash of the compiled firmware binary. Believers that are
+	// FirmwareDigestSha256 is the hash of the compiled firmware binary. Believers that are
 	// installing a firmware release must check that the firmware data they are going to
 	// believe has a fingerprint matching this hash. Verifiers that check out the correct
 	// source repo & version must be able to reproducibly build a binary that has this fingerprint.
-	Sha256Digest []byte `json:"firmware_digest_sha256"`
+	FirmwareDigestSha256 []byte `json:"firmware_digest_sha256"`
 
 	// TamagoVersion identifies the version of [Tamago] that the builder used to compile
-	// the binary with Sha256Digest.
+	// the binary with FirmwareDigestSha256.
 	//
 	// [Tamago]: https://github.com/usbarmory/tamago
 	TamagoVersion string `json:"tamago_version"`

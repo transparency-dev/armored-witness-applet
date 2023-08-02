@@ -37,19 +37,19 @@ func TestParseFirmwareRelease(t *testing.T) {
 	if got, want := r.Component, api.ComponentApplet; got != want {
 		t.Errorf("Got %q, want %q", got, want)
 	}
-	if got, want := r.TagName, "0.1.2"; got != want {
+	if got, want := r.GitTagName, "0.1.2"; got != want {
 		t.Errorf("Got %q, want %q", got, want)
 	}
-	if got, want := len(r.CommitHash), 40; got != want {
+	if got, want := len(r.GitCommitFingerprint), 40; got != want {
 		t.Errorf("Got %d, want %d", got, want)
 	}
-	if got, want := r.CommitHash, "aac1e176cfac1a1e079b5f624b83fda54b5d0f76"; got != want {
+	if got, want := r.GitCommitFingerprint, "aac1e176cfac1a1e079b5f624b83fda54b5d0f76"; got != want {
 		t.Errorf("Got %x, want %x", got, want)
 	}
-	if got, want := len(r.Sha256Digest), 32; got != want {
+	if got, want := len(r.FirmwareDigestSha256), 32; got != want {
 		t.Errorf("Got %d, want %d", got, want)
 	}
-	if got, want := r.Sha256Digest, mustDecode("8l4TaroPsSq+zwG+XMPZw+EdpUoXH0IT4cKM2RmFyNE="); !bytes.Equal(got, want) {
+	if got, want := r.FirmwareDigestSha256, mustDecode("8l4TaroPsSq+zwG+XMPZw+EdpUoXH0IT4cKM2RmFyNE="); !bytes.Equal(got, want) {
 		t.Errorf("Got %x, want %x", got, want)
 	}
 	if got, want := r.TamagoVersion, "1.20.6"; got != want {
