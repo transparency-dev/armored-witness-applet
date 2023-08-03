@@ -58,13 +58,15 @@ steps:
       - cp
       - output/trusted_applet.sig
       - gs://${_TRUSTED_APPLET_BUCKET}/${TAG_NAME}/trusted_applet.sig
-      # Construct log entry / Claimant Model statement.
+  # Construct log entry / Claimant Model statement.
+  # TODO(jayhou): replace this with a more programmatic JSON construction. `firmware_digest_sha256`
+  # should be in base64 instead of hex.
   - name: 'ubuntu'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        echo -e "{\n  \"component\": \"TRUSTED_APPLET\"\n  \"git_tag_name\": \"${TAG_NAME}\"\n  \"git_commit_fingerprint\": \"${COMMIT_SHA}\"\n  \"firmware_digest_sha256\": \"$(sha256sum -b output/trusted_applet.elf | cut -d " " -f1)\"\n  \"tamago_version\": \"${_TAMAGO_VERSION}\"\n}" > output/applet_log_entry
+        echo -e "{\n  \"component\": \"TRUSTED_APPLET\",\n  \"git_tag_name\": \"${TAG_NAME}\",\n  \"git_commit_fingerprint\": \"${COMMIT_SHA}\",\n  \"firmware_digest_sha256\": \"$(sha256sum -b output/trusted_applet.elf | cut -d ' ' -f1)\",\n  \"tamago_version\": \"${_TAMAGO_VERSION}\"\n}" > output/applet_log_entry
   # Copy log entry to the sequence bucket, preparing to write to log.
   - name: gcr.io/cloud-builders/gcloud
     args:
