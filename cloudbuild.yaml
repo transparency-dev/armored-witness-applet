@@ -58,12 +58,49 @@ steps:
       - cp
       - output/trusted_applet.sig
       - gs://${_TRUSTED_APPLET_BUCKET}/${TAG_NAME}/trusted_applet.sig
-
+  # Construct log entry / Claimant Model statement.
+  # TODO(jayhou): replace this with a more programmatic JSON construction. `firmware_digest_sha256`
+  # should be in base64 instead of hex.
+  - name: 'ubuntu'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo -e "{\n  \"component\": \"TRUSTED_APPLET\",\n  \"git_tag_name\": \"${TAG_NAME}\",\n  \"git_commit_fingerprint\": \"${COMMIT_SHA}\",\n  \"firmware_digest_sha256\": \"$(sha256sum -b output/trusted_applet.elf | cut -d ' ' -f1)\",\n  \"tamago_version\": \"${_TAMAGO_VERSION}\"\n}" > output/applet_log_entry
+  # Copy log entry to the sequence bucket, preparing to write to log.
+  - name: gcr.io/cloud-builders/gcloud
+    args:
+      - storage
+      - cp
+      - output/applet_log_entry
+      - 'gs://${_LOG_NAME}/${_ENTRIES_DIR}/applet_log_entry'
+  # Sequence log entry.
+  - name: gcr.io/cloud-builders/gcloud
+    args:
+      - functions
+      - call
+      - sequence
+      - '--data'
+      - '{"entriesDir": "${_ENTRIES_DIR}", "origin": "${_ORIGIN}", "bucket": "${_LOG_NAME}"}'
+  # Integrate log entry.
+  - name: gcr.io/cloud-builders/gcloud
+    args:
+      - functions
+      - call
+      - integrate
+      - '--data'
+      - '{"origin": "${_ORIGIN}", "bucket": "${_LOG_NAME}"}'
 substitutions:
+  # Build-related.
   _ARTIFACT_REGISTRY_REPO: trusted-applet-builder
-  _KMS_KEY: trusted-applet
-  _KMS_KEYRING: armored-witness
-  _KMS_KEY_VERSION: '1'
   _REGION: europe-west2
   _TRUSTED_APPLET_BUCKET: trusted-applet-artifacts
   _TAMAGO_VERSION: '1.20.6'
+  # Signing-related.
+  _KMS_KEY: trusted-applet
+  _KMS_KEYRING: armored-witness
+  _KMS_KEY_VERSION: '1'
+  # Log-related.
+  _ENTRIES_DIR: firmware-log-sequence
+  _ORIGIN: transparency.dev/armored-witness/binary_transparency/0
+  _LOG_NAME: firmware-log
