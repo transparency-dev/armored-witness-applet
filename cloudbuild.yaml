@@ -3,10 +3,10 @@ steps:
   - name: gcr.io/cloud-builders/docker
     args:
       - build
-      - -t
       - --build-arg
       - TAMAGO_VERSION=${_TAMAGO_VERSION}
-      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/trusted-applet-build-${TAG_NAME}
+      - -t
+      - builder-image
       - .
   # Prepare a container with a copy of the artifacts.
   - name: gcr.io/cloud-builders/docker
@@ -14,7 +14,7 @@ steps:
       - create
       - --name
       - scratch
-      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/trusted-applet-build-${TAG_NAME}
+      - builder-image
   # Copy the artifacts from the container to the Cloud Build VM.
   - name: gcr.io/cloud-builders/docker
     args:
@@ -44,7 +44,7 @@ steps:
       - --input-file
       - output/trusted_applet.elf
       - --signature-file
-      - output/trusted-applet.sig
+      - output/trusted_applet.sig
   # Copy the artifacts from the Cloud Build VM to GCS.
   - name: gcr.io/cloud-builders/gcloud
     args:
