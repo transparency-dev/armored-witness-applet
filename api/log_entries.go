@@ -20,6 +20,8 @@ import "github.com/coreos/go-semver/semver"
 const (
 	// Component name for the applet used in FirmwareRelease.Component.
 	ComponentApplet = "TRUSTED_APPLET"
+	// Component name for the OS used in FirmwareRelease.Component.
+	ComponentOS = "TRUSTED_OS"
 )
 
 // FirmwareRelease represents a firmware release in the log.
