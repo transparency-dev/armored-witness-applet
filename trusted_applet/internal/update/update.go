@@ -33,14 +33,14 @@ type Local interface {
 	// currently running.
 	GetInstalledVersions() (os, applet semver.Version, err error)
 
-	// InstallOS updates the OS to that included in the firmware bundle.
+	// InstallOS updates the OS to the version contained in the firmware bundle.
 	InstallOS(firmware.Bundle) error
 
-	// InstallApplet updates the Applet to that included in the firmware bundle.
+	// InstallApplet updates the Applet to the version contained in the firmware bundle.
 	InstallApplet(firmware.Bundle) error
 
 	// Reboot instructs the device to reboot after new firmware is installed.
-	// This call will not return.
+	// This call will not return and deferred functions will not be run.
 	Reboot()
 }
 
