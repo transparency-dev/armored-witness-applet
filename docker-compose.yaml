@@ -1,0 +1,6 @@
+version: '3.8'
+services:
+  trusted_applet:
+    build:
+      context: .
+      dockerfile: ./docker/trusted_applet/Dockerfile
