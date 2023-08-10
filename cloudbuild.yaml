@@ -1,4 +1,5 @@
 steps:
+  ### Build the Trusted Applet, sign it, and upload both to GCS.
   # Build an image containing the trusted applet artifacts with the Dockerfile.
   - name: gcr.io/cloud-builders/docker
     args:
@@ -58,22 +59,49 @@ steps:
       - cp
       - output/trusted_applet.sig
       - gs://${_TRUSTED_APPLET_BUCKET}/${TAG_NAME}/trusted_applet.sig
-  # Construct log entry / Claimant Model statement.
-  # TODO(jayhou): replace this with a more programmatic JSON construction. `firmware_digest_sha256`
-  # should be in base64 instead of hex.
-  - name: 'ubuntu'
-    entrypoint: 'bash'
+  ### Construct log entry / Claimant Model statement.
+  # Build an image with the log entry in JSON format.
+  - name: gcr.io/cloud-builders/docker
     args:
-      - '-c'
-      - |
-        echo -e "{\n  \"component\": \"TRUSTED_APPLET\",\n  \"git_tag_name\": \"${TAG_NAME}\",\n  \"git_commit_fingerprint\": \"${COMMIT_SHA}\",\n  \"firmware_digest_sha256\": \"$(sha256sum -b output/trusted_applet.elf | cut -d ' ' -f1)\",\n  \"tamago_version\": \"${_TAMAGO_VERSION}\"\n}" > output/applet_log_entry
+      - build
+      - '--build-arg'
+      - GIT_TAG=0.1.2
+      - '--build-arg'
+      - GIT_COMMIT_FINGERPRINT=aac1e176cfac1a1e079b5f624b83fda54b5d0f76
+      - '--build-arg'
+      - >-
+        FIRMWARE_FINGERPRINT=f25e136aba0fb12abecf01be5cc3d9c3e11da54a171f4213e1c28cd91985c8d1
+      - '--build-arg'
+      - TAMAGO_VERSION=1.20.7
+      - '-t'
+      - json-constructor-image
+      - docker/json_constructor/
+  # Prepare a container with a copy of the JSON artifact.
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - create
+      - '--name'
+      - scratch
+      - json-constructor-image
+  # Copy the JSON artifact from the container to the Cloud Build VM.
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - cp
+      - 'scratch:/app/output.json'
+      - output/applet_log_entry.json
+  # Print the content of the JSON artifact.
+  - name: bash
+    args:
+      - cat
+      - output/applet_log_entry.json
+  ### Write the firmware release to the transparency log.
   # Copy log entry to the sequence bucket, preparing to write to log.
   - name: gcr.io/cloud-builders/gcloud
     args:
       - storage
       - cp
-      - output/applet_log_entry
-      - 'gs://${_LOG_NAME}/${_ENTRIES_DIR}/applet_log_entry'
+      - output/applet_log_entry.json
+      - 'gs://${_LOG_NAME}/${_ENTRIES_DIR}/applet_log_entry.json'
   # Sequence log entry.
   - name: gcr.io/cloud-builders/gcloud
     args:
