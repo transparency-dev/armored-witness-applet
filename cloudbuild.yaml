@@ -64,16 +64,15 @@ steps:
   - name: gcr.io/cloud-builders/docker
     args:
       - build
-      - '--build-arg'
-      - GIT_TAG=0.1.2
-      - '--build-arg'
-      - GIT_COMMIT_FINGERPRINT=aac1e176cfac1a1e079b5f624b83fda54b5d0f76
-      - '--build-arg'
-      - >-
-        FIRMWARE_FINGERPRINT=f25e136aba0fb12abecf01be5cc3d9c3e11da54a171f4213e1c28cd91985c8d1
-      - '--build-arg'
-      - TAMAGO_VERSION=1.20.7
-      - '-t'
+      - --build-arg
+      - GIT_TAG=${TAG_NAME}
+      - --build-arg
+      - GIT_COMMIT_FINGERPRINT=${COMMIT_SHA}
+      - --build-arg
+      - FIRMWARE_FINGERPRINT=$(sha256sum -b output/trusted_applet.elf | cut -d ' ' -f1)
+      - --build-arg
+      - TAMAGO_VERSION=${_TAMAGO_VERSION}
+      - -t
       - json-constructor-image
       - docker/json_constructor/
   # Prepare a container with a copy of the JSON artifact.
