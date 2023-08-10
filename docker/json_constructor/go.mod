@@ -1,4 +1,4 @@
-module github.com/transparency-dev/armored-witness-applet/release
+module github.com/transparency-dev/armored-witness-applet/json_constructor
 
 go 1.22
 

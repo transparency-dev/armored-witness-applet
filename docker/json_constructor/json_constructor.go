@@ -15,11 +15,12 @@
 package main
 
 import (
-	"encoding/hex"
+	"crypto/sha256"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/coreos/go-semver/semver"
 	"github.com/transparency-dev/armored-witness-applet/api"
@@ -30,8 +31,8 @@ func main() {
 		"The semantic version of the Trusted Applet release.")
 	gitCommitFingerprint := flag.String("git_commit_fingerprint", "",
 		"Hex-encoded SHA-1 commit hash of the git repository when checked out at the specified git_tag.")
-	firmwareFingerprint := flag.String("firmware_fingerprint", "",
-		"Hex-encoded hash of the compiled firmware binary. ")
+	firmwareFile := flag.String("firmware_file", "",
+		"Path of the firmware ELF file. ")
 	tamagoVersion := flag.String("tamago_version", "",
 		"The version of the Tamago (https://github.com/usbarmory/tamago) used to compile the Trusted Applet.")
 
@@ -43,23 +44,24 @@ func main() {
 	if *gitCommitFingerprint == "" {
 		log.Fatal("git_commit_fingerprint is required.")
 	}
-	if *firmwareFingerprint == "" {
-		log.Fatal("firmware_fingerprint is required.")
+	if *firmwareFile == "" {
+		log.Fatal("firmware_file is required.")
 	}
 	if *tamagoVersion == "" {
 		log.Fatal("tamago_version is required.")
 	}
 
-	digestBytes, err := hex.DecodeString(*firmwareFingerprint)
+	firmwareBytes, err := os.ReadFile(*firmwareFile)
 	if err != nil {
-		log.Fatalf("Failed to hex-deocode string %q: %v", *firmwareFingerprint, err)
+		log.Fatalf("Failed to read firmware_file %q: %v", *firmwareFile, err)
 	}
+	digestBytes := sha256.Sum256(firmwareBytes)
 
 	r := api.FirmwareRelease{
 		Component:            api.ComponentApplet,
 		GitTagName:           *semver.New(*gitTag),
 		GitCommitFingerprint: *gitCommitFingerprint,
-		FirmwareDigestSha256: digestBytes,
+		FirmwareDigestSha256: digestBytes[:],
 		TamagoVersion:        *semver.New(*tamagoVersion),
 	}
 	b, err := json.MarshalIndent(r, "", "  ")

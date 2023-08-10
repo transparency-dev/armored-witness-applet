@@ -14,13 +14,13 @@ steps:
     args:
       - create
       - --name
-      - scratch
+      - builder_scratch
       - builder-image
   # Copy the artifacts from the container to the Cloud Build VM.
   - name: gcr.io/cloud-builders/docker
     args:
       - cp
-      - scratch:/build/bin
+      - builder_scratch:/build/bin
       - output
   # List the artifacts.
   - name: bash
@@ -60,6 +60,12 @@ steps:
       - output/trusted_applet.sig
       - gs://${_TRUSTED_APPLET_BUCKET}/${TAG_NAME}/trusted_applet.sig
   ### Construct log entry / Claimant Model statement.
+  # Copy trusted_applet.elf to prepare Docker context.
+  - name: bash
+    args:
+      - cp
+      - output/trusted_applet.elf
+      - docker/json_constructor/
   # Build an image with the log entry in JSON format.
   - name: gcr.io/cloud-builders/docker
     args:
@@ -69,7 +75,7 @@ steps:
       - --build-arg
       - GIT_COMMIT_FINGERPRINT=${COMMIT_SHA}
       - --build-arg
-      - FIRMWARE_FINGERPRINT=$(sha256sum -b output/trusted_applet.elf | cut -d ' ' -f1)
+      - FIRMWARE_FILE=trusted_applet.elf
       - --build-arg
       - TAMAGO_VERSION=${_TAMAGO_VERSION}
       - -t
@@ -79,14 +85,14 @@ steps:
   - name: gcr.io/cloud-builders/docker
     args:
       - create
-      - '--name'
-      - scratch
+      - --name
+      - json_scratch
       - json-constructor-image
   # Copy the JSON artifact from the container to the Cloud Build VM.
   - name: gcr.io/cloud-builders/docker
     args:
       - cp
-      - 'scratch:/app/output.json'
+      - json_scratch:/app/output.json
       - output/applet_log_entry.json
   # Print the content of the JSON artifact.
   - name: bash
