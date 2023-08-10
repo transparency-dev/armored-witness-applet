@@ -4,3 +4,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/trusted_applet/Dockerfile
+  json_constructor:
+    build:
+      context: ./docker/json_constructor
+      dockerfile: ./Dockerfile
