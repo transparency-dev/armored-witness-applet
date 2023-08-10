@@ -1,5 +1,5 @@
 steps:
-  ### Build the Trusted Applet, sign it, and upload both to GCS.
+  ### Build the Trusted Applet, create a detached signature for it, and upload both to GCS.
   # Build an image containing the trusted applet artifacts with the Dockerfile.
   - name: gcr.io/cloud-builders/docker
     args:
