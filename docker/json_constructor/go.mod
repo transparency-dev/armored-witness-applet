@@ -1,6 +1,6 @@
 module github.com/transparency-dev/armored-witness-applet/json_constructor
 
-go 1.22
+go 1.21
 
 require (
 	github.com/coreos/go-semver v0.3.1 // indirect
