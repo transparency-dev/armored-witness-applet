@@ -74,6 +74,7 @@ var (
 	Version  string
 
 	GitHubUser, GitHubEmail, GitHubToken string
+	RestDistributorBaseURL               string
 
 	cfg *api.Configuration
 
@@ -274,11 +275,12 @@ func runWithNetworking(ctx context.Context) error {
 		return fmt.Errorf("failed to init verifier: %v", err)
 	}
 	opConfig := omniwitness.OperatorConfig{
-		WitnessSigner:   signer,
-		WitnessVerifier: verifier,
-		GithubUser:      GitHubUser,
-		GithubEmail:     GitHubEmail,
-		GithubToken:     GitHubToken,
+		WitnessSigner:          signer,
+		WitnessVerifier:        verifier,
+		GithubUser:             GitHubUser,
+		GithubEmail:            GitHubEmail,
+		GithubToken:            GitHubToken,
+		RestDistributorBaseURL: RestDistributorBaseURL,
 	}
 	// TODO(mhutchinson): add a second listener for an admin API.
 	mainListener, err := listenCfg.Listen(ctx, "tcp", ":80")
