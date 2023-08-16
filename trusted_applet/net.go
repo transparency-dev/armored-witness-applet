@@ -363,10 +363,10 @@ func startNetworking() (err error) {
 	http.DefaultClient = &http.Client{
 		Transport: &http.Transport{
 			ForceAttemptHTTP2:     true,
-			MaxIdleConns:          100,
-			IdleConnTimeout:       90 * time.Second,
+			IdleConnTimeout:       1 * time.Second,
 			TLSHandshakeTimeout:   5 * time.Second,
-			ExpectContinueTimeout: 1 * time.Second,
+			ExpectContinueTimeout: 5 * time.Second,
+			DisableKeepAlives:     true,
 		},
 		Timeout: httpTimeout,
 	}
