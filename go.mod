@@ -1,6 +1,6 @@
 module github.com/transparency-dev/armored-witness-applet
 
-go 1.19
+go 1.20
 
 require (
 	github.com/beevik/ntp v1.3.0
@@ -8,8 +8,9 @@ require (
 	github.com/golang/glog v1.1.2
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.9
+	github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e
 	github.com/prometheus/client_golang v1.16.0
-	github.com/transparency-dev/armored-witness-os v0.0.0-20230608161615-85a962a3140d
+	github.com/transparency-dev/armored-witness-os v0.0.0-20230727144007-820f2b6c57f7
 	github.com/transparency-dev/formats v0.0.0-20230607101544-c064fae4cff6
 	github.com/transparency-dev/witness v0.0.0-20230626165226-5051f84409bc
 	github.com/usbarmory/GoTEE v0.0.0-20230717085113-1beadf7e5429

@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"github.com/usbarmory/GoTEE/applet"
 	"github.com/usbarmory/GoTEE/syscall"
 	"github.com/usbarmory/tamago/soc/nxp/usdhc"
@@ -49,11 +50,6 @@ import (
 )
 
 const (
-	// Generated from https://go.dev/play/p/uWUKLNK6h9v
-	// TODO(mhutchinson): these need to be read from file instead of constants
-	publicKey  = "TrustMe+68958214+AQ4Ys/PsXqfhPkNK7Y7RyYUMOJvfl65PzJOEiq9VFPjF"
-	signingKey = "PRIVATE+KEY+TrustMe+68958214+AZKby3TDZizdARF975ZyLJwGbHTivd+EqbfYTN5qr2cI"
-
 	// slotsPartitionOffsetBytes defines where our witness data storage partition starts.
 	// Changing this location is overwhelmingly likely to result in data loss.
 	slotsPartitionOffsetBytes = 1 << 30
@@ -152,6 +148,9 @@ func main() {
 
 	syscall.Call("RPC.LED", rpc.LEDStatus{Name: "blue", On: true}, nil)
 	defer syscall.Call("RPC.LED", rpc.LEDStatus{Name: "blue", On: false}, nil)
+
+	// (Re-)create our witness identity based on the device's internal secret key.
+	deriveWitnessKey()
 
 	go func() {
 		l := true
@@ -266,11 +265,11 @@ func runWithNetworking(ctx context.Context) error {
 	}()
 
 	// Set up and start omniwitness
-	signer, err := note.NewSigner(signingKey)
+	signer, err := note.NewSigner(witnessSigningKey)
 	if err != nil {
 		return fmt.Errorf("failed to init signer: %v", err)
 	}
-	verifier, err := note.NewVerifier(publicKey)
+	verifier, err := note.NewVerifier(witnessPublicKey)
 	if err != nil {
 		return fmt.Errorf("failed to init verifier: %v", err)
 	}
@@ -294,6 +293,7 @@ func runWithNetworking(ctx context.Context) error {
 	}()
 
 	log.Println("Starting witness...")
+	log.Printf("I am %q", witnessPublicKey)
 	if err := omniwitness.Main(ctx, opConfig, persistence, mainListener, http.DefaultClient); err != nil {
 		return fmt.Errorf("omniwitness.Main failed: %v", err)
 	}
