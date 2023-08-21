@@ -15,6 +15,7 @@
 package slots
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -136,4 +137,57 @@ func TestOpenSlot(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestErase(t *testing.T) {
+	p, _ := memPartition(t)
+
+	// Create some data in each slot
+	for i := 0; i < p.NumSlots(); i++ {
+		s, err := p.Open(uint(i))
+		if err != nil {
+			t.Fatalf("Failed to open slot %d: %v", i, err)
+		}
+		s.Write([]byte(fmt.Sprintf("data for slot %d", i)))
+	}
+
+	// Verify slots contain _something_
+	for i := 0; i < p.NumSlots(); i++ {
+		d, r := openAndRead(t, p, i)
+		if got, want := r, uint32(1); got != want {
+			t.Fatalf("Got data with revision %d, want %d", got, want)
+		}
+		if len(d) == 0 {
+			t.Fatal("Got unexpected zero length data")
+		}
+	}
+
+	// Erase all the slots
+	if err := p.Erase(); err != nil {
+		t.Fatalf("Failed to erase partition: %v", err)
+	}
+
+	// All slots should now be empty
+	for i := 0; i < p.NumSlots(); i++ {
+		d, r := openAndRead(t, p, i)
+		if got, want := r, uint32(0); got != want {
+			t.Fatalf("Got data with revision %d, want %d", got, want)
+		}
+		if len(d) != 0 {
+			t.Fatalf("Got unexpected data: %x", d)
+		}
+	}
+}
+
+func openAndRead(t *testing.T, p *Partition, i uint) ([]byte, uint32) {
+	t.Helper()
+	s, err := p.Open(uint(i))
+	if err != nil {
+		t.Fatalf("Failed to open slot %d: %v", i, err)
+	}
+	d, r, err := s.Read()
+	if err != nil {
+		t.Fatalf("Failed to read slot %d: %v", i, err)
+	}
+	return d, r
 }
