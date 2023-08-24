@@ -151,6 +151,8 @@ func main() {
 
 	// (Re-)create our witness identity based on the device's internal secret key.
 	deriveWitnessKey()
+	// Update our status in OS so custodian can inspect our signing identity even if there's no network.
+	syscall.Call("RPC.SetWitnessStatus", rpc.WitnessStatus{Identity: witnessPublicKey}, nil)
 
 	go func() {
 		l := true
@@ -218,6 +220,8 @@ func runWithNetworking(ctx context.Context) error {
 		return fmt.Errorf("runWithNetworking has no network configured: %v", tcpErr)
 	}
 	log.Printf("TA Version:%s MAC:%s IP:%s GW:%s DNS:%s", Version, iface.NIC.MAC.String(), addr, iface.Stack.GetRouteTable(), resolver)
+	// Update status with latest IP address too.
+	syscall.Call("RPC.SetWitnessStatus", rpc.WitnessStatus{Identity: witnessPublicKey, IP: addr.Address.String()}, nil)
 
 	select {
 	case <-runNTP(ctx):
