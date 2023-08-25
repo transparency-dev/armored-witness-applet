@@ -10,12 +10,12 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e
 	github.com/prometheus/client_golang v1.16.0
-	github.com/transparency-dev/armored-witness-os v0.0.0-20230727144007-820f2b6c57f7
+	github.com/transparency-dev/armored-witness-os v0.0.0-20230824092545-da2c55937a67
 	github.com/transparency-dev/formats v0.0.0-20230607101544-c064fae4cff6
 	github.com/transparency-dev/witness v0.0.0-20230626165226-5051f84409bc
 	github.com/usbarmory/GoTEE v0.0.0-20230717085113-1beadf7e5429
 	github.com/usbarmory/imx-enet v0.0.0-20230622162703-9eec0bcf6bb4
-	github.com/usbarmory/tamago v0.0.0-20230724190245-6f2dec2f8412
+	github.com/usbarmory/tamago v0.0.0-20230814171810-6cd63c1accf5
 	golang.org/x/crypto v0.12.0
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
 	golang.org/x/mod v0.12.0
