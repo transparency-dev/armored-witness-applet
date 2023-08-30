@@ -94,7 +94,7 @@ func (d *Device) ReadBlocks(lba uint, b []byte) error {
 			bl = MaxTransferBytes
 		}
 		xfer := rpc.Read{
-			Offset: int64(int(lba) * bs),
+			Offset: int64(lba) * int64(bs),
 			Size:   int64(bl),
 		}
 
