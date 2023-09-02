@@ -8,6 +8,7 @@ steps:
       - TAMAGO_VERSION=${_TAMAGO_VERSION}
       - -t
       - builder-image
+      # Path is relative to the root of the repo.
       - .
   # Prepare a container with a copy of the artifacts.
   - name: gcr.io/cloud-builders/docker
@@ -65,7 +66,7 @@ steps:
     args:
       - cp
       - output/trusted_applet.elf
-      - docker/json_constructor/
+      - release/json_constructor/
   # Build an image with the log entry in JSON format.
   - name: gcr.io/cloud-builders/docker
     args:
@@ -80,7 +81,7 @@ steps:
       - TAMAGO_VERSION=${_TAMAGO_VERSION}
       - -t
       - json-constructor-image
-      - docker/json_constructor/
+      - release/json_constructor/
   # Prepare a container with a copy of the JSON artifact.
   - name: gcr.io/cloud-builders/docker
     args:
