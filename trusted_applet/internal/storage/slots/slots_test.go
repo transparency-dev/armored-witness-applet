@@ -153,7 +153,7 @@ func TestErase(t *testing.T) {
 
 	// Verify slots contain _something_
 	for i := 0; i < p.NumSlots(); i++ {
-		d, r := openAndRead(t, p, i)
+		d, r := openAndRead(t, p, uint(i))
 		if got, want := r, uint32(1); got != want {
 			t.Fatalf("Got data with revision %d, want %d", got, want)
 		}
@@ -169,7 +169,7 @@ func TestErase(t *testing.T) {
 
 	// All slots should now be empty
 	for i := 0; i < p.NumSlots(); i++ {
-		d, r := openAndRead(t, p, i)
+		d, r := openAndRead(t, p, uint(i))
 		if got, want := r, uint32(0); got != want {
 			t.Fatalf("Got data with revision %d, want %d", got, want)
 		}
