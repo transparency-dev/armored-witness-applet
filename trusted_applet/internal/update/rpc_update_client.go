@@ -40,6 +40,7 @@ func (r *RPCClient) GetInstalledVersions() (os, applet semver.Version, err error
 }
 
 // InstallOS updates the OS to the version contained in the firmware bundle.
+// If the update is successful, the RPC will not return.
 func (r *RPCClient) InstallOS(fb firmware.Bundle) error {
 	fu := &rpc.FirmwareUpdate{
 		Image: fb.Firmware,
@@ -56,6 +57,7 @@ func (r *RPCClient) InstallOS(fb firmware.Bundle) error {
 }
 
 // InstallApplet updates the Applet to the version contained in the firmware bundle.
+// If the update is successful, the RPC will not return.
 func (r *RPCClient) InstallApplet(fb firmware.Bundle) error {
 	fu := &rpc.FirmwareUpdate{
 		Image: fb.Firmware,
@@ -72,6 +74,6 @@ func (r *RPCClient) InstallApplet(fb firmware.Bundle) error {
 
 // Reboot instructs the device to reboot after new firmware is installed.
 // This call will not return and deferred functions will not be run.
-func (r *RPCUpdate) Reboot() {
+func (r *RPCClient) Reboot() {
 	_ = syscall.Call("RPC.Reboot", nil, nil)
 }
