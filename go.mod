@@ -10,10 +10,10 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e
 	github.com/prometheus/client_golang v1.16.0
-	github.com/transparency-dev/armored-witness-os v0.0.0-20230824092545-da2c55937a67
-	github.com/transparency-dev/formats v0.0.0-20230607101544-c064fae4cff6
-	github.com/transparency-dev/witness v0.0.0-20230626165226-5051f84409bc
-	github.com/usbarmory/GoTEE v0.0.0-20230717085113-1beadf7e5429
+	github.com/transparency-dev/armored-witness-boot v0.0.0-20230904140406-e2e16c7665b7
+	github.com/transparency-dev/armored-witness-os v0.0.0-20230831144836-58c7ed2760c8
+	github.com/transparency-dev/witness v0.0.0-20230825091121-0ad5f255cd7b
+	github.com/usbarmory/GoTEE v0.0.0-20230828134615-ef53a1a84ba4
 	github.com/usbarmory/imx-enet v0.0.0-20230622162703-9eec0bcf6bb4
 	github.com/usbarmory/tamago v0.0.0-20230814171810-6cd63c1accf5
 	golang.org/x/crypto v0.12.0
@@ -42,9 +42,11 @@ require (
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.42.0 // indirect
 	github.com/prometheus/procfs v0.11.1 // indirect
+	github.com/rogpeppe/go-internal v1.11.0 // indirect
+	github.com/transparency-dev/formats v0.0.0-20230607101544-c064fae4cff6 // indirect
 	github.com/transparency-dev/merkle v0.0.2 // indirect
-	golang.org/x/net v0.11.0 // indirect
-	golang.org/x/oauth2 v0.9.0 // indirect
+	golang.org/x/net v0.14.0 // indirect
+	golang.org/x/oauth2 v0.11.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.11.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
