@@ -16,17 +16,12 @@
 // associated metadata.
 package firmware
 
-import (
-	"github.com/transparency-dev/armored-witness-applet/api"
-	"github.com/transparency-dev/formats/log"
-)
-
 // Bundle represents the required information for firmware to be installed
 // onto the device.
 type Bundle struct {
 	// Checkpoint is an append-only commitment from the log that includes the
 	// Manifest as a leaf.
-	Checkpoint log.Checkpoint
+	Checkpoint []byte
 	// Index is the position in the log that Manifest is committed to as a leaf.
 	Index uint64
 	// InclusionProof is a chain of hashes that proves that Manifest is the
@@ -35,7 +30,7 @@ type Bundle struct {
 	// Manifest is the metadata about Firmware, including its type, provenance,
 	// and semantic version. This includes a hash of Firmware, which binds this
 	// executable to Checkpoint.
-	Manifest api.FirmwareRelease
+	Manifest []byte
 	// Firmware is the elf executable data committed to by Manifest.
 	Firmware []byte
 }
