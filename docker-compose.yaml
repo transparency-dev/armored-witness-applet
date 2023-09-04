@@ -3,7 +3,7 @@ services:
   trusted_applet:
     build:
       context: .
-      dockerfile: ./release/trusted_applet/Dockerfile
+      dockerfile: ./Dockerfile
   json_constructor:
     build:
       context: ./release/json_constructor
