@@ -11,7 +11,7 @@ require (
 	github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e
 	github.com/prometheus/client_golang v1.16.0
 	github.com/transparency-dev/armored-witness-boot v0.0.0-20230904140406-e2e16c7665b7
-	github.com/transparency-dev/armored-witness-os v0.0.0-20230831144836-58c7ed2760c8
+	github.com/transparency-dev/armored-witness-os v0.0.0-20230904142303-8cff7e12c215
 	github.com/transparency-dev/witness v0.0.0-20230825091121-0ad5f255cd7b
 	github.com/usbarmory/GoTEE v0.0.0-20230828134615-ef53a1a84ba4
 	github.com/usbarmory/imx-enet v0.0.0-20230622162703-9eec0bcf6bb4
