@@ -24,13 +24,15 @@ import (
 	"github.com/usbarmory/GoTEE/syscall"
 )
 
-type RPCUpdate struct {
+// RPCClient is an implementation of the Local interface which uses RPCs to the TrustedOS
+// to perform the updates.
+type RPCClient struct {
 }
 
 // GetInstalledVersions returns the semantic versions of the OS and Applet
 // installed on this device. These will be the same versions that are
 // currently running.
-func (r *RPCUpdate) GetInstalledVersions() (os, applet semver.Version, err error) {
+func (r *RPCClient) GetInstalledVersions() (os, applet semver.Version, err error) {
 	iv := &rpc.InstalledVersions{}
 	err = syscall.Call("RPC.GetInstalledVersions", nil, iv)
 	return iv.OS, iv.Applet, err
@@ -38,7 +40,7 @@ func (r *RPCUpdate) GetInstalledVersions() (os, applet semver.Version, err error
 }
 
 // InstallOS updates the OS to the version contained in the firmware bundle.
-func (r *RPCUpdate) InstallOS(fb firmware.Bundle) error {
+func (r *RPCClient) InstallOS(fb firmware.Bundle) error {
 	fu := &rpc.FirmwareUpdate{
 		Image: fb.Firmware,
 		Proof: config.ProofBundle{
@@ -54,7 +56,7 @@ func (r *RPCUpdate) InstallOS(fb firmware.Bundle) error {
 }
 
 // InstallApplet updates the Applet to the version contained in the firmware bundle.
-func (r *RPCUpdate) InstallApplet(fb firmware.Bundle) error {
+func (r *RPCClient) InstallApplet(fb firmware.Bundle) error {
 	fu := &rpc.FirmwareUpdate{
 		Image: fb.Firmware,
 		Proof: config.ProofBundle{
