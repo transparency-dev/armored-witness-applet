@@ -35,10 +35,8 @@ import (
 	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
 
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/cmd"
-	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/firmware"
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/storage"
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/storage/slots"
-	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/update"
 	"github.com/transparency-dev/armored-witness-os/api"
 	"github.com/transparency-dev/armored-witness-os/api/rpc"
 
@@ -174,35 +172,6 @@ func main() {
 
 	// Register and run our RPC handler so we can receive ethernet frames.
 	go eventHandler()
-
-	{
-		u := &update.RPCUpdate{}
-		if os, applet, err := u.GetInstalledVersions(); err != nil {
-			glog.Errorf("GetInstalledVersions: %v, %v, %v", os, applet, err)
-		}
-
-		osUpdate := firmware.Bundle{
-			Checkpoint: []byte("checkpoint"),
-			Index:      123,
-			Manifest:   []byte("manifest"),
-			Firmware:   []byte("legit OS firmware"),
-		}
-		if err := u.InstallOS(osUpdate); err != nil {
-			glog.Errorf("InstallOS: %v", err)
-		}
-
-		appletUpdate := firmware.Bundle{
-			Checkpoint: []byte("checkpoint"),
-			Index:      123,
-			Manifest:   []byte("manifest"),
-			Firmware:   []byte("legit applet firmware"),
-		}
-		if err := u.InstallApplet(appletUpdate); err != nil {
-			glog.Errorf("InstallApplet: %v", err)
-		}
-
-		u.Reboot()
-	}
 
 	glog.Infof("Opening storage...")
 	part := openStorage()
