@@ -136,5 +136,5 @@ substitutions:
   _KMS_KEY_VERSION: '1'
   # Log-related.
   _ENTRIES_DIR: firmware-log-sequence
-  _ORIGIN: transparency.dev/armored-witness/binary_transparency/0
+  _ORIGIN: transparency.dev/armored-witness/firmware_transparency/prod/0
   _LOG_NAME: firmware-log
