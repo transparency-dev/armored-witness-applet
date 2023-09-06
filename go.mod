@@ -16,7 +16,7 @@ require (
 	github.com/usbarmory/GoTEE v0.0.0-20230828134615-ef53a1a84ba4
 	github.com/usbarmory/imx-enet v0.0.0-20230622162703-9eec0bcf6bb4
 	github.com/usbarmory/tamago v0.0.0-20230814171810-6cd63c1accf5
-	golang.org/x/crypto v0.12.0
+	golang.org/x/crypto v0.13.0
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
 	golang.org/x/mod v0.12.0
 	golang.org/x/term v0.12.0
