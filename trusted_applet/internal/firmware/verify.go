@@ -57,12 +57,13 @@ func (v *BundleVerifier) Verify(b Bundle) error {
 	if err != nil {
 		return fmt.Errorf("ParseCheckpoint(): %v", err)
 	}
+	manifestHash := rfc6962.DefaultHasher.HashLeaf(b.Manifest)
 	manifest := api.FirmwareRelease{}
 	if err := json.Unmarshal(b.Manifest, &manifest); err != nil {
 		return fmt.Errorf("Unmarshal(): %v", err)
 	}
 
-	if err := proof.VerifyInclusion(rfc6962.DefaultHasher, b.Index, cp.Size, manifest.FirmwareDigestSha256, b.InclusionProof, cp.Hash); err != nil {
+	if err := proof.VerifyInclusion(rfc6962.DefaultHasher, b.Index, cp.Size, manifestHash, b.InclusionProof, cp.Hash); err != nil {
 		return fmt.Errorf("inclusion proof verification failed: %v", err)
 	}
 	h := sha256.Sum256(b.Firmware)
