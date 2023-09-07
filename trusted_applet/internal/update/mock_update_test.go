@@ -78,18 +78,6 @@ func (mr *MockLocalMockRecorder) InstallOS(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InstallOS", reflect.TypeOf((*MockLocal)(nil).InstallOS), arg0)
 }
 
-// Reboot mocks base method.
-func (m *MockLocal) Reboot() {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Reboot")
-}
-
-// Reboot indicates an expected call of Reboot.
-func (mr *MockLocalMockRecorder) Reboot() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Reboot", reflect.TypeOf((*MockLocal)(nil).Reboot))
-}
-
 // MockRemote is a mock of Remote interface.
 type MockRemote struct {
 	ctrl     *gomock.Controller

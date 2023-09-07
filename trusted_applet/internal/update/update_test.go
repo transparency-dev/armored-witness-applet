@@ -35,7 +35,6 @@ func TestUpdate(t *testing.T) {
 		remoteOS       semver.Version
 		wantOSInstall  bool
 		wantAppInstall bool
-		wantReboot     bool
 	}{
 		{
 			desc:           "No changes",
@@ -45,7 +44,6 @@ func TestUpdate(t *testing.T) {
 			remoteApp:      *semver.New("1.0.2"),
 			wantOSInstall:  false,
 			wantAppInstall: false,
-			wantReboot:     false,
 		},
 		{
 			desc:           "OS update",
@@ -55,7 +53,6 @@ func TestUpdate(t *testing.T) {
 			remoteApp:      *semver.New("1.0.2"),
 			wantOSInstall:  true,
 			wantAppInstall: false,
-			wantReboot:     true,
 		},
 		{
 			desc:           "Applet update",
@@ -65,7 +62,6 @@ func TestUpdate(t *testing.T) {
 			remoteApp:      *semver.New("1.0.4"),
 			wantOSInstall:  false,
 			wantAppInstall: true,
-			wantReboot:     true,
 		},
 		{
 			desc:           "Both update",
@@ -74,8 +70,7 @@ func TestUpdate(t *testing.T) {
 			remoteOS:       *semver.New("1.0.3"),
 			remoteApp:      *semver.New("1.0.4"),
 			wantOSInstall:  true,
-			wantAppInstall: true,
-			wantReboot:     true,
+			wantAppInstall: true, // In reality this won't happen because OS install will cause reboot
 		},
 		{
 			desc:           "Downgrade",
@@ -85,7 +80,6 @@ func TestUpdate(t *testing.T) {
 			remoteApp:      *semver.New("1.0.2"),
 			wantOSInstall:  false,
 			wantAppInstall: false,
-			wantReboot:     false,
 		},
 	}
 	for _, tC := range testCases {
@@ -116,11 +110,6 @@ func TestUpdate(t *testing.T) {
 				remote.EXPECT().GetApplet().Return(appDownload, nil)
 				verifier.EXPECT().Verify(gomock.Eq(appDownload)).Return(nil)
 				local.EXPECT().InstallApplet(gomock.Eq(appDownload)).Return(nil)
-			}
-			if tC.wantReboot {
-				// Allow this to be called multiple times, even though in reality the
-				// implementation would not get to the second invocation.
-				local.EXPECT().Reboot().MinTimes(1)
 			}
 
 			if err := updater.Update(ctx); err != nil {
