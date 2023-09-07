@@ -34,14 +34,12 @@ type Local interface {
 	GetInstalledVersions() (os, applet semver.Version, err error)
 
 	// InstallOS updates the OS to the version contained in the firmware bundle.
+	// If the update is successful, the RPC will not return.
 	InstallOS(firmware.Bundle) error
 
 	// InstallApplet updates the Applet to the version contained in the firmware bundle.
+	// If the update is successful, the RPC will not return.
 	InstallApplet(firmware.Bundle) error
-
-	// Reboot instructs the device to reboot after new firmware is installed.
-	// This call will not return and deferred functions will not be run.
-	Reboot()
 }
 
 // A Remote represents the connection to the Internet and allows access to
@@ -110,8 +108,6 @@ func (u Updater) Update(ctx context.Context) error {
 		if err := u.local.InstallOS(bundle); err != nil {
 			return fmt.Errorf("failed to install OS firmware: %v", err)
 		}
-		// Defer rebooting until we've attempted updating the Applet
-		defer u.local.Reboot()
 	}
 	if u.appVer.LessThan(appVer) {
 		glog.Infof("Upgrading applet from %q to %q", u.osVer, osVer)
@@ -125,7 +121,6 @@ func (u Updater) Update(ctx context.Context) error {
 		if err := u.local.InstallApplet(bundle); err != nil {
 			return fmt.Errorf("failed to install applet firmware: %v", err)
 		}
-		u.local.Reboot()
 	}
 	return nil
 }
