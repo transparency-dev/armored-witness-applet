@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package update provides functionality for fetching updates, verifying
-// them, and installing them onto the armory device.
-package update
+// Package rpc provides an RPC-based update client.
+package rpc
 
 import (
 	"github.com/coreos/go-semver/semver"
@@ -24,15 +23,15 @@ import (
 	"github.com/usbarmory/GoTEE/syscall"
 )
 
-// RPCClient is an implementation of the Local interface which uses RPCs to the TrustedOS
+// Client is an implementation of the Local interface which uses RPCs to the TrustedOS
 // to perform the updates.
-type RPCClient struct {
+type Client struct {
 }
 
 // GetInstalledVersions returns the semantic versions of the OS and Applet
 // installed on this device. These will be the same versions that are
 // currently running.
-func (r *RPCClient) GetInstalledVersions() (os, applet semver.Version, err error) {
+func (r *Client) GetInstalledVersions() (os, applet semver.Version, err error) {
 	iv := &rpc.InstalledVersions{}
 	err = syscall.Call("RPC.GetInstalledVersions", nil, iv)
 	return iv.OS, iv.Applet, err
@@ -41,7 +40,7 @@ func (r *RPCClient) GetInstalledVersions() (os, applet semver.Version, err error
 
 // InstallOS updates the OS to the version contained in the firmware bundle.
 // If the update is successful, the RPC will not return.
-func (r *RPCClient) InstallOS(fb firmware.Bundle) error {
+func (r *Client) InstallOS(fb firmware.Bundle) error {
 	fu := &rpc.FirmwareUpdate{
 		Image: fb.Firmware,
 		Proof: config.ProofBundle{
@@ -58,7 +57,7 @@ func (r *RPCClient) InstallOS(fb firmware.Bundle) error {
 
 // InstallApplet updates the Applet to the version contained in the firmware bundle.
 // If the update is successful, the RPC will not return.
-func (r *RPCClient) InstallApplet(fb firmware.Bundle) error {
+func (r *Client) InstallApplet(fb firmware.Bundle) error {
 	fu := &rpc.FirmwareUpdate{
 		Image: fb.Firmware,
 		Proof: config.ProofBundle{
@@ -74,6 +73,6 @@ func (r *RPCClient) InstallApplet(fb firmware.Bundle) error {
 
 // Reboot instructs the device to reboot after new firmware is installed.
 // This call will not return and deferred functions will not be run.
-func (r *RPCClient) Reboot() {
+func (r *Client) Reboot() {
 	_ = syscall.Call("RPC.Reboot", nil, nil)
 }
