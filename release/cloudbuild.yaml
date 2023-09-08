@@ -126,10 +126,10 @@ steps:
       - '{"origin": "${_ORIGIN}", "bucket": "${_LOG_NAME}"}'
 substitutions:
   # Build-related.
-  _REGION: europe-west2
   _TRUSTED_APPLET_BUCKET: trusted-applet-artifacts
   _TAMAGO_VERSION: '1.20.6'
   # Signing-related.
+  _REGION: europe-west2
   _KMS_KEY: trusted-applet
   _KMS_KEYRING: armored-witness
   _KMS_KEY_VERSION: '1'
