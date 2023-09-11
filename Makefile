@@ -19,6 +19,8 @@ BUILD_EPOCH := $(shell /bin/date -u "+%s")
 BUILD_TAGS = linkramsize,linkramstart,disable_fr_auth,linkprintk,nostatfs
 BUILD = ${BUILD_USER}@${BUILD_HOST} on ${BUILD_DATE}
 REV = $(shell git rev-parse --short HEAD 2> /dev/null)
+DEV_LOG_DIR ?= ./bin/log
+DEV_LOG_ORIGIN ?= "DEV.armoredwitness.transparency.dev/${USER}"
 
 SHELL = /bin/bash
 
@@ -62,6 +64,39 @@ trusted_applet: check_applet_env elf
 	else \
 		${SIGN} -S -s ${APPLET_PRIVATE_KEY} -m ${CURDIR}/bin/trusted_applet.elf -x ${CURDIR}/bin/trusted_applet.sig; \
 	fi
+
+## Targets for managing a local serverless log instance for dev/testing FT related bits.
+
+## log_initialise initialises the log stored at the path in DEV_LOG_DIR.
+## If the log already exists, it will be reset.
+log_initialise:
+	echo "(Re-)initialising log at ${DEV_LOG_DIR}"
+	@rm -fr ${DEV_LOG_DIR}
+	go run github.com/google/trillian-examples/serverless/cmd/integrate@HEAD \
+		--storage_dir=${DEV_LOG_DIR} \
+		--origin=${DEV_LOG_ORIGIN} \
+		--public_key=${LOG_PUBLIC_KEY} \
+		--initialise
+
+## log_applet adds the trusted_applet_manifest.json file created during the build to the dev FT log.
+log_applet:
+	@if [ "${LOG_PRIVATE_KEY}" == "" -o "${LOG_PUBLIC_KEY}" == "" ]; then \
+		@echo "You need to set LOG_PRIVATE_KEY and LOG_PUBLIC_KEY variables"; \
+		exit 1; \
+	fi
+	@if [ ! -f ${DEV_LOG_DIR}/checkpoint ]; then \
+		make log_initialise; \
+	fi
+	go run github.com/google/trillian-examples/serverless/cmd/sequence@HEAD \
+		--storage_dir=${DEV_LOG_DIR} \
+		--origin=${DEV_LOG_ORIGIN} \
+		--public_key=${LOG_PUBLIC_KEY} \
+		--entries=${CURDIR}/bin/trusted_applet_manifest.json
+	-go run github.com/google/trillian-examples/serverless/cmd/integrate@HEAD \
+		--storage_dir=${DEV_LOG_DIR} \
+		--origin=${DEV_LOG_ORIGIN} \
+		--private_key=${LOG_PRIVATE_KEY} \
+		--public_key=${LOG_PUBLIC_KEY}
 
 #### ARM targets ####
 
@@ -110,5 +145,18 @@ clean:
 
 #### application target ####
 
+$(APP).elf: TAMAGO_SEMVER=$(shell ${TAMAGO} version | sed 's/.*go\([0-9]\.[0-9]*\.[0-9]*\).*/\1/')
+$(APP).elf: GIT_SEMVER_TAG=$(shell (git describe --tags --exact-match --match 'v*.*.*' 2>/dev/null || git describe --match 'v*.*.*' --tags 2>/dev/null || git describe --tags 2>/dev/null || echo -n 'v0.0.0-'`git rev-parse HEAD`) | tail --bytes=+2 )
 $(APP).elf: check_tamago
 	cd $(DIR) && $(GOENV) $(TAMAGO) build -tags ${BUILD_TAGS} $(GOFLAGS) -o $(CURDIR)/bin/$(APP).elf
+
+	# Create manifest
+	go run ./release/json_constructor/json_constructor.go \
+		--git_tag=${GIT_SEMVER_TAG} \
+		--git_commit_fingerprint="${REV}" \
+		--firmware_file=${CURDIR}/bin/$(APP).elf \
+		--tamago_version=${TAMAGO_SEMVER} > ${CURDIR}/bin/trusted_applet_manifest.json
+	@echo ---------- Manifest --------------
+	@cat ${CURDIR}/bin/trusted_applet_manifest.json
+	@echo ----------------------------------
+
