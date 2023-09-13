@@ -19,6 +19,9 @@ BUILD_EPOCH := $(shell /bin/date -u "+%s")
 BUILD_TAGS = linkramsize,linkramstart,disable_fr_auth,linkprintk,nostatfs
 BUILD = ${BUILD_USER}@${BUILD_HOST} on ${BUILD_DATE}
 REV = $(shell git rev-parse --short HEAD 2> /dev/null)
+DEV_LOG_DIR ?= ./bin/log
+DEV_LOG_ORIGIN ?= "DEV.armoredwitness.transparency.dev/${USER}"
+GIT_SEMVER_TAG ?= $(shell (git describe --tags --exact-match --match 'v*.*.*' 2>/dev/null || git describe --match 'v*.*.*' --tags 2>/dev/null || git describe --tags 2>/dev/null || echo -n 'v0.0.0-'`git rev-parse HEAD`) | tail -c +2 )
 
 SHELL = /bin/bash
 
@@ -51,11 +54,11 @@ GOFLAGS = -tags ${BUILD_TAGS} -trimpath \
 
 all: trusted_applet
 
-elf: APP=trusted_applet
-elf: DIR=$(CURDIR)/trusted_applet
-elf: $(APP).elf
+trusted_applet_nosign: APP=trusted_applet
+trusted_applet_nosign: DIR=$(CURDIR)/trusted_applet
+trusted_applet_nosign: elf manifest
 
-trusted_applet: check_applet_env elf
+trusted_applet: check_signing_env trusted_applet_nosign 
 	echo "signing Trusted Applet"
 	@if [ "${SIGN_PWD}" != "" ]; then \
 		echo -e "${SIGN_PWD}\n" | ${SIGN} -S -s ${APPLET_PRIVATE_KEY} -m ${CURDIR}/bin/trusted_applet.elf -x ${CURDIR}/bin/trusted_applet.sig; \
@@ -63,9 +66,44 @@ trusted_applet: check_applet_env elf
 		${SIGN} -S -s ${APPLET_PRIVATE_KEY} -m ${CURDIR}/bin/trusted_applet.elf -x ${CURDIR}/bin/trusted_applet.sig; \
 	fi
 
+## Targets for managing a local serverless log instance for dev/testing FT related bits.
+
+## log_initialise initialises the log stored at the path in DEV_LOG_DIR.
+## If the log already exists, it will be reset.
+log_initialise:
+	echo "(Re-)initialising log at ${DEV_LOG_DIR}"
+	@rm -fr ${DEV_LOG_DIR}
+	go run github.com/google/trillian-examples/serverless/cmd/integrate@HEAD \
+		--storage_dir=${DEV_LOG_DIR} \
+		--origin=${DEV_LOG_ORIGIN} \
+		--public_key=${LOG_PUBLIC_KEY} \
+		--initialise
+
+## log_applet adds the trusted_applet_manifest.json file created during the build to the dev FT log.
+log_applet:
+	@if [ "${LOG_PRIVATE_KEY}" == "" -o "${LOG_PUBLIC_KEY}" == "" ]; then \
+		@echo "You need to set LOG_PRIVATE_KEY and LOG_PUBLIC_KEY variables"; \
+		exit 1; \
+	fi
+	@if [ ! -f ${DEV_LOG_DIR}/checkpoint ]; then \
+		make log_initialise; \
+	fi
+	go run github.com/google/trillian-examples/serverless/cmd/sequence@HEAD \
+		--storage_dir=${DEV_LOG_DIR} \
+		--origin=${DEV_LOG_ORIGIN} \
+		--public_key=${LOG_PUBLIC_KEY} \
+		--entries=${CURDIR}/bin/trusted_applet_manifest.json
+	-go run github.com/google/trillian-examples/serverless/cmd/integrate@HEAD \
+		--storage_dir=${DEV_LOG_DIR} \
+		--origin=${DEV_LOG_ORIGIN} \
+		--private_key=${LOG_PRIVATE_KEY} \
+		--public_key=${LOG_PUBLIC_KEY}
+
 #### ARM targets ####
 
 imx: $(APP).imx
+elf: $(APP).elf
+manifest: $(APP)_manifest.json
 
 $(APP).bin: CROSS_COMPILE=arm-none-eabi-
 $(APP).bin: $(APP).elf
@@ -90,7 +128,7 @@ $(APP).dcd: dcd
 
 #### utilities ####
 
-check_applet_env:
+check_signing_env:
 	@if [ "${APPLET_PRIVATE_KEY}" == "" ] || [ ! -f "${APPLET_PRIVATE_KEY}" ]; then \
 		echo 'You need to set the APPLET_PRIVATE_KEY variable to a valid signing key path'; \
 		exit 1; \
@@ -112,3 +150,18 @@ clean:
 
 $(APP).elf: check_tamago
 	cd $(DIR) && $(GOENV) $(TAMAGO) build -tags ${BUILD_TAGS} $(GOFLAGS) -o $(CURDIR)/bin/$(APP).elf
+
+
+$(APP)_manifest.json: TAMAGO_SEMVER=$(shell ${TAMAGO} version | sed 's/.*go\([0-9]\.[0-9]*\.[0-9]*\).*/\1/')
+$(APP)_manifest.json:
+	# Create manifest
+	go run ./release/json_constructor/json_constructor.go \
+		--git_tag=${GIT_SEMVER_TAG} \
+		--git_commit_fingerprint="${REV}" \
+		--firmware_file=${CURDIR}/bin/$(APP).elf \
+		--tamago_version=${TAMAGO_SEMVER} > ${CURDIR}/bin/trusted_applet_manifest.json
+	@echo ---------- Manifest --------------
+	@cat ${CURDIR}/bin/trusted_applet_manifest.json
+	@echo ----------------------------------
+
+
