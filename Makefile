@@ -21,6 +21,7 @@ BUILD = ${BUILD_USER}@${BUILD_HOST} on ${BUILD_DATE}
 REV = $(shell git rev-parse --short HEAD 2> /dev/null)
 DEV_LOG_DIR ?= ./bin/log
 DEV_LOG_ORIGIN ?= "DEV.armoredwitness.transparency.dev/${USER}"
+GIT_SEMVER_TAG ?= $(shell (git describe --tags --exact-match --match 'v*.*.*' 2>/dev/null || git describe --match 'v*.*.*' --tags 2>/dev/null || git describe --tags 2>/dev/null || echo -n 'v0.0.0-'`git rev-parse HEAD`) | tail --bytes=+2 )
 
 SHELL = /bin/bash
 
@@ -53,11 +54,9 @@ GOFLAGS = -tags ${BUILD_TAGS} -trimpath \
 
 all: trusted_applet
 
-elf: APP=trusted_applet
-elf: DIR=$(CURDIR)/trusted_applet
-elf: $(APP).elf
-
-trusted_applet: check_applet_env elf
+trusted_applet: APP=trusted_applet
+trusted_applet: DIR=$(CURDIR)/trusted_applet
+trusted_applet: check_applet_env elf manifest
 	echo "signing Trusted Applet"
 	@if [ "${SIGN_PWD}" != "" ]; then \
 		echo -e "${SIGN_PWD}\n" | ${SIGN} -S -s ${APPLET_PRIVATE_KEY} -m ${CURDIR}/bin/trusted_applet.elf -x ${CURDIR}/bin/trusted_applet.sig; \
@@ -101,6 +100,8 @@ log_applet:
 #### ARM targets ####
 
 imx: $(APP).imx
+elf: $(APP).elf
+manifest: $(APP)_manifest.json
 
 $(APP).bin: CROSS_COMPILE=arm-none-eabi-
 $(APP).bin: $(APP).elf
@@ -145,11 +146,12 @@ clean:
 
 #### application target ####
 
-$(APP).elf: TAMAGO_SEMVER=$(shell ${TAMAGO} version | sed 's/.*go\([0-9]\.[0-9]*\.[0-9]*\).*/\1/')
-$(APP).elf: GIT_SEMVER_TAG=$(shell (git describe --tags --exact-match --match 'v*.*.*' 2>/dev/null || git describe --match 'v*.*.*' --tags 2>/dev/null || git describe --tags 2>/dev/null || echo -n 'v0.0.0-'`git rev-parse HEAD`) | tail --bytes=+2 )
 $(APP).elf: check_tamago
 	cd $(DIR) && $(GOENV) $(TAMAGO) build -tags ${BUILD_TAGS} $(GOFLAGS) -o $(CURDIR)/bin/$(APP).elf
 
+
+$(APP)_manifest.json: TAMAGO_SEMVER=$(shell ${TAMAGO} version | sed 's/.*go\([0-9]\.[0-9]*\.[0-9]*\).*/\1/')
+$(APP)_manifest.json:
 	# Create manifest
 	go run ./release/json_constructor/json_constructor.go \
 		--git_tag=${GIT_SEMVER_TAG} \
@@ -159,4 +161,5 @@ $(APP).elf: check_tamago
 	@echo ---------- Manifest --------------
 	@cat ${CURDIR}/bin/trusted_applet_manifest.json
 	@echo ----------------------------------
+
 
