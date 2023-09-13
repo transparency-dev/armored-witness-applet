@@ -54,9 +54,11 @@ GOFLAGS = -tags ${BUILD_TAGS} -trimpath \
 
 all: trusted_applet
 
-trusted_applet: APP=trusted_applet
-trusted_applet: DIR=$(CURDIR)/trusted_applet
-trusted_applet: check_applet_env elf manifest
+trusted_applet_nosign: APP=trusted_applet
+trusted_applet_nosign: DIR=$(CURDIR)/trusted_applet
+trusted_applet_nosign: elf manifest
+
+trusted_applet: check_signing_env trusted_applet_nosign 
 	echo "signing Trusted Applet"
 	@if [ "${SIGN_PWD}" != "" ]; then \
 		echo -e "${SIGN_PWD}\n" | ${SIGN} -S -s ${APPLET_PRIVATE_KEY} -m ${CURDIR}/bin/trusted_applet.elf -x ${CURDIR}/bin/trusted_applet.sig; \
@@ -126,7 +128,7 @@ $(APP).dcd: dcd
 
 #### utilities ####
 
-check_applet_env:
+check_signing_env:
 	@if [ "${APPLET_PRIVATE_KEY}" == "" ] || [ ! -f "${APPLET_PRIVATE_KEY}" ]; then \
 		echo 'You need to set the APPLET_PRIVATE_KEY variable to a valid signing key path'; \
 		exit 1; \
