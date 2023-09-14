@@ -12,6 +12,8 @@ require (
 	github.com/prometheus/client_golang v1.16.0
 	github.com/transparency-dev/armored-witness-boot v0.0.0-20230904140406-e2e16c7665b7
 	github.com/transparency-dev/armored-witness-os v0.0.0-20230904142303-8cff7e12c215
+	github.com/transparency-dev/formats v0.0.0-20230607101544-c064fae4cff6
+	github.com/transparency-dev/merkle v0.0.2
 	github.com/transparency-dev/witness v0.0.0-20230825091121-0ad5f255cd7b
 	github.com/usbarmory/GoTEE v0.0.0-20230828134615-ef53a1a84ba4
 	github.com/usbarmory/imx-enet v0.0.0-20230622162703-9eec0bcf6bb4
@@ -20,7 +22,7 @@ require (
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
 	golang.org/x/mod v0.12.0
 	golang.org/x/term v0.12.0
-	google.golang.org/grpc v1.58.0
+	google.golang.org/grpc v1.58.1
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
 	gvisor.dev/gvisor v0.0.0-20230614190805-57027c7d31f8
@@ -43,8 +45,6 @@ require (
 	github.com/prometheus/common v0.42.0 // indirect
 	github.com/prometheus/procfs v0.11.1 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
-	github.com/transparency-dev/formats v0.0.0-20230607101544-c064fae4cff6 // indirect
-	github.com/transparency-dev/merkle v0.0.2 // indirect
 	golang.org/x/net v0.14.0 // indirect
 	golang.org/x/oauth2 v0.11.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
