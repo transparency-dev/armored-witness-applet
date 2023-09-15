@@ -12,7 +12,7 @@ require (
 	github.com/prometheus/client_golang v1.16.0
 	github.com/transparency-dev/armored-witness-boot v0.0.0-20230904140406-e2e16c7665b7
 	github.com/transparency-dev/armored-witness-os v0.0.0-20230904142303-8cff7e12c215
-	github.com/transparency-dev/formats v0.0.0-20230607101544-c064fae4cff6
+	github.com/transparency-dev/formats v0.0.0-20230914071414-5732692f1e50
 	github.com/transparency-dev/merkle v0.0.2
 	github.com/transparency-dev/witness v0.0.0-20230915104643-4681d15a938b
 	github.com/usbarmory/GoTEE v0.0.0-20230828134615-ef53a1a84ba4
@@ -36,7 +36,6 @@ require (
 	github.com/google/btree v1.1.2 // indirect
 	github.com/google/go-github/v39 v39.2.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
-	github.com/google/trillian-examples v0.0.0-20230419170052-1d4b6bbacc57 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gsora/fidati v0.0.0-20220824075547-eeb0a5f7d6c3 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -45,8 +44,7 @@ require (
 	github.com/prometheus/common v0.42.0 // indirect
 	github.com/prometheus/procfs v0.11.1 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
-	github.com/transparency-dev/formats v0.0.0-20230914071414-5732692f1e50 // indirect
-	github.com/transparency-dev/merkle v0.0.2 // indirect
+	github.com/transparency-dev/serverless-log v0.0.0-20230914155322-9b6f31f76f1f // indirect
 	golang.org/x/net v0.15.0 // indirect
 	golang.org/x/oauth2 v0.12.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
