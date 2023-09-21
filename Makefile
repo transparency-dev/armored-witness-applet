@@ -32,7 +32,7 @@ APP := ""
 TEXT_START = 0x90010000 # ramStart (defined in mem.go under relevant tamago/soc package) + 0x10000
 
 ifeq ("${BEE}","1")
-	TEXT_START := 0x10010000
+	TEXT_START := 0x20010000
 	BUILD_TAGS := ${BUILD_TAGS},bee
 endif
 
