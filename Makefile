@@ -73,9 +73,10 @@ trusted_applet: check_signing_env trusted_applet_nosign
 log_initialise:
 	echo "(Re-)initialising log at ${DEV_LOG_DIR}"
 	@rm -fr ${DEV_LOG_DIR}
-	go run github.com/google/trillian-examples/serverless/cmd/integrate@HEAD \
+	go run github.com/transparency-dev/serverless-log/cmd/integrate@HEAD \
 		--storage_dir=${DEV_LOG_DIR} \
 		--origin=${DEV_LOG_ORIGIN} \
+		--private_key=${LOG_PRIVATE_KEY} \
 		--public_key=${LOG_PUBLIC_KEY} \
 		--initialise
 
@@ -88,12 +89,12 @@ log_applet:
 	@if [ ! -f ${DEV_LOG_DIR}/checkpoint ]; then \
 		make log_initialise; \
 	fi
-	go run github.com/google/trillian-examples/serverless/cmd/sequence@HEAD \
+	go run github.com/transparency-dev/serverless-log/cmd/sequence@HEAD \
 		--storage_dir=${DEV_LOG_DIR} \
 		--origin=${DEV_LOG_ORIGIN} \
 		--public_key=${LOG_PUBLIC_KEY} \
 		--entries=${CURDIR}/bin/trusted_applet_manifest.json
-	-go run github.com/google/trillian-examples/serverless/cmd/integrate@HEAD \
+	-go run github.com/transparency-dev/serverless-log/cmd/integrate@HEAD \
 		--storage_dir=${DEV_LOG_DIR} \
 		--origin=${DEV_LOG_ORIGIN} \
 		--private_key=${LOG_PRIVATE_KEY} \
