@@ -21,11 +21,11 @@ import (
 	"sync"
 
 	"github.com/coreos/go-semver/semver"
-	"github.com/golang/glog"
 	"github.com/transparency-dev/armored-witness-applet/api"
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/firmware"
 	"github.com/transparency-dev/formats/log"
 	"golang.org/x/mod/sumdb/note"
+	"k8s.io/klog/v2"
 )
 
 const (
@@ -159,7 +159,7 @@ func (f *HttpFetcher) Scan() error {
 				}
 			}
 		default:
-			glog.Warningf("unknown build in log: %q", manifest.Component)
+			klog.Warningf("unknown build in log: %q", manifest.Component)
 		}
 	}
 	f.latest = *to

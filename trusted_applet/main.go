@@ -40,11 +40,11 @@ import (
 	"github.com/transparency-dev/armored-witness-os/api"
 	"github.com/transparency-dev/armored-witness-os/api/rpc"
 
-	"github.com/golang/glog"
 	"github.com/transparency-dev/witness/monitoring"
 	"github.com/transparency-dev/witness/monitoring/prometheus"
 	"github.com/transparency-dev/witness/omniwitness"
 	"golang.org/x/mod/sumdb/note"
+	"k8s.io/klog/v2"
 
 	_ "golang.org/x/crypto/x509roots/fallback"
 )
@@ -173,9 +173,9 @@ func main() {
 	// Register and run our RPC handler so we can receive ethernet frames.
 	go eventHandler()
 
-	glog.Infof("Opening storage...")
+	klog.Infof("Opening storage...")
 	part := openStorage()
-	glog.Infof("Storage opened.")
+	klog.Infof("Storage opened.")
 
 	// Set this to true to "wipe" the storage.
 	// Currently this simply force-writes an entry with zero bytes to
@@ -188,14 +188,14 @@ func main() {
 			time.Sleep(time.Second)
 		}
 		if err := part.Erase(); err != nil {
-			glog.Exitf("Failed to erase partition: %v", err)
+			klog.Exitf("Failed to erase partition: %v", err)
 		}
-		glog.Exit("Erase completed")
+		klog.Exit("Erase completed")
 	}
 
 	persistence = storage.NewSlotPersistence(part)
 	if err := persistence.Init(); err != nil {
-		glog.Exitf("Failed to create persistence layer: %v", err)
+		klog.Exitf("Failed to create persistence layer: %v", err)
 	}
 	persistence.Init()
 
@@ -204,7 +204,7 @@ func main() {
 		runDHCP(ctx, nicID, runWithNetworking)
 	} else {
 		if err := runWithNetworking(ctx); err != nil && err != context.Canceled {
-			glog.Exitf("runWithNetworking: %v", err)
+			klog.Exitf("runWithNetworking: %v", err)
 		}
 	}
 }
@@ -265,7 +265,7 @@ func runWithNetworking(ctx context.Context) error {
 			Handler:      srvMux,
 		}
 		if err := srv.Serve(metricsListener); err != http.ErrServerClosed {
-			glog.Errorf("Error serving metrics: %v", err)
+			klog.Errorf("Error serving metrics: %v", err)
 		}
 	}()
 
@@ -309,7 +309,7 @@ func runWithNetworking(ctx context.Context) error {
 func openStorage() *slots.Partition {
 	var info usdhc.CardInfo
 	if err := syscall.Call("RPC.CardInfo", nil, &info); err != nil {
-		glog.Exitf("Failed to get cardinfo: %v", err)
+		klog.Exitf("Failed to get cardinfo: %v", err)
 	}
 	log.Printf("CardInfo: %+v", info)
 	// dev is our access to the MMC storage.
@@ -326,7 +326,7 @@ func openStorage() *slots.Partition {
 
 	p, err := slots.OpenPartition(dev, geo)
 	if err != nil {
-		glog.Exitf("Failed to open partition: %v", err)
+		klog.Exitf("Failed to open partition: %v", err)
 	}
 	return p
 }

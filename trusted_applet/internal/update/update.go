@@ -21,8 +21,8 @@ import (
 	"fmt"
 
 	"github.com/coreos/go-semver/semver"
-	"github.com/golang/glog"
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/firmware"
+	"k8s.io/klog/v2"
 )
 
 // Local allows access to query the firmware installed on this device and
@@ -97,7 +97,7 @@ func (u Updater) Update(ctx context.Context) error {
 		return fmt.Errorf("failed to get latest versions: %v", err)
 	}
 	if u.osVer.LessThan(osVer) {
-		glog.Infof("Upgrading OS from %q to %q", u.osVer, osVer)
+		klog.Infof("Upgrading OS from %q to %q", u.osVer, osVer)
 		bundle, err := u.remote.GetOS()
 		if err != nil {
 			return fmt.Errorf("failed to fetch OS firmware: %v", err)
@@ -110,7 +110,7 @@ func (u Updater) Update(ctx context.Context) error {
 		}
 	}
 	if u.appVer.LessThan(appVer) {
-		glog.Infof("Upgrading applet from %q to %q", u.osVer, osVer)
+		klog.Infof("Upgrading applet from %q to %q", u.osVer, osVer)
 		bundle, err := u.remote.GetApplet()
 		if err != nil {
 			return fmt.Errorf("failed to fetch applet firmware: %v", err)

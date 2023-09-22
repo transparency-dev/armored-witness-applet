@@ -19,12 +19,12 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/golang/glog"
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/storage/slots"
 	"github.com/transparency-dev/witness/omniwitness"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gopkg.in/yaml.v3"
+	"k8s.io/klog/v2"
 )
 
 const (
@@ -137,14 +137,14 @@ func (p *SlotPersistence) WriteOps(logID string) (omniwitness.LogStateWriteOps, 
 		var err error
 		i, err = p.addLog(logID)
 		if err != nil {
-			glog.Warningf("Failed to add mapping: %q", err)
+			klog.Warningf("Failed to add mapping: %q", err)
 			return nil, fmt.Errorf("unable to assign slot for log ID %q: %v", logID, err)
 		}
 	}
-	glog.V(2).Infof("mapping %q -> %d", logID, i)
+	klog.V(2).Infof("mapping %q -> %d", logID, i)
 	s, err := p.part.Open(i)
 	if err != nil {
-		glog.Warningf("failed to open %d: %v", i, err)
+		klog.Warningf("failed to open %d: %v", i, err)
 		return nil, fmt.Errorf("internal error opening slot %d associated with log ID %q: %v", i, logID, err)
 	}
 	return &slotOps{slot: s}, nil
@@ -174,20 +174,20 @@ func (s *slotOps) GetLatest() ([]byte, []byte, error) {
 
 	b, t, err := s.slot.Read()
 	if err != nil {
-		glog.Warningf("Read failed: %v", err)
+		klog.Warningf("Read failed: %v", err)
 		return nil, nil, fmt.Errorf("failed to read data: %v", err)
 	}
 	s.writeToken = t
 	if len(b) == 0 {
-		glog.Warningf("No checkpoint")
+		klog.Warningf("No checkpoint")
 		return nil, nil, status.Error(codes.NotFound, "no checkpoint for log")
 	}
 	lr := logRecord{}
 	if err := yaml.Unmarshal(b, &lr); err != nil {
-		glog.Warningf("Unmarshal failed: %v", err)
+		klog.Warningf("Unmarshal failed: %v", err)
 		return nil, nil, fmt.Errorf("failed to unmarshal data: %v", err)
 	}
-	glog.V(2).Infof("read:\n%s", lr.Checkpoint)
+	klog.V(2).Infof("read:\n%s", lr.Checkpoint)
 	return lr.Checkpoint, lr.Proof, nil
 }
 
@@ -203,16 +203,16 @@ func (s *slotOps) Set(checkpointRaw []byte, compactRange []byte) error {
 		Proof:      compactRange,
 	}
 
-	glog.V(2).Infof("writing with token %d:\n%s", s.writeToken, lr.Checkpoint)
+	klog.V(2).Infof("writing with token %d:\n%s", s.writeToken, lr.Checkpoint)
 
 	lrRaw, err := yaml.Marshal(&lr)
 	if err != nil {
-		glog.Warningf("marshal failed: %v", err)
+		klog.Warningf("marshal failed: %v", err)
 		return fmt.Errorf("failed to marshal data: %v", err)
 	}
 
 	if err := s.slot.CheckAndWrite(s.writeToken, lrRaw); err != nil {
-		glog.Warningf("Write failed: %v", err)
+		klog.Warningf("Write failed: %v", err)
 		return fmt.Errorf("failed to write data: %v", err)
 	}
 	return nil
@@ -293,6 +293,6 @@ func (p *SlotPersistence) addLog(id string) (uint, error) {
 	if err := p.storeDirectory(); err != nil {
 		return 0, fmt.Errorf("failed to storeMap: %v", err)
 	}
-	glog.V(1).Infof("Added new mapping %q -> %d", id, f)
+	klog.V(1).Infof("Added new mapping %q -> %d", id, f)
 	return f, nil
 }

@@ -16,12 +16,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/golang/glog"
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/header"
 	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
 	"gvisor.dev/gvisor/pkg/waiter"
+	"k8s.io/klog/v2"
 )
 
 const (
@@ -168,7 +168,7 @@ func (c *Client) Run(ctx context.Context) {
 	c.sem <- struct{}{}
 	defer func() { <-c.sem }()
 	defer func() {
-		glog.Warning("client is stopping, cleaning up")
+		klog.Warning("client is stopping, cleaning up")
 		c.cleanup(&info)
 		// cleanup mutates info.
 		c.info.Store(info)
@@ -217,12 +217,12 @@ func (c *Client) Run(ctx context.Context) {
 			{
 				leaseLength, renewTime, rebindTime := cfg.LeaseLength, cfg.RenewTime, cfg.RebindTime
 				if cfg.LeaseLength == 0 {
-					glog.Warningf("unspecified lease length, setting default=%s", defaultLeaseLength)
+					klog.Warningf("unspecified lease length, setting default=%s", defaultLeaseLength)
 					leaseLength = defaultLeaseLength
 				}
 				switch {
 				case cfg.LeaseLength != 0 && cfg.RenewTime >= cfg.LeaseLength:
-					glog.Warningf("invalid renewal time: renewing=%s, lease=%s", cfg.RenewTime, cfg.LeaseLength)
+					klog.Warningf("invalid renewal time: renewing=%s, lease=%s", cfg.RenewTime, cfg.LeaseLength)
 					fallthrough
 				case cfg.RenewTime == 0:
 					// Based on RFC 2131 Sec. 4.4.5, this defaults to (0.5 * duration_of_lease).
@@ -230,7 +230,7 @@ func (c *Client) Run(ctx context.Context) {
 				}
 				switch {
 				case cfg.RenewTime != 0 && cfg.RebindTime <= cfg.RenewTime:
-					glog.Warningf("invalid rebinding time: rebinding=%s, renewing=%s", cfg.RebindTime, cfg.RenewTime)
+					klog.Warningf("invalid rebinding time: rebinding=%s, renewing=%s", cfg.RebindTime, cfg.RenewTime)
 					fallthrough
 				case cfg.RebindTime == 0:
 					// Based on RFC 2131 Sec. 4.4.5, this defaults to (0.875 * duration_of_lease).
@@ -255,7 +255,7 @@ func (c *Client) Run(ctx context.Context) {
 			if ctx.Err() != nil {
 				return
 			}
-			glog.V(1).Infof("%s; retrying", err)
+			klog.V(1).Infof("%s; retrying", err)
 		}
 
 		// Synchronize info after attempt to acquire is complete.
@@ -311,7 +311,7 @@ func (c *Client) Run(ctx context.Context) {
 		}
 
 		if info.State != initSelecting && next == initSelecting {
-			glog.Warning("lease time expired, cleaning up")
+			klog.Warning("lease time expired, cleaning up")
 			c.cleanup(&info)
 		}
 
@@ -521,13 +521,13 @@ func acquire(ctx context.Context, c *Client, info *Info) (Config, error) {
 				}
 				if timedOut {
 					c.stats.RecvOfferTimeout.Increment()
-					glog.V(1).Infof("recv timeout waiting for %s, retransmitting %s", dhcpOFFER, dhcpDISCOVER)
+					klog.V(1).Infof("recv timeout waiting for %s, retransmitting %s", dhcpOFFER, dhcpDISCOVER)
 					continue retransmitDiscover
 				}
 
 				if typ != dhcpOFFER {
 					c.stats.RecvOfferUnexpectedType.Increment()
-					glog.V(1).Infof("got DHCP type = %s, want = %s", typ, dhcpOFFER)
+					klog.V(1).Infof("got DHCP type = %s, want = %s", typ, dhcpOFFER)
 					continue
 				}
 				c.stats.RecvOffers.Increment()
@@ -556,7 +556,7 @@ func acquire(ctx context.Context, c *Client, info *Info) (Config, error) {
 					PrefixLen: prefixLen,
 				}
 
-				glog.V(1).Infof("got %s from %s: Address=%s, server=%s, leaseLength=%s, renewTime=%s, rebindTime=%s", typ, srcAddr.Addr, requestedAddr, info.Server, cfg.LeaseLength, cfg.RenewTime, cfg.RebindTime)
+				klog.V(1).Infof("got %s from %s: Address=%s, server=%s, leaseLength=%s, renewTime=%s, rebindTime=%s", typ, srcAddr.Addr, requestedAddr, info.Server, cfg.LeaseLength, cfg.RenewTime, cfg.RebindTime)
 
 				break retransmitDiscover
 			}
@@ -605,7 +605,7 @@ retransmitRequest:
 			}
 			if timedOut {
 				c.stats.RecvAckTimeout.Increment()
-				glog.V(1).Infof("recv timeout waiting for %s, retransmitting %s", dhcpACK, dhcpREQUEST)
+				klog.V(1).Infof("recv timeout waiting for %s, retransmitting %s", dhcpACK, dhcpREQUEST)
 				continue retransmitRequest
 			}
 
@@ -629,7 +629,7 @@ retransmitRequest:
 
 				// Now that we've successfully acquired the address, update the client state.
 				info.Addr = requestedAddr
-				glog.V(1).Infof("got %s from %s with leaseLength=%s", typ, fromAddr.Addr, cfg.LeaseLength)
+				klog.V(1).Infof("got %s from %s with leaseLength=%s", typ, fromAddr.Addr, cfg.LeaseLength)
 				return cfg, nil
 			case dhcpNAK:
 				if msg := opts.message(); len(msg) != 0 {
@@ -640,7 +640,7 @@ retransmitRequest:
 				return Config{}, fmt.Errorf("empty %s", typ)
 			default:
 				c.stats.RecvAckUnexpectedType.Increment()
-				glog.V(1).Infof("got DHCP type = %s from %s, want = %s or %s", typ, fromAddr.Addr, dhcpACK, dhcpNAK)
+				klog.V(1).Infof("got DHCP type = %s from %s, want = %s or %s", typ, fromAddr.Addr, dhcpACK, dhcpNAK)
 				continue
 			}
 		}
@@ -667,7 +667,7 @@ func (c *Client) send(ctx context.Context, info *Info, ep tcpip.Endpoint, opts o
 		panic(err)
 	}
 
-	glog.V(1).Infof("send %s to %s:%d on NIC:%d (bcast=%t ciaddr=%t)", typ, writeOpts.To.Addr, writeOpts.To.Port, writeOpts.To.NIC, broadcast, ciaddr)
+	klog.V(1).Infof("send %s to %s:%d on NIC:%d (bcast=%t ciaddr=%t)", typ, writeOpts.To.Addr, writeOpts.To.Port, writeOpts.To.NIC, broadcast, ciaddr)
 
 	for {
 		payload := bytes.NewBuffer(h)
