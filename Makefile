@@ -32,7 +32,7 @@ APP := ""
 TEXT_START = 0x90010000 # ramStart (defined in mem.go under relevant tamago/soc package) + 0x10000
 
 ifeq ("${BEE}","1")
-	TEXT_START := 0x10010000
+	TEXT_START := 0x20010000
 	BUILD_TAGS := ${BUILD_TAGS},bee
 endif
 
@@ -42,7 +42,7 @@ ENTRY_POINT := _rt0_arm_tamago
 ARCH = "arm"
 
 GOFLAGS = -tags ${BUILD_TAGS} -trimpath \
-        -ldflags "-T ${TEXT_START} -E ${ENTRY_POINT} -R 0x1000 \
+        -ldflags "-T ${TEXT_START} -E ${ENTRY_POINT} -R 0x1000 -s -w \
                   -X 'main.Build=${BUILD}' -X 'main.Revision=${REV}' -X 'main.Version=${BUILD_EPOCH}' \
                   -X 'main.PublicKey=$(shell test ${PUBLIC_KEY} && cat ${PUBLIC_KEY} | tail -n 1)' \
                   -X 'main.GitHubUser=${GITHUB_USER}' -X 'main.GitHubEmail=${GITHUB_EMAIL}' -X 'main.GitHubToken=${GITHUB_TOKEN}' \

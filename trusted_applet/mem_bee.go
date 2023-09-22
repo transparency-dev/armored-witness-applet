@@ -34,3 +34,6 @@ var ramStart uint32 = appletStart
 
 //go:linkname ramSize runtime.ramSize
 var ramSize uint32 = appletSize
+
+//go:linkname ramStackOffset runtime.ramStackOffset
+var ramStackOffset uint32 = 0x100
