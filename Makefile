@@ -89,7 +89,7 @@ log_applet:
 	@if [ ! -f ${DEV_LOG_DIR}/checkpoint ]; then \
 		make log_initialise; \
 	fi
-	go run github.com/transparency-dev/serverless-log/cmd/integrate@a56a93b5681e5dc231882ac9de435c21cb340846 \
+	go run github.com/transparency-dev/serverless-log/cmd/sequence@a56a93b5681e5dc231882ac9de435c21cb340846 \
 		--storage_dir=${DEV_LOG_DIR} \
 		--origin=${DEV_LOG_ORIGIN} \
 		--public_key=${LOG_PUBLIC_KEY} \
