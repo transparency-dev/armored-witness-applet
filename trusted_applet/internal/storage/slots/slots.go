@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/golang/glog"
+	"k8s.io/klog/v2"
 )
 
 // Geometry describes the physical layout of a Partition and its slots on the
@@ -86,11 +86,11 @@ func OpenPartition(rw BlockReaderWriter, geo Geometry) (*Partition, error) {
 // Erase destroys the data stored in all slots configured in this partition.
 // WARNING: Data Loss!
 func (p *Partition) Erase() error {
-	glog.Info("Erasing partition")
+	klog.Info("Erasing partition")
 	borked := false
 	for i := range p.slots {
 		if err := p.eraseSlot(i); err != nil {
-			glog.Warningf("Failed to erase slot %d: %v", i, err)
+			klog.Warningf("Failed to erase slot %d: %v", i, err)
 		}
 	}
 	if borked {
@@ -106,7 +106,7 @@ func (p *Partition) eraseSlot(i int) error {
 	// Invalidate journal since we're erasing data from underneath it.
 	p.slots[i].journal = nil
 
-	glog.Infof("Erasing partition slot %d @ block %d len %d blocks", i, p.slots[i].start, p.slots[i].length)
+	klog.Infof("Erasing partition slot %d @ block %d len %d blocks", i, p.slots[i].start, p.slots[i].length)
 	length := p.slots[i].length * p.dev.BlockSize()
 	start := p.slots[i].start
 	b := make([]byte, length)
@@ -122,9 +122,9 @@ func (p *Partition) Open(slot uint) (*Slot, error) {
 		return nil, fmt.Errorf("invalid slot %d (partition has %d slots)", slot, l)
 	}
 	s := &p.slots[slot]
-	glog.V(2).Infof("Opening slot %d", slot)
+	klog.V(2).Infof("Opening slot %d", slot)
 	if err := s.Open(p.dev); err != nil {
-		glog.V(2).Infof("Failed to open slot %d: %v", slot, err)
+		klog.V(2).Infof("Failed to open slot %d: %v", slot, err)
 	}
 
 	return s, nil

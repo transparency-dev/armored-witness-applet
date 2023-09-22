@@ -5,7 +5,6 @@ go 1.20
 require (
 	github.com/beevik/ntp v1.3.0
 	github.com/coreos/go-semver v0.3.1
-	github.com/golang/glog v1.1.2
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.9
 	github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e
@@ -26,12 +25,15 @@ require (
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
 	gvisor.dev/gvisor v0.0.0-20230614190805-57027c7d31f8
+	k8s.io/klog/v2 v2.100.1
 )
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/go-logr/logr v1.2.0 // indirect
+	github.com/golang/glog v1.1.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/btree v1.1.2 // indirect
 	github.com/google/go-github/v39 v39.2.0 // indirect
