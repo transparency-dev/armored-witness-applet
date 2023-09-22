@@ -61,53 +61,34 @@ steps:
       - output/trusted_applet.sig
       - gs://${_TRUSTED_APPLET_BUCKET}/${_TEST_TAG_NAME}/trusted_applet.sig
   ### Construct log entry / Claimant Model statement.
-  # Copy trusted_applet.elf to prepare Docker context.
-  - name: bash
+  - name: golang
     args:
-      - cp
-      - output/trusted_applet.elf
-      - release/json_constructor/
-  # Build an image with the log entry in JSON format.
-  - name: gcr.io/cloud-builders/docker
+      - go
+      - get
+      - github.com/transparency-dev/armored-witness/cmd/manifest
+  - name: golang
     args:
-      - build
-      - --build-arg
-      - GIT_TAG=${_TEST_TAG_NAME}
-      - --build-arg
-      - GIT_COMMIT_FINGERPRINT=${COMMIT_SHA}
-      - --build-arg
-      - FIRMWARE_FILE=trusted_applet.elf
-      - --build-arg
-      - TAMAGO_VERSION=${_TAMAGO_VERSION}
-      - -t
-      - json-constructor-image
-      - release/json_constructor/
-  # Prepare a container with a copy of the JSON artifact.
-  - name: gcr.io/cloud-builders/docker
-    args:
-      - create
-      - --name
-      - json_scratch
-      - json-constructor-image
-  # Copy the JSON artifact from the container to the Cloud Build VM.
-  - name: gcr.io/cloud-builders/docker
-    args:
-      - cp
-      - json_scratch:/app/output.json
-      - output/applet_log_entry.json
+      - go
+      - run
+      - github.com/transparency-dev/armored-witness/cmd/manifest
+      - -git_tag=${_TEST_TAG_NAME}
+      - -git_commit_fingerprint=${COMMIT_SHA}
+      - -firmware_file=output/trusted_applet.elf
+      - -tamago_version=${_TAMAGO_VERSION}
+      - -output_file=output/trusted_applet_manifest.json
   # Print the content of the JSON artifact.
   - name: bash
     args:
       - cat
-      - output/applet_log_entry.json
+      - output/trusted_applet_manifest.json
   ### Write the firmware release to the transparency log.
   # Copy log entry to the sequence bucket, preparing to write to log.
   - name: gcr.io/cloud-builders/gcloud
     args:
       - storage
       - cp
-      - output/applet_log_entry.json
-      - 'gs://${_LOG_NAME}/${_ENTRIES_DIR}/applet_log_entry.json'
+      - output/trusted_applet_manifest.json
+      - 'gs://${_LOG_NAME}/${_ENTRIES_DIR}/trusted_applet_manifest.json'
   # Sequence log entry.
   - name: gcr.io/cloud-builders/gcloud
     args:
