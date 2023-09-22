@@ -73,7 +73,7 @@ trusted_applet: check_signing_env trusted_applet_nosign
 log_initialise:
 	echo "(Re-)initialising log at ${DEV_LOG_DIR}"
 	@rm -fr ${DEV_LOG_DIR}
-	go run github.com/transparency-dev/serverless-log/cmd/integrate@HEAD \
+	go run github.com/transparency-dev/serverless-log/cmd/integrate@a56a93b5681e5dc231882ac9de435c21cb340846 \
 		--storage_dir=${DEV_LOG_DIR} \
 		--origin=${DEV_LOG_ORIGIN} \
 		--private_key=${LOG_PRIVATE_KEY} \
@@ -89,12 +89,12 @@ log_applet:
 	@if [ ! -f ${DEV_LOG_DIR}/checkpoint ]; then \
 		make log_initialise; \
 	fi
-	go run github.com/transparency-dev/serverless-log/cmd/sequence@HEAD \
+	go run github.com/transparency-dev/serverless-log/cmd/integrate@a56a93b5681e5dc231882ac9de435c21cb340846 \
 		--storage_dir=${DEV_LOG_DIR} \
 		--origin=${DEV_LOG_ORIGIN} \
 		--public_key=${LOG_PUBLIC_KEY} \
 		--entries=${CURDIR}/bin/trusted_applet_manifest.json
-	-go run github.com/transparency-dev/serverless-log/cmd/integrate@HEAD \
+	-go run github.com/transparency-dev/serverless-log/cmd/integrate@a56a93b5681e5dc231882ac9de435c21cb340846 \
 		--storage_dir=${DEV_LOG_DIR} \
 		--origin=${DEV_LOG_ORIGIN} \
 		--private_key=${LOG_PRIVATE_KEY} \
@@ -156,10 +156,11 @@ $(APP).elf: check_tamago
 $(APP)_manifest.json: TAMAGO_SEMVER=$(shell ${TAMAGO} version | sed 's/.*go\([0-9]\.[0-9]*\.[0-9]*\).*/\1/')
 $(APP)_manifest.json:
 	# Create manifest
-	go run ./release/json_constructor/json_constructor.go \
+	go run github.com/transparency-dev/armored-witness/cmd/manifest@e852dd82d9d56121576aff66de89e800380e5d53 \
 		--git_tag=${GIT_SEMVER_TAG} \
 		--git_commit_fingerprint="${REV}" \
 		--firmware_file=${CURDIR}/bin/$(APP).elf \
+		--firmware_type=TRUSTED_APPLET \
 		--tamago_version=${TAMAGO_SEMVER} > ${CURDIR}/bin/trusted_applet_manifest.json
 	@echo ---------- Manifest --------------
 	@cat ${CURDIR}/bin/trusted_applet_manifest.json
