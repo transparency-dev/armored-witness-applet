@@ -2,33 +2,33 @@
 
 ## File structure
 
-*   The [`trusted_applet/`](release/trusted_applet) directory contains the
-    Dockerfile to build an image which installs dependencies and compiles the
-    Trusted Applet with TamaGo. The version of TamaGo to use can be specified
-    with the Docker
+*   The Dockerfile found in the root of the repo builds an image which installs
+    dependencies and compiles the Trusted Applet with TamaGo. The version of
+    TamaGo to use can be specified with the Docker
     [build arg](https://docs.docker.com/engine/reference/commandline/build/#build-arg)
     `TAMAGO_VERSION`.
-*   The [`json_constructor/`](release/json_constructor) directory contains the
-    Dockerfile and source files to build a Go helper binary to construct the
-    Claimant Model Statement of the transparency log.
+*   Cloud Build triggers for the continuous integration (CI) and prod
+    environments are defined on the Cloud Build yaml files in this directory.
 
 ## Build and Release Process
 
 A
 [Cloud Build trigger](https://cloud.google.com/build/docs/automating-builds/create-manage-triggers)
-is defined by the cloudbuild.yaml config file and is invoked when a new tag is
-published in this repository.
+is defined by a yaml config file and is invoked when a new tag is published in
+this repository.
 
 The pipeline includes two main steps: building and making available the Trusted
 Applet files, and writing the release metadata (Claimant Model Statement) to the
-transparency log.
+firmware transparency log.
 
 1.  Cloud Build builds the Trusted Applet builder Docker image, copies the
     compiled Trusted Applet ELF file, signs it and creates a detached signature
     file. Then, it uploads both to a public Google Cloud Storage bucket.
-1.  Cloud Build builds the JSON constructor binary Docker image, which runs the
-    binary with arguments specific to this release. It then copies the output
-    Statement and adds it to the public transparency log.
+1.  Cloud Build runs the
+    [`manifest`](https://github.com/transparency-dev/armored-witness/tree/main/cmd/manifest)
+    tool to construct the Claimant Model Statement with arguments specific to
+    this release. It then copies the output Statement and adds it as an entry to
+    the public firmware transparency log.
 
 TODO: add links for the GCS buckets once public.
 
