@@ -74,6 +74,7 @@ steps:
       - -git_tag=${_TEST_TAG_NAME}
       - -git_commit_fingerprint=${COMMIT_SHA}
       - -firmware_file=output/trusted_applet.elf
+      - -firmware_type=TRUSTED_APPLET
       - -tamago_version=${_TAMAGO_VERSION}
       - -output_file=output/trusted_applet_manifest.json
   # Print the content of the JSON artifact.
