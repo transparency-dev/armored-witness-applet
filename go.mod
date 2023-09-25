@@ -14,9 +14,9 @@ require (
 	github.com/transparency-dev/formats v0.0.0-20230914071414-5732692f1e50
 	github.com/transparency-dev/merkle v0.0.2
 	github.com/transparency-dev/witness v0.0.0-20230915104643-4681d15a938b
-	github.com/usbarmory/GoTEE v0.0.0-20230828134615-ef53a1a84ba4
+	github.com/usbarmory/GoTEE v0.0.0-20230914094934-f4f769daa5a9
 	github.com/usbarmory/imx-enet v0.0.0-20230622162703-9eec0bcf6bb4
-	github.com/usbarmory/tamago v0.0.0-20230814171810-6cd63c1accf5
+	github.com/usbarmory/tamago v0.0.0-20230922151120-1f76695abebe
 	golang.org/x/crypto v0.13.0
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
 	golang.org/x/mod v0.12.0
