@@ -19,7 +19,6 @@ BUILD_EPOCH := $(shell /bin/date -u "+%s")
 BUILD_TAGS = linkramsize,linkramstart,disable_fr_auth,linkprintk,nostatfs
 BUILD = ${BUILD_USER}@${BUILD_HOST} on ${BUILD_DATE}
 REV = $(shell git rev-parse --short HEAD 2> /dev/null)
-DEV_LOG_DIR ?= ./bin/log
 DEV_LOG_ORIGIN ?= "DEV.armoredwitness.transparency.dev/${USER}"
 GIT_SEMVER_TAG ?= $(shell (git describe --tags --exact-match --match 'v*.*.*' 2>/dev/null || git describe --match 'v*.*.*' --tags 2>/dev/null || git describe --tags 2>/dev/null || echo -n 'v0.0.0+'`git rev-parse HEAD`) | tail -c +2 )
 
@@ -68,37 +67,44 @@ trusted_applet: check_signing_env trusted_applet_nosign
 
 ## Targets for managing a local serverless log instance for dev/testing FT related bits.
 
-## log_initialise initialises the log stored at the path in DEV_LOG_DIR.
-## If the log already exists, it will be reset.
+## log_initialise initialises the log stored under ${LOG_STORAGE_DIR}.
 log_initialise:
-	echo "(Re-)initialising log at ${DEV_LOG_DIR}"
-	@rm -fr ${DEV_LOG_DIR}
+	echo "(Re-)initialising log at ${LOG_STORAGE_DIR}"
 	go run github.com/transparency-dev/serverless-log/cmd/integrate@a56a93b5681e5dc231882ac9de435c21cb340846 \
-		--storage_dir=${DEV_LOG_DIR} \
+		--storage_dir=${LOG_STORAGE_DIR} \
 		--origin=${DEV_LOG_ORIGIN} \
 		--private_key=${LOG_PRIVATE_KEY} \
 		--public_key=${LOG_PUBLIC_KEY} \
 		--initialise
 
 ## log_applet adds the trusted_applet_manifest.json file created during the build to the dev FT log.
+log_applet: LOG_STORAGE_DIR=$(DEV_LOG_DIR)/log
+log_applet: LOG_ARTEFACT_DIR=$(DEV_LOG_DIR)/applet/$(GIT_SEMVER_TAG)
 log_applet:
 	@if [ "${LOG_PRIVATE_KEY}" == "" -o "${LOG_PUBLIC_KEY}" == "" ]; then \
 		@echo "You need to set LOG_PRIVATE_KEY and LOG_PUBLIC_KEY variables"; \
 		exit 1; \
 	fi
-	@if [ ! -f ${DEV_LOG_DIR}/checkpoint ]; then \
-		make log_initialise; \
+	@if [ "${DEV_LOG_DIR}" == "" ]; then \
+		@echo "You need to set the DEV_LOG_DIR variable"; \
+		exit 1; \
+	fi
+
+	@if [ ! -f ${LOG_STORAGE_DIR}/checkpoint ]; then \
+		make log_initialise LOG_STORAGE_DIR="${LOG_STORAGE_DIR}" ; \
 	fi
 	go run github.com/transparency-dev/serverless-log/cmd/sequence@a56a93b5681e5dc231882ac9de435c21cb340846 \
-		--storage_dir=${DEV_LOG_DIR} \
+		--storage_dir=${LOG_STORAGE_DIR} \
 		--origin=${DEV_LOG_ORIGIN} \
 		--public_key=${LOG_PUBLIC_KEY} \
 		--entries=${CURDIR}/bin/trusted_applet_manifest.json
 	-go run github.com/transparency-dev/serverless-log/cmd/integrate@a56a93b5681e5dc231882ac9de435c21cb340846 \
-		--storage_dir=${DEV_LOG_DIR} \
+		--storage_dir=${LOG_STORAGE_DIR} \
 		--origin=${DEV_LOG_ORIGIN} \
 		--private_key=${LOG_PRIVATE_KEY} \
 		--public_key=${LOG_PUBLIC_KEY}
+	@mkdir -p ${LOG_ARTEFACT_DIR}
+	cp ${CURDIR}/bin/trusted_applet.* ${LOG_ARTEFACT_DIR}
 
 #### ARM targets ####
 
