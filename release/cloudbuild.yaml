@@ -53,13 +53,13 @@ steps:
       - storage
       - cp
       - output/trusted_applet.elf
-      - gs://${_TRUSTED_APPLET_BUCKET}/${TAG_NAME}/trusted_applet.elf
+      - gs://${_FIRMWARE_BUCKET}/${_FIRMWARE_COMPONENT}/${TAG_NAME}/firmware.elf
   - name: gcr.io/cloud-builders/gcloud
     args:
       - storage
       - cp
       - output/trusted_applet.sig
-      - gs://${_TRUSTED_APPLET_BUCKET}/${TAG_NAME}/trusted_applet.sig
+      - gs://${_FIRMWARE_BUCKET}/${_FIRMWARE_COMPONENT}/${TAG_NAME}/firmware.sig
   ### Construct log entry / Claimant Model statement.
   - name: golang
     args:
@@ -108,7 +108,8 @@ steps:
       - '{"origin": "${_ORIGIN}", "bucket": "${_LOG_NAME}"}'
 substitutions:
   # Build-related.
-  _TRUSTED_APPLET_BUCKET: trusted-applet-artifacts
+  _FIRMWARE_BUCKET: armored-witness-firmware
+  _FIRMWARE_COMPONENT: trusted-applet
   _TAMAGO_VERSION: '1.20.6'
   # Signing-related.
   _REGION: europe-west2
@@ -118,4 +119,4 @@ substitutions:
   # Log-related.
   _ENTRIES_DIR: firmware-log-sequence
   _ORIGIN: transparency.dev/armored-witness/firmware_transparency/prod/0
-  _LOG_NAME: firmware-log
+  _LOG_NAME: armored-witness-firmware-log
