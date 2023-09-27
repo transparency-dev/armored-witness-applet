@@ -12,9 +12,10 @@ TODO
 
 The following table summarizes currently supported SoCs and boards.
 
-| SoC          | Board                                                                                                                                                                                | SoC package                                                               | Board package                                                                        |
-|--------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
-| NXP i.MX6UL  | [USB armory Mk II LAN](https://github.com/usbarmory/usbarmory/wiki)                                                                                                                  | [imx6ul](https://github.com/usbarmory/tamago/tree/master/soc/nxp/imx6ul)  | [usbarmory/mk2](https://github.com/usbarmory/tamago/tree/master/board/usbarmory)      |
+| SoC          | Board                                                               | SoC package                                                              | Board package                                                                    |
+|--------------|---------------------------------------------------------------------|--------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+| NXP i.MX6UL  | [USB armory Mk II LAN](https://github.com/usbarmory/usbarmory/wiki) | [imx6ul](https://github.com/usbarmory/tamago/tree/master/soc/nxp/imx6ul) | [usbarmory/mk2](https://github.com/usbarmory/tamago/tree/master/board/usbarmory) |
+| NXP i.MX6ULL | [USB armory Mk II](https://github.com/usbarmory/usbarmory/wiki)     | [imx6ul](https://github.com/usbarmory/tamago/tree/master/soc/nxp/imx6ul) | [usbarmory/mk2](https://github.com/usbarmory/tamago/tree/master/board/usbarmory) |
 
 The GoTEE [syscall](https://github.com/usbarmory/GoTEE/blob/master/syscall/syscall.go)
 interface is implemented for communication between the Trusted OS and Trusted
@@ -42,13 +43,14 @@ status                                                   # status information
 ```
 
 The witness can be also executed under QEMU emulation, including networking
-support (requires a `tap0` device routing the Trusted Applet IP address).
+support (requires a `tap0` device routing the Trusted Applet IP address),
+through `armored-witness-os`.
 
 > :warning: emulated runs perform partial tests due to lack of full hardware
 > support by QEMU.
 
 ```
-make trusted_applet && make DEBUG=1 trusted_os && make qemu
+make DEBUG=1 trusted_os && make qemu
 ...
 00:00:00 tamago/arm • TEE security monitor (Secure World system/monitor)
 00:00:00 SM applet verification
@@ -68,7 +70,7 @@ make trusted_applet && make DEBUG=1 trusted_os && make qemu
 Trusted Applet authentication
 =============================
 
-To maintain the chain of trust the OS performes trusted applet authentication
+To maintain the chain of trust the OS performs trusted applet authentication
 before loading it, to this end the `APPLET_PUBLIC_KEY` and `APPLET_PRIVATE_KEY`
 environment variables must be set to the path of either
 [signify](https://man.openbsd.org/signify) or
@@ -106,11 +108,17 @@ Build the example trusted applet and kernel executables as follows:
 
 TODO: fix this
 ```
-make trusted_applet && make trusted_os
+make trusted_applet
 ```
 
-Final executables are created in the `bin` subdirectory, `trusted_os.elf`
-should be used for loading through `armored-witness-boot`.
+Final executables are created in the `bin` subdirectory, `trusted_applet.elf`
+should be used for loading through `armored-witness-os`.
+
+Only on i.MX6UL P/Ns, the `BEE` environment variable must be set to match
+`armored-witness-boot` and `armored-witness-os` compilation options in case AES
+CTR encryption for all external RAM, using TamaGo
+[bee package](https://pkg.go.dev/github.com/usbarmory/tamago/soc/nxp/bee),
+is configured at boot.
 
 The following targets are available:
 
@@ -129,7 +137,7 @@ Trusted Applet logs, it can be enabled when compiling with the `DEBUG`
 environment variable set:
 
 ```
-make trusted_applet && make DEBUG=1 trusted_os
+make DEBUG=1 trusted_applet
 ```
 
 The Serial over USB console can be accessed from a Linux host as follows:
