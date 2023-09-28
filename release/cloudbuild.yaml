@@ -53,13 +53,13 @@ steps:
       - storage
       - cp
       - output/trusted_applet.elf
-      - gs://${_FIRMWARE_BUCKET}/${_FIRMWARE_COMPONENT}/${TAG_NAME}/firmware.elf
+      - gs://${_FIRMWARE_BUCKET}/${_FIRMWARE_COMPONENT}/${TAG_NAME}/trusted_applet.elf
   - name: gcr.io/cloud-builders/gcloud
     args:
       - storage
       - cp
       - output/trusted_applet.sig
-      - gs://${_FIRMWARE_BUCKET}/${_FIRMWARE_COMPONENT}/${TAG_NAME}/firmware.sig
+      - gs://${_FIRMWARE_BUCKET}/${_FIRMWARE_COMPONENT}/${TAG_NAME}/trusted_applet_transparency_dev.sig
   ### Construct log entry / Claimant Model statement.
   - name: golang
     args:
