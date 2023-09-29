@@ -22,7 +22,7 @@ jobs:
         sudo apt install protobuf-compiler protoc-gen-go signify-openbsd
     - name: Create throwaway keys
       run: |
-        signify-openbsd -G -n -p ${APPLET_PUBLIC_KEY} -s ${APPLET_PRIVATE_KEY}
+        go run github.com/transparency-dev/serverless-log/cmd/generate_keys@HEAD --key_name="DEV-APPLET" --out_priv=${APPLET_PRIVATE_KEY} --out_pub=${APPLET_PUBLIC_KEY}
     - name: Make
       run: |
         DEBUG=1 make trusted_applet
