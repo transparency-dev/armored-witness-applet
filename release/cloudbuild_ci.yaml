@@ -72,25 +72,28 @@ steps:
       - go
       - run
       - github.com/transparency-dev/armored-witness/cmd/manifest
+      -  create
       - -git_tag=${_TEST_TAG_NAME}
       - -git_commit_fingerprint=${COMMIT_SHA}
       - -firmware_file=output/trusted_applet.elf
       - -firmware_type=TRUSTED_APPLET
       - -tamago_version=${_TAMAGO_VERSION}
-      - -output_file=output/trusted_applet_manifest.json
-  # Print the content of the JSON artifact.
+      - -raw
+      - -output_file=output/trusted_applet_manifest
+  # Print the content of the manifest.
   - name: bash
     args:
       - cat
-      - output/trusted_applet_manifest.json
+      - output/trusted_applet_manifest
   ### Write the firmware release to the transparency log.
   # Copy log entry to the sequence bucket, preparing to write to log.
   - name: gcr.io/cloud-builders/gcloud
     args:
       - storage
       - cp
-      - output/trusted_applet_manifest.json
-      - gs://${_LOG_NAME}/${_ENTRIES_DIR}/trusted_applet_manifest.json
+      - output/trusted_applet_manifest
+      - 'gs://${_LOG_NAME}/${_ENTRIES_DIR}/trusted_applet_manifest'
+>>>>>>> c0ea086 (Update GCB workflows)
   # Sequence log entry.
   - name: gcr.io/cloud-builders/gcloud
     args:
