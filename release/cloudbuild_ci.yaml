@@ -1,5 +1,5 @@
 steps:
-  ### Build the Trusted Applet, create a detached signature for it, and upload both to GCS.
+  ### Build the Trusted Applet and upload it to GCS.
   # Build an image containing the trusted applet artifacts with the Dockerfile.
   - name: gcr.io/cloud-builders/docker
     args:
@@ -28,26 +28,6 @@ steps:
     args:
       - ls
       - output
-  ### TODO(jayhou): replace this with the signing tool in the apex repo.
-  # Sign the built applet.
-  - name: gcr.io/cloud-builders/gcloud
-    args:
-      - kms
-      - asymmetric-sign
-      - --digest-algorithm
-      - sha256
-      - --version
-      - ${_KMS_KEY_VERSION}
-      - --key
-      - ${_KMS_KEY}
-      - --keyring
-      - ${_KMS_KEYRING}
-      - --location
-      - ${_REGION}
-      - --input-file
-      - output/trusted_applet.elf
-      - --signature-file
-      - output/trusted_applet.sig
   # Copy the artifacts from the Cloud Build VM to GCS.
   - name: gcr.io/cloud-builders/gcloud
     args:
@@ -55,12 +35,6 @@ steps:
       - cp
       - output/trusted_applet.elf
       - gs://${_FIRMWARE_BUCKET}/${_FIRMWARE_COMPONENT}/${_TEST_TAG_NAME}/trusted_applet.elf
-  - name: gcr.io/cloud-builders/gcloud
-    args:
-      - storage
-      - cp
-      - output/trusted_applet.sig
-      - gs://${_FIRMWARE_BUCKET}/${_FIRMWARE_COMPONENT}/${_TEST_TAG_NAME}/trusted_applet_transparency_dev.sig
   ### Construct log entry / Claimant Model statement.
   - name: golang
     args:
@@ -79,12 +53,37 @@ steps:
       - --firmware_type=TRUSTED_APPLET
       - --tamago_version=${_TAMAGO_VERSION}
       - --raw
+      - --output_file=output/trusted_applet_manifest_unsigned.json
+  # Sign the log entry.
+  - name: golang
+    args:
+      - go
+      - get
+      - github.com/transparency-dev/armored-witness/cmd/sign
+  - name: golang
+    args:
+      - go
+      - run
+      - github.com/transparency-dev/armored-witness/cmd/sign
+      - --project_name=${PROJECT_ID}
+      - --key_ring=${_KMS_KEYRING}
+      - --key_name=${_KMS_KEY}
+      - --key_version=${_KMS_KEY_VERSION}
+      - --key_location=${_REGION}
+      - --manifest_file=output/trusted_applet_manifest_unsigned.json
       - --output_file=output/trusted_applet_manifest
-  # Print the content of the manifest.
+  # Print the content of the signed manifest.
   - name: bash
     args:
       - cat
       - output/trusted_applet_manifest
+  ### Copy the signed manifest to the public artifacts bucket.
+  - name: gcr.io/cloud-builders/gcloud
+    args:
+      - storage
+      - cp
+      - output/trusted_applet_manifest
+      - gs://${_FIRMWARE_BUCKET}/${_FIRMWARE_COMPONENT}/${_TEST_TAG_NAME}/trusted_applet_manifest
   ### Write the firmware release to the transparency log.
   # Copy the log entry to the sequence bucket, preparing to write to log.
   - name: gcr.io/cloud-builders/gcloud
@@ -92,7 +91,7 @@ steps:
       - storage
       - cp
       - output/trusted_applet_manifest
-      - 'gs://${_LOG_NAME}/${_ENTRIES_DIR}/trusted_applet_manifest'
+      - gs://${_LOG_NAME}/${_ENTRIES_DIR}/trusted_applet_manifest
   # Sequence log entry.
   - name: gcr.io/cloud-builders/gcloud
     args:
