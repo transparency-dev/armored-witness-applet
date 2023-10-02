@@ -86,7 +86,7 @@ steps:
       - cat
       - output/trusted_applet_manifest
   ### Write the firmware release to the transparency log.
-  # Copy log entry to the sequence bucket, preparing to write to log.
+  # Copy the log entry to the sequence bucket, preparing to write to log.
   - name: gcr.io/cloud-builders/gcloud
     args:
       - storage
