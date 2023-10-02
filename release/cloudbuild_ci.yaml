@@ -28,6 +28,7 @@ steps:
     args:
       - ls
       - output
+  ### TODO(jayhou): replace this with the signing tool in the apex repo.
   # Sign the built applet.
   - name: gcr.io/cloud-builders/gcloud
     args:
@@ -53,13 +54,13 @@ steps:
       - storage
       - cp
       - output/trusted_applet.elf
-      - gs://${_TRUSTED_APPLET_BUCKET}/${_TEST_TAG_NAME}/trusted_applet.elf
+      - gs://${_FIRMWARE_BUCKET}/${_FIRMWARE_COMPONENT}/${_TEST_TAG_NAME}/trusted_applet.elf
   - name: gcr.io/cloud-builders/gcloud
     args:
       - storage
       - cp
       - output/trusted_applet.sig
-      - gs://${_TRUSTED_APPLET_BUCKET}/${_TEST_TAG_NAME}/trusted_applet.sig
+      - gs://${_FIRMWARE_BUCKET}/${_FIRMWARE_COMPONENT}/${_TEST_TAG_NAME}/trusted_applet_transparency_dev.sig
   ### Construct log entry / Claimant Model statement.
   - name: golang
     args:
@@ -89,7 +90,7 @@ steps:
       - storage
       - cp
       - output/trusted_applet_manifest.json
-      - 'gs://${_LOG_NAME}/${_ENTRIES_DIR}/trusted_applet_manifest.json'
+      - gs://${_LOG_NAME}/${_ENTRIES_DIR}/trusted_applet_manifest.json
   # Sequence log entry.
   - name: gcr.io/cloud-builders/gcloud
     args:
@@ -108,7 +109,8 @@ steps:
       - '{"origin": "${_ORIGIN}", "bucket": "${_LOG_NAME}"}'
 substitutions:
   # Build-related.
-  _TRUSTED_APPLET_BUCKET: trusted-applet-artifacts-ci
+  _FIRMWARE_BUCKET: armored-witness-firmware-ci
+  _FIRMWARE_COMPONENT: trusted-applet
   _TAMAGO_VERSION: '1.20.6'
   _TEST_TAG_NAME: '0.1.2'
   # Signing-related.
@@ -119,4 +121,4 @@ substitutions:
   # Log-related.
   _ENTRIES_DIR: firmware-log-sequence
   _ORIGIN: transparency.dev/armored-witness/firmware_transparency/ci/0
-  _LOG_NAME: firmware-log-ci
+  _LOG_NAME: armored-witness-firmware-log-ci
