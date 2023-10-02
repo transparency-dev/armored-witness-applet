@@ -65,13 +65,13 @@ steps:
       - go
       - run
       - github.com/transparency-dev/armored-witness/cmd/sign
-      - -project_name=${PROJECT_ID}
-      - -key_ring=${_KMS_KEYRING}
-      - -key_name=${_KMS_KEY}
-      - -key_version=${_KMS_KEY_VERSION}
-      - -key_location=${_REGION}
-      - -manifest_file=output/trusted_applet_manifest_unsigned.json
-      - -output_file=output/trusted_applet_manifest
+      - --project_name=${PROJECT_ID}
+      - --key_ring=${_KMS_KEYRING}
+      - --key_name=${_KMS_KEY}
+      - --key_version=${_KMS_KEY_VERSION}
+      - --key_location=${_REGION}
+      - --manifest_file=output/trusted_applet_manifest_unsigned.json
+      - --output_file=output/trusted_applet_manifest
   # Print the content of the signed manifest.
   - name: bash
     args:
