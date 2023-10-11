@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/beevik/ntp v1.3.0
 	github.com/coreos/go-semver v0.3.1
-	github.com/google/go-cmp v0.5.9
+	github.com/google/go-cmp v0.6.0
 	github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e
 	github.com/prometheus/client_golang v1.17.0
 	github.com/transparency-dev/armored-witness-boot v0.0.0-20230904140406-e2e16c7665b7
@@ -20,7 +20,7 @@ require (
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
 	golang.org/x/mod v0.13.0
 	golang.org/x/term v0.13.0
-	google.golang.org/grpc v1.58.2
+	google.golang.org/grpc v1.58.3
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
 	gvisor.dev/gvisor v0.0.0-20230614190805-57027c7d31f8
