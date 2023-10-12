@@ -55,15 +55,11 @@ all: trusted_applet
 
 trusted_applet_nosign: APP=trusted_applet
 trusted_applet_nosign: DIR=$(CURDIR)/trusted_applet
-trusted_applet_nosign: elf manifest
+trusted_applet_nosign: elf
 
-trusted_applet: check_signing_env trusted_applet_nosign 
-	echo "signing Trusted Applet"
-	@if [ "${SIGN_PWD}" != "" ]; then \
-		echo -e "${SIGN_PWD}\n" | ${SIGN} -S -s ${APPLET_PRIVATE_KEY} -m ${CURDIR}/bin/trusted_applet.elf -x ${CURDIR}/bin/trusted_applet.sig; \
-	else \
-		${SIGN} -S -s ${APPLET_PRIVATE_KEY} -m ${CURDIR}/bin/trusted_applet.elf -x ${CURDIR}/bin/trusted_applet.sig; \
-	fi
+trusted_applet: APP=trusted_applet
+trusted_applet: DIR=$(CURDIR)/trusted_applet
+trusted_applet: check_signing_env elf manifest
 
 ## Targets for managing a local serverless log instance for dev/testing FT related bits.
 
@@ -77,7 +73,7 @@ log_initialise:
 		--public_key=${LOG_PUBLIC_KEY} \
 		--initialise
 
-## log_applet adds the trusted_applet_manifest.json file created during the build to the dev FT log.
+## log_applet adds the trusted_applet_manifest file created during the build to the dev FT log.
 log_applet: LOG_STORAGE_DIR=$(DEV_LOG_DIR)/log
 log_applet: LOG_ARTEFACT_DIR=$(DEV_LOG_DIR)/trusted-applet/$(GIT_SEMVER_TAG)
 log_applet:
@@ -97,7 +93,7 @@ log_applet:
 		--storage_dir=${LOG_STORAGE_DIR} \
 		--origin=${DEV_LOG_ORIGIN} \
 		--public_key=${LOG_PUBLIC_KEY} \
-		--entries=${CURDIR}/bin/trusted_applet_manifest.json
+		--entries=${CURDIR}/bin/trusted_applet_manifest
 	-go run github.com/transparency-dev/serverless-log/cmd/integrate@a56a93b5681e5dc231882ac9de435c21cb340846 \
 		--storage_dir=${LOG_STORAGE_DIR} \
 		--origin=${DEV_LOG_ORIGIN} \
@@ -110,7 +106,7 @@ log_applet:
 
 imx: $(APP).imx
 elf: $(APP).elf
-manifest: $(APP)_manifest.json
+manifest: $(APP)_manifest
 
 $(APP).bin: CROSS_COMPILE=arm-none-eabi-
 $(APP).bin: $(APP).elf
@@ -159,17 +155,19 @@ $(APP).elf: check_tamago
 	cd $(DIR) && $(GOENV) $(TAMAGO) build -tags ${BUILD_TAGS} $(GOFLAGS) -o $(CURDIR)/bin/$(APP).elf
 
 
-$(APP)_manifest.json: TAMAGO_SEMVER=$(shell ${TAMAGO} version | sed 's/.*go\([0-9]\.[0-9]*\.[0-9]*\).*/\1/')
-$(APP)_manifest.json:
+$(APP)_manifest: TAMAGO_SEMVER=$(shell ${TAMAGO} version | sed 's/.*go\([0-9]\.[0-9]*\.[0-9]*\).*/\1/')
+$(APP)_manifest:
 	# Create manifest
-	go run github.com/transparency-dev/armored-witness/cmd/manifest@e852dd82d9d56121576aff66de89e800380e5d53 \
+	@echo ---------- Manifest --------------
+	go run github.com/transparency-dev/armored-witness/cmd/manifest@228f2f6432babe1f1657e150ce0ca4a96ab394da \
+		create \
 		--git_tag=${GIT_SEMVER_TAG} \
 		--git_commit_fingerprint="${REV}" \
 		--firmware_file=${CURDIR}/bin/$(APP).elf \
 		--firmware_type=TRUSTED_APPLET \
-		--tamago_version=${TAMAGO_SEMVER} > ${CURDIR}/bin/trusted_applet_manifest.json
-	@echo ---------- Manifest --------------
-	@cat ${CURDIR}/bin/trusted_applet_manifest.json
+		--tamago_version=${TAMAGO_SEMVER} \
+		--private_key_file=${APPLET_PRIVATE_KEY} \
+		--output_file=${CURDIR}/bin/trusted_applet_manifest
 	@echo ----------------------------------
 
 
