@@ -4,11 +4,11 @@ This repo contains code for a GoTEE Trusted Applet which implements
 a witness. It's intended to be used with the Trusted OS found at
 https://github.com/transparency-dev/armored-witness-os.
 
-# Introduction
+## Introduction
 
 TODO
 
-# Supported hardware
+## Supported hardware
 
 The following table summarizes currently supported SoCs and boards.
 
@@ -24,7 +24,7 @@ Applet.
 When launched, the witness applet is reachable via SSH through the first
 Ethernet port.
 
-```
+```none
 $ ssh ta@10.0.0.1
 
 date            (time in RFC339 format)?                 # show/change runtime date and time
@@ -49,7 +49,7 @@ through `armored-witness-os`.
 > :warning: emulated runs perform partial tests due to lack of full hardware
 > support by QEMU.
 
-```
+```none
 make DEBUG=1 trusted_os && make qemu
 ...
 00:00:00 tamago/arm • TEE security monitor (Secure World system/monitor)
@@ -67,8 +67,7 @@ make DEBUG=1 trusted_os && make qemu
 00:00:02 TA starting ssh server (SHA256:eeMIwwN/zw1ov1BvO6sW3wtYi463sq+oLgKhmAew1WE) at 10.0.0.1:22
 ```
 
-Trusted Applet authentication
-=============================
+## Trusted Applet authentication
 
 To maintain the chain of trust the Trusted Applet must be signed and logged.
 To this end, two [note](https://pkg.go.dev/golang.org/x/mod/sumdb/note) signing keys
@@ -100,23 +99,23 @@ $ go run github.com/transparency-dev/serverless-log/cmd/generate_keys@HEAD \
   --out_pub=armored-witness-log.pub
 ```
 
-Building the compiler
-=====================
+## Building and executing on ARM targets
+
+### Building the compiler
 
 Build the [TamaGo compiler](https://github.com/usbarmory/tamago-go)
 (or use the [latest binary release](https://github.com/usbarmory/tamago-go/releases/latest)):
 
-```
+```bash
 wget https://github.com/usbarmory/tamago-go/archive/refs/tags/latest.zip
 unzip latest.zip
 cd tamago-go-latest/src && ./all.bash
 cd ../bin && export TAMAGO=`pwd`/go
 ```
 
-Building and executing on ARM targets
-=====================================
+### Building the applet
 
-nsure the following environment variables are set:
+Ensure the following environment variables are set:
 
 | Variable                | Description
 |-------------------------|------------
@@ -150,30 +149,29 @@ The following targets are available:
 The targets support native (see relevant documentation links in the table above)
 as well as emulated execution (e.g. `make qemu`).
 
-Debugging
----------
+### Debugging
 
 An optional Serial over USB console can be used to access Trusted OS and
 Trusted Applet logs, it can be enabled when compiling with the `DEBUG`
 environment variable set:
 
-```
-make DEBUG=1 trusted_applet
+```bash 
+make DEBUG=1 trusted_applet log_applet
 ```
 
 The Serial over USB console can be accessed from a Linux host as follows:
 
-```
+```bash
 picocom -b 115200 -eb /dev/ttyACM0 --imap lfcrlf
 ```
 
-Trusted Applet installation
-===========================
+## Trusted Applet installation
 
-TODO
+Installing the various firmware images onto the device can be accomplished using the
+[provision](https://github.com/transparency-dev/armored-witness/tree/main/cmd/provision)
+tool.
 
-LED status
-==========
+## LED status
 
 The [USB armory Mk II](https://github.com/usbarmory/usbarmory/wiki) LEDs
 are used, in sequence, as follows:
