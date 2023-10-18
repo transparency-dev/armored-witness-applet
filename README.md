@@ -87,7 +87,7 @@ The corresponding public key files will be built into the Trusted OS to verify t
 All ArmoredWitness firmware artefacts need to be added to a firmware transparency log.
 
 The provided `Makefile` has support for maintaining a local firmware transparency
-log on disk. This is primarily intended to be used for development only.
+log on disk. This is intended to be used for development only.
 
 In order to use this functionality, a log key pair can be generated with the
 following command:
@@ -122,6 +122,7 @@ Ensure the following environment variables are set:
 | `APPLET_PRIVATE_KEY1`   | Path to Trusted Applet firmware signing key. Used by the Makefile to sign the applet.
 | `LOG_PRIVATE_KEY`       | Path to log signing key. Used by Makefile to add the new applet firmware to the local dev log.
 | `LOG_ORIGIN`            | FT log origin string. Used by Makefile to update the local dev log.
+| `DEV_LOG_DIR`           | Path to directory in which to store the dev FT log files.
 
 The applet firmware image can then be built, signed, and logged with the following command:
 
