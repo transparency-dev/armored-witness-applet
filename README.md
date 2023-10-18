@@ -101,17 +101,8 @@ $ go run github.com/transparency-dev/serverless-log/cmd/generate_keys@HEAD \
 
 ## Building and executing on ARM targets
 
-### Building the compiler
-
-Build the [TamaGo compiler](https://github.com/usbarmory/tamago-go)
-(or use the [latest binary release](https://github.com/usbarmory/tamago-go/releases/latest)):
-
-```bash
-wget https://github.com/usbarmory/tamago-go/archive/refs/tags/latest.zip
-unzip latest.zip
-cd tamago-go-latest/src && ./all.bash
-cd ../bin && export TAMAGO=`pwd`/go
-```
+Download and install the
+[latest TamaGo binary release](https://github.com/usbarmory/tamago-go/releases/latest).
 
 ### Building the applet
 
@@ -132,6 +123,8 @@ make trusted_applet log_applet
 
 Final executables are created in the `bin` subdirectory, `trusted_applet.elf`
 should be used for loading through `armored-witness-os`.
+
+Firmware transparency artefacts will be written into `${DEV_LOG_DIR}`.
 
 ### Encrypted RAM support
 
@@ -169,8 +162,7 @@ picocom -b 115200 -eb /dev/ttyACM0 --imap lfcrlf
 ## Trusted Applet installation
 
 Installing the various firmware images onto the device can be accomplished using the
-[provision](https://github.com/transparency-dev/armored-witness/tree/main/cmd/provision)
-tool.
+[provision tool](https://github.com/transparency-dev/armored-witness/tree/main/cmd/provision).
 
 ## LED status
 
