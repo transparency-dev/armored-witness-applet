@@ -4,11 +4,11 @@ This repo contains code for a GoTEE Trusted Applet which implements
 a witness. It's intended to be used with the Trusted OS found at
 https://github.com/transparency-dev/armored-witness-os.
 
-# Introduction
+## Introduction
 
 TODO
 
-# Supported hardware
+## Supported hardware
 
 The following table summarizes currently supported SoCs and boards.
 
@@ -24,7 +24,7 @@ Applet.
 When launched, the witness applet is reachable via SSH through the first
 Ethernet port.
 
-```
+```none
 $ ssh ta@10.0.0.1
 
 date            (time in RFC339 format)?                 # show/change runtime date and time
@@ -49,7 +49,7 @@ through `armored-witness-os`.
 > :warning: emulated runs perform partial tests due to lack of full hardware
 > support by QEMU.
 
-```
+```none
 make DEBUG=1 trusted_os && make qemu
 ...
 00:00:00 tamago/arm • TEE security monitor (Secure World system/monitor)
@@ -67,52 +67,66 @@ make DEBUG=1 trusted_os && make qemu
 00:00:02 TA starting ssh server (SHA256:eeMIwwN/zw1ov1BvO6sW3wtYi463sq+oLgKhmAew1WE) at 10.0.0.1:22
 ```
 
-Trusted Applet authentication
-=============================
+## Trusted Applet authentication
 
-To maintain the chain of trust the OS performs trusted applet authentication
-before loading it, to this end the `APPLET_PUBLIC_KEY` and `APPLET_PRIVATE_KEY`
-environment variables must be set to the path of either
-[signify](https://man.openbsd.org/signify) or
-[minisign](https://jedisct1.github.io/minisign/) keys, while compiling.
+To maintain the chain of trust the Trusted Applet must be signed and logged.
+To this end, two [note](https://pkg.go.dev/golang.org/x/mod/sumdb/note) signing keys
+must be generated.
 
-Example key generation (signify):
-
-```
-signify -G -n -p armored-witness-applet.pub -s armored-witness-applet.sec
+```bash
+$ go run github.com/transparency-dev/serverless-log/cmd/generate_keys@HEAD \
+  --key_name="DEV-TrustedApplet" \
+  --out_priv=armored-witness-applet.sec \
+  --out_pub=armored-witness-applet.pub
 ```
 
-Example key generation (minisign):
+The corresponding public key files will be built into the Trusted OS to verify the Applet.
 
+## Firmware transparency
+
+All ArmoredWitness firmware artefacts need to be added to a firmware transparency log.
+
+The provided `Makefile` has support for maintaining a local firmware transparency
+log on disk. This is intended to be used for development only.
+
+In order to use this functionality, a log key pair can be generated with the
+following command:
+
+```bash
+$ go run github.com/transparency-dev/serverless-log/cmd/generate_keys@HEAD \
+  --key_name="DEV-Log" \
+  --out_priv=armored-witness-log.sec \
+  --out_pub=armored-witness-log.pub
 ```
-minisign -G -p armored-witness-applet.pub -s armored-witness-applet.sec
-```
 
-Building the compiler
-=====================
+## Building and executing on ARM targets
 
-Build the [TamaGo compiler](https://github.com/usbarmory/tamago-go)
-(or use the [latest binary release](https://github.com/usbarmory/tamago-go/releases/latest)):
+Download and install the
+[latest TamaGo binary release](https://github.com/usbarmory/tamago-go/releases/latest).
 
-```
-wget https://github.com/usbarmory/tamago-go/archive/refs/tags/latest.zip
-unzip latest.zip
-cd tamago-go-latest/src && ./all.bash
-cd ../bin && export TAMAGO=`pwd`/go
-```
+### Building the applet
 
-Building and executing on ARM targets
-=====================================
+Ensure the following environment variables are set:
 
-Build the example trusted applet and kernel executables as follows:
+| Variable                | Description
+|-------------------------|------------
+| `APPLET_PRIVATE_KEY1`   | Path to Trusted Applet firmware signing key. Used by the Makefile to sign the applet.
+| `LOG_PRIVATE_KEY`       | Path to log signing key. Used by Makefile to add the new applet firmware to the local dev log.
+| `LOG_ORIGIN`            | FT log origin string. Used by Makefile to update the local dev log.
+| `DEV_LOG_DIR`           | Path to directory in which to store the dev FT log files.
 
-TODO: fix this
-```
-make trusted_applet
+The applet firmware image can then be built, signed, and logged with the following command:
+
+```bash
+make trusted_applet log_applet
 ```
 
 Final executables are created in the `bin` subdirectory, `trusted_applet.elf`
 should be used for loading through `armored-witness-os`.
+
+Firmware transparency artefacts will be written into `${DEV_LOG_DIR}`.
+
+### Encrypted RAM support
 
 Only on i.MX6UL P/Ns, the `BEE` environment variable must be set to match
 `armored-witness-boot` and `armored-witness-os` compilation options in case AES
@@ -129,30 +143,28 @@ The following targets are available:
 The targets support native (see relevant documentation links in the table above)
 as well as emulated execution (e.g. `make qemu`).
 
-Debugging
----------
+### Debugging
 
 An optional Serial over USB console can be used to access Trusted OS and
 Trusted Applet logs, it can be enabled when compiling with the `DEBUG`
 environment variable set:
 
-```
-make DEBUG=1 trusted_applet
+```bash 
+make DEBUG=1 trusted_applet log_applet
 ```
 
 The Serial over USB console can be accessed from a Linux host as follows:
 
-```
+```bash
 picocom -b 115200 -eb /dev/ttyACM0 --imap lfcrlf
 ```
 
-Trusted Applet installation
-===========================
+## Trusted Applet installation
 
-TODO
+Installing the various firmware images onto the device can be accomplished using the
+[provision tool](https://github.com/transparency-dev/armored-witness/tree/main/cmd/provision).
 
-LED status
-==========
+## LED status
 
 The [USB armory Mk II](https://github.com/usbarmory/usbarmory/wiki) LEDs
 are used, in sequence, as follows:
