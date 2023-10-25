@@ -230,7 +230,29 @@ func runWithNetworking(ctx context.Context) error {
 		return ctx.Err()
 	}
 
-	time.Sleep(5 * time.Second)
+	updateFetcher, updateClient, err := updater(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to create updater: %v", err)
+	}
+
+	go func() {
+		for {
+			select {
+			case <-time.After(5 * time.Second):
+				log.Print("Scanning for available updates")
+				if err := updateFetcher.Scan(ctx); err != nil {
+					log.Printf("UpdateFetcher.Scan: %v", err)
+					continue
+				}
+				log.Print("Attempting update")
+				if err := updateClient.Update(ctx); err != nil {
+					log.Printf("Update: %v", err)
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
 
 	listenCfg := &net.ListenConfig{}
 
