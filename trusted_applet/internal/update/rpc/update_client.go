@@ -17,8 +17,8 @@ package rpc
 
 import (
 	"github.com/coreos/go-semver/semver"
-	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/firmware"
 	"github.com/transparency-dev/armored-witness-boot/config"
+	"github.com/transparency-dev/armored-witness-common/release/firmware"
 	"github.com/transparency-dev/armored-witness-os/api/rpc"
 	"github.com/usbarmory/GoTEE/syscall"
 )
@@ -31,7 +31,7 @@ type Client struct {
 // GetInstalledVersions returns the semantic versions of the OS and Applet
 // installed on this device. These will be the same versions that are
 // currently running.
-func (r *Client) GetInstalledVersions() (os, applet semver.Version, err error) {
+func (r Client) GetInstalledVersions() (os, applet semver.Version, err error) {
 	iv := &rpc.InstalledVersions{}
 	err = syscall.Call("RPC.GetInstalledVersions", nil, iv)
 	return iv.OS, iv.Applet, err
@@ -40,7 +40,7 @@ func (r *Client) GetInstalledVersions() (os, applet semver.Version, err error) {
 
 // InstallOS updates the OS to the version contained in the firmware bundle.
 // If the update is successful, the RPC will not return.
-func (r *Client) InstallOS(fb firmware.Bundle) error {
+func (r Client) InstallOS(fb firmware.Bundle) error {
 	fu := &rpc.FirmwareUpdate{
 		Image: fb.Firmware,
 		Proof: config.ProofBundle{
@@ -57,7 +57,7 @@ func (r *Client) InstallOS(fb firmware.Bundle) error {
 
 // InstallApplet updates the Applet to the version contained in the firmware bundle.
 // If the update is successful, the RPC will not return.
-func (r *Client) InstallApplet(fb firmware.Bundle) error {
+func (r Client) InstallApplet(fb firmware.Bundle) error {
 	fu := &rpc.FirmwareUpdate{
 		Image: fb.Firmware,
 		Proof: config.ProofBundle{
@@ -73,6 +73,6 @@ func (r *Client) InstallApplet(fb firmware.Bundle) error {
 
 // Reboot instructs the device to reboot after new firmware is installed.
 // This call will not return and deferred functions will not be run.
-func (r *Client) Reboot() {
+func (r Client) Reboot() {
 	_ = syscall.Call("RPC.Reboot", nil, nil)
 }
