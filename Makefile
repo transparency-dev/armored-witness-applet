@@ -21,6 +21,10 @@ BUILD = ${BUILD_USER}@${BUILD_HOST} on ${BUILD_DATE}
 REV = $(shell git rev-parse --short HEAD 2> /dev/null)
 DEV_LOG_ORIGIN ?= "DEV.armoredwitness.transparency.dev/${USER}"
 GIT_SEMVER_TAG ?= $(shell (git describe --tags --exact-match --match 'v*.*.*' 2>/dev/null || git describe --match 'v*.*.*' --tags 2>/dev/null || git describe --tags 2>/dev/null || echo -n v0.0.${BUILD_EPOCH}+`git rev-parse HEAD`) | tail -c +2 )
+FT_BIN_URL ?= "http://$(shell hostname --fqdn):9944/"
+FT_LOG_URL ?= "http://$(shell hostname --fqdn):9944/log/"
+FT_LOG_ORIGIN ?= $(DEV_LOG_ORIGIN)
+
 
 SHELL = /bin/bash
 
@@ -41,11 +45,19 @@ ENTRY_POINT := _rt0_arm_tamago
 ARCH = "arm"
 
 GOFLAGS = -tags ${BUILD_TAGS} -trimpath \
-        -ldflags "-T ${TEXT_START} -E ${ENTRY_POINT} -R 0x1000 -s -w \
-                  -X 'main.Build=${BUILD}' -X 'main.Revision=${REV}' -X 'main.Version=${BUILD_EPOCH}' \
+        -ldflags "-T ${TEXT_START} -E ${ENTRY_POINT} -R 0x1000 \
+                  -X 'main.Build=${BUILD}' -X 'main.Revision=${REV}' -X 'main.Version=${GIT_SEMVER_TAG}' \
                   -X 'main.PublicKey=$(shell test ${PUBLIC_KEY} && cat ${PUBLIC_KEY} | tail -n 1)' \
                   -X 'main.GitHubUser=${GITHUB_USER}' -X 'main.GitHubEmail=${GITHUB_EMAIL}' -X 'main.GitHubToken=${GITHUB_TOKEN}' \
-                  -X 'main.RestDistributorBaseURL=${REST_DISTRIBUTOR_BASE_URL}'"
+                  -X 'main.RestDistributorBaseURL=${REST_DISTRIBUTOR_BASE_URL}' \
+                  -X 'main.updateBinariesURL=${FT_BIN_URL}' \
+                  -X 'main.updateLogURL=${FT_LOG_URL}' \
+                  -X 'main.updateLogOrigin=${FT_LOG_ORIGIN}' \
+                  -X 'main.updateLogVerifier=$(shell cat ${LOG_PUBLIC_KEY})' \
+                  -X 'main.updateAppletVerifier=$(shell cat ${APPLET_PUBLIC_KEY})' \
+                  -X 'main.updateOSVerifier1=$(shell cat ${OS_PUBLIC_KEY1})' \
+                  -X 'main.updateOSVerifier2=$(shell cat ${OS_PUBLIC_KEY2})' \
+				  "
 
 .PHONY: clean
 
