@@ -69,9 +69,6 @@ const (
 
 var (
 	iface *enet.Interface
-
-	// resolver is the DNS server address:port to use to resolve names
-	resolver string
 )
 
 func init() {
@@ -183,8 +180,13 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 // Note that this function does not update the network stack's assigned IP address.
 func configureNetFromDHCP(newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
 	if len(cfg.DNS) > 0 {
-		resolver = fmt.Sprintf("%s:53", cfg.DNS[0].String())
-		log.Printf("DHCPC: Using DNS server %v", resolver)
+		resolvers := []string{}
+		for _, r := range cfg.DNS {
+			resolver := fmt.Sprintf("%s:53", r.String())
+			resolvers = append(resolvers, resolver)
+		}
+		log.Printf("DHCPC: Using DNS server(s) %v", resolvers)
+		net.DefaultNS = resolvers
 	}
 	// Set up routing for new address
 	// Start with the implicit route to local segment
@@ -348,7 +350,7 @@ func mac() string {
 
 func startNetworking() (err error) {
 	// Set the default resolver from the config, if we're using DHCP this may be updated.
-	resolver = cfg.Resolver
+	net.DefaultNS = []string{cfg.Resolver}
 
 	if iface, err = enet.Init(nil, cfg.IP, cfg.Netmask, mac(), cfg.Gateway, int(nicID)); err != nil {
 		return
