@@ -20,7 +20,7 @@ BUILD_TAGS = linkramsize,linkramstart,disable_fr_auth,linkprintk,nostatfs
 BUILD = ${BUILD_USER}@${BUILD_HOST} on ${BUILD_DATE}
 REV = $(shell git rev-parse --short HEAD 2> /dev/null)
 DEV_LOG_ORIGIN ?= "DEV.armoredwitness.transparency.dev/${USER}"
-GIT_SEMVER_TAG ?= $(shell (git describe --tags --exact-match --match 'v*.*.*' 2>/dev/null || git describe --match 'v*.*.*' --tags 2>/dev/null || git describe --tags 2>/dev/null || echo -n 'v0.0.0+'`git rev-parse HEAD`) | tail -c +2 )
+GIT_SEMVER_TAG ?= $(shell (git describe --tags --exact-match --match 'v*.*.*' 2>/dev/null || git describe --match 'v*.*.*' --tags 2>/dev/null || git describe --tags 2>/dev/null || echo -n v0.0.${BUILD_EPOCH}+`git rev-parse HEAD`) | tail -c +2 )
 
 SHELL = /bin/bash
 
