@@ -220,7 +220,7 @@ func runWithNetworking(ctx context.Context) error {
 	if tcpErr != nil {
 		return fmt.Errorf("runWithNetworking has no network configured: %v", tcpErr)
 	}
-	log.Printf("TA Version:%s MAC:%s IP:%s GW:%s DNS:%s", Version, iface.NIC.MAC.String(), addr, iface.Stack.GetRouteTable(), resolver)
+	log.Printf("TA Version:%s MAC:%s IP:%s GW:%s DNS:%s", Version, iface.NIC.MAC.String(), addr, iface.Stack.GetRouteTable(), net.DefaultNS)
 	// Update status with latest IP address too.
 	syscall.Call("RPC.SetWitnessStatus", rpc.WitnessStatus{Identity: witnessPublicKey, IP: addr.Address.String()}, nil)
 
