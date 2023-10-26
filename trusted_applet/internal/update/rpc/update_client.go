@@ -16,6 +16,8 @@
 package rpc
 
 import (
+	"log"
+
 	"github.com/coreos/go-semver/semver"
 	"github.com/transparency-dev/armored-witness-boot/config"
 	"github.com/transparency-dev/armored-witness-common/release/firmware"
@@ -41,6 +43,7 @@ func (r Client) GetInstalledVersions() (os, applet semver.Version, err error) {
 // InstallOS updates the OS to the version contained in the firmware bundle.
 // If the update is successful, the RPC will not return.
 func (r Client) InstallOS(fb firmware.Bundle) error {
+	log.Print("Requesting OS install from OS...")
 	fu := &rpc.FirmwareUpdate{
 		Image: fb.Firmware,
 		Proof: config.ProofBundle{
@@ -50,14 +53,14 @@ func (r Client) InstallOS(fb firmware.Bundle) error {
 			Manifest:       fb.Manifest,
 		},
 	}
-	err := syscall.Call("RPC.InstallOS", nil, fu)
-	return err
+	return syscall.Call("RPC.InstallOS", fu, nil)
 
 }
 
 // InstallApplet updates the Applet to the version contained in the firmware bundle.
 // If the update is successful, the RPC will not return.
 func (r Client) InstallApplet(fb firmware.Bundle) error {
+	log.Print("Requesting applet install from OS...")
 	fu := &rpc.FirmwareUpdate{
 		Image: fb.Firmware,
 		Proof: config.ProofBundle{
@@ -67,8 +70,7 @@ func (r Client) InstallApplet(fb firmware.Bundle) error {
 			Manifest:       fb.Manifest,
 		},
 	}
-	err := syscall.Call("RPC.InstallApplet", nil, fu)
-	return err
+	return syscall.Call("RPC.InstallApplet", fu, nil)
 }
 
 // Reboot instructs the device to reboot after new firmware is installed.
