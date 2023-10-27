@@ -235,6 +235,9 @@ func runWithNetworking(ctx context.Context) error {
 		return fmt.Errorf("failed to create updater: %v", err)
 	}
 
+	// TODO(al): figure out where & how frequently we should be doing this.
+	// For now, since we're still developing/testing this, we'll be very aggressive
+	// checking for and installing updates.
 	go func() {
 		for {
 			select {
