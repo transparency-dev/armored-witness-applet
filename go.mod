@@ -10,7 +10,7 @@ require (
 	github.com/prometheus/client_golang v1.17.0
 	github.com/transparency-dev/armored-witness-boot v0.0.0-20230904140406-e2e16c7665b7
 	github.com/transparency-dev/armored-witness-os v0.0.0-20230904142303-8cff7e12c215
-	github.com/transparency-dev/formats v0.0.0-20230914071414-5732692f1e50
+	github.com/transparency-dev/formats v0.0.0-20230920083814-0f75b1d4e813
 	github.com/transparency-dev/merkle v0.0.2
 	github.com/transparency-dev/witness v0.0.0-20230915104643-4681d15a938b
 	github.com/usbarmory/GoTEE v0.0.0-20230914094934-f4f769daa5a9
@@ -46,7 +46,8 @@ require (
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.11.1 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
-	github.com/transparency-dev/serverless-log v0.0.0-20230914155322-9b6f31f76f1f // indirect
+	github.com/transparency-dev/armored-witness-common v0.0.0-20231027110430-3802c9e3e15d // indirect
+	github.com/transparency-dev/serverless-log v0.0.0-20230922115421-a56a93b5681e // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/oauth2 v0.12.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
