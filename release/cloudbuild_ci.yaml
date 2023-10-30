@@ -117,7 +117,7 @@ substitutions:
   # Signing-related.
   _REGION: global
   _KMS_KEY: trusted-applet-ci
-  _KMS_KEYRING: firmware-release
+  _KMS_KEYRING: firmware-release-ci
   _KMS_KEY_VERSION: '1'
   # Log-related.
   _ENTRIES_DIR: firmware-log-sequence
