@@ -239,9 +239,11 @@ func runWithNetworking(ctx context.Context) error {
 	// For now, since we're still developing/testing this, we'll be very aggressive
 	// checking for and installing updates.
 	go func() {
+		t := time.NewTicker(5 * time.Second)
+		defer t.Stop()
 		for {
 			select {
-			case <-time.After(5 * time.Second):
+			case <-t.C:
 				log.Print("Scanning for available updates")
 				if err := updateFetcher.Scan(ctx); err != nil {
 					log.Printf("UpdateFetcher.Scan: %v", err)

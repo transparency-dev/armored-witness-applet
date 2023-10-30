@@ -57,7 +57,7 @@ GOFLAGS = -tags ${BUILD_TAGS} -trimpath \
                   -X 'main.updateAppletVerifier=$(shell cat ${APPLET_PUBLIC_KEY})' \
                   -X 'main.updateOSVerifier1=$(shell cat ${OS_PUBLIC_KEY1})' \
                   -X 'main.updateOSVerifier2=$(shell cat ${OS_PUBLIC_KEY2})' \
-				  "
+                 "
 
 .PHONY: clean
 
