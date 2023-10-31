@@ -56,7 +56,7 @@ const (
 	nicID = tcpip.NICID(1)
 
 	// Timeout for any http requests.
-	httpTimeout = 10 * time.Second
+	httpTimeout = 30 * time.Second
 )
 
 // Trusted OS syscalls
@@ -366,8 +366,8 @@ func startNetworking() (err error) {
 		Transport: &http.Transport{
 			ForceAttemptHTTP2:     true,
 			IdleConnTimeout:       1 * time.Second,
-			TLSHandshakeTimeout:   5 * time.Second,
-			ExpectContinueTimeout: 5 * time.Second,
+			TLSHandshakeTimeout:   30 * time.Second,
+			ExpectContinueTimeout: 30 * time.Second,
 			DisableKeepAlives:     true,
 		},
 		Timeout: httpTimeout,
