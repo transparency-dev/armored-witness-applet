@@ -4,8 +4,14 @@ steps:
   - name: gcr.io/cloud-builders/docker
     args:
       - build
-      - --build-arg
-      - TAMAGO_VERSION=${_TAMAGO_VERSION}
+      - --build-arg=TAMAGO_VERSION=${_TAMAGO_VERSION}
+      - --build-arg=FT_LOG_ORIGIN=${_ORIGIN}
+      - --build-arg=FT_LOG_URL=${_LOG_BASE_URL}
+      - --build-arg=FT_BIN_URL=${_BIN_BASE_URL}
+      - --build-arg=LOG_PUBLIC_KEY=${_LOG_PUBLIC_KEY}
+      - --build-arg=APPLET_PUBLIC_KEY=${_APPLET_PUBLIC_KEY}
+      - --build-arg=OS_PUBLIC_KEY1=${_OS_PUBLIC_KEY1}
+      - --build-arg=OS_PUBLIC_KEY2=${_OS_PUBLIC_KEY2}
       - -t
       - builder-image
       # Path is relative to the root of the repo.
@@ -66,10 +72,8 @@ steps:
       - run
       - github.com/transparency-dev/armored-witness/cmd/sign
       - --project_name=${PROJECT_ID}
-      - --key_ring=${_KMS_KEYRING}
-      - --key_name=${_KMS_KEY}
-      - --key_version=${_KMS_KEY_VERSION}
-      - --key_location=${_REGION}
+      - --release="ci"
+      - --artefact="applet"
       - --manifest_file=output/trusted_applet_manifest_unsigned.json
       - --output_file=output/trusted_applet_manifest
   # Print the content of the signed manifest.
@@ -116,10 +120,16 @@ substitutions:
   _TEST_TAG_NAME: '0.1.2'
   # Signing-related.
   _REGION: global
-  _KMS_KEY: trusted-applet-ci
+  _KMS_APPLET_KEY: trusted-applet-ci
+  _KMS_APPLET_KEY_VERSION: '1'
   _KMS_KEYRING: firmware-release-ci
-  _KMS_KEY_VERSION: '1'
   # Log-related.
   _ENTRIES_DIR: firmware-log-sequence
   _ORIGIN: transparency.dev/armored-witness/firmware_transparency/ci/0
   _LOG_NAME: armored-witness-firmware-log-ci
+  _LOG_BASE_URL:https://storage.mtls.cloud.google.com/armored-witness-firmware-log-ci/
+  _BIN_BASE_URL: https://storage.mtls.cloud.google.com/armored-witness-firmware-ci/
+  _LOG_PUBLIC_KEY: transparency.dev-aw-ftlog-ci+eed5ba0f+AR6gW0mycDtL17iM2uvQUThJsoiuSRirstEj9a5AdCCu
+  _APPLET_PUBLIC_KEY: transparency.dev-aw-applet-ci+f6aefd80+AV1fgxtByjXuPjPfi0/7qTbEBlPGGCyxqr6ZlppoLOz3
+  _OS_PUBLIC_KEY1: transparency.dev-aw-os1-ci+dd8ea9bb+AcsqvmrcKIbs21H2Bm2fWb6oFWn/9MmLGNc6NLJty2eQ
+  _OS_PUBLIC_KEY2: transparency.dev-aw-os2-ci+917d40ec+AbBJk5MgxRB+68KhGojhUdSt1ts5GAdRIT1Eq9zEkgQh
