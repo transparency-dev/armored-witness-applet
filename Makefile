@@ -87,7 +87,8 @@ log_initialise:
 
 ## log_applet adds the trusted_applet_manifest file created during the build to the dev FT log.
 log_applet: LOG_STORAGE_DIR=$(DEV_LOG_DIR)/log
-log_applet: LOG_ARTEFACT_DIR=$(DEV_LOG_DIR)/trusted-applet/$(GIT_SEMVER_TAG)
+log_applet: LOG_ARTEFACT_DIR=$(DEV_LOG_DIR)
+log_applet: ARTEFACT_HASH=$(shell sha256sum ${CURDIR}/bin/trusted_applet.elf | cut -f1 -d" ")
 log_applet:
 	@if [ "${LOG_PRIVATE_KEY}" == "" -o "${LOG_PUBLIC_KEY}" == "" ]; then \
 		@echo "You need to set LOG_PRIVATE_KEY and LOG_PUBLIC_KEY variables"; \
@@ -112,7 +113,7 @@ log_applet:
 		--private_key=${LOG_PRIVATE_KEY} \
 		--public_key=${LOG_PUBLIC_KEY}
 	@mkdir -p ${LOG_ARTEFACT_DIR}
-	cp ${CURDIR}/bin/trusted_applet.* ${LOG_ARTEFACT_DIR}
+	cp ${CURDIR}/bin/trusted_applet.elf ${LOG_ARTEFACT_DIR}/${ARTEFACT_HASH}
 
 #### ARM targets ####
 
