@@ -10,7 +10,7 @@ require (
 	github.com/machinebox/progress v0.2.0
 	github.com/prometheus/client_golang v1.17.0
 	github.com/transparency-dev/armored-witness-boot v0.0.0-20230904140406-e2e16c7665b7
-	github.com/transparency-dev/armored-witness-common v0.0.0-20231027110430-3802c9e3e15d
+	github.com/transparency-dev/armored-witness-common v0.0.0-20231031160117-eefcf9dd7f27
 	github.com/transparency-dev/armored-witness-os v0.0.0-20230904142303-8cff7e12c215
 	github.com/transparency-dev/formats v0.0.0-20230920083814-0f75b1d4e813
 	github.com/transparency-dev/merkle v0.0.2
