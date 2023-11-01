@@ -21,7 +21,7 @@ BUILD = ${BUILD_USER}@${BUILD_HOST} on ${BUILD_DATE}
 REV = $(shell git rev-parse --short HEAD 2> /dev/null)
 DEV_LOG_ORIGIN ?= "DEV.armoredwitness.transparency.dev/${USER}"
 GIT_SEMVER_TAG ?= $(shell (git describe --tags --exact-match --match 'v*.*.*' 2>/dev/null || git describe --match 'v*.*.*' --tags 2>/dev/null || git describe --tags 2>/dev/null || echo -n v0.0.${BUILD_EPOCH}+`git rev-parse HEAD`) | tail -c +2 )
-FT_BIN_URL ?= "http://$(shell hostname --fqdn):9944/"
+FT_BIN_URL ?= "http://$(shell hostname --fqdn):9944/artefacts/"
 FT_LOG_URL ?= "http://$(shell hostname --fqdn):9944/log/"
 FT_LOG_ORIGIN ?= $(DEV_LOG_ORIGIN)
 
@@ -87,7 +87,8 @@ log_initialise:
 
 ## log_applet adds the trusted_applet_manifest file created during the build to the dev FT log.
 log_applet: LOG_STORAGE_DIR=$(DEV_LOG_DIR)/log
-log_applet: LOG_ARTEFACT_DIR=$(DEV_LOG_DIR)/trusted-applet/$(GIT_SEMVER_TAG)
+log_applet: LOG_ARTEFACT_DIR=$(DEV_LOG_DIR)/artefacts
+log_applet: ARTEFACT_HASH=$(shell sha256sum ${CURDIR}/bin/trusted_applet.elf | cut -f1 -d" ")
 log_applet:
 	@if [ "${LOG_PRIVATE_KEY}" == "" -o "${LOG_PUBLIC_KEY}" == "" ]; then \
 		@echo "You need to set LOG_PRIVATE_KEY and LOG_PUBLIC_KEY variables"; \
@@ -112,7 +113,7 @@ log_applet:
 		--private_key=${LOG_PRIVATE_KEY} \
 		--public_key=${LOG_PUBLIC_KEY}
 	@mkdir -p ${LOG_ARTEFACT_DIR}
-	cp ${CURDIR}/bin/trusted_applet.* ${LOG_ARTEFACT_DIR}
+	cp ${CURDIR}/bin/trusted_applet.elf ${LOG_ARTEFACT_DIR}/${ARTEFACT_HASH}
 
 #### ARM targets ####
 
