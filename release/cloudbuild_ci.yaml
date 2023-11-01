@@ -127,7 +127,7 @@ substitutions:
   _ENTRIES_DIR: firmware-log-sequence
   _ORIGIN: transparency.dev/armored-witness/firmware_transparency/ci/0
   _LOG_NAME: armored-witness-firmware-log-ci
-  _LOG_BASE_URL:https://storage.mtls.cloud.google.com/armored-witness-firmware-log-ci/
+  _LOG_BASE_URL: https://storage.mtls.cloud.google.com/armored-witness-firmware-log-ci/
   _BIN_BASE_URL: https://storage.mtls.cloud.google.com/armored-witness-firmware-ci/
   _LOG_PUBLIC_KEY: transparency.dev-aw-ftlog-ci+eed5ba0f+AR6gW0mycDtL17iM2uvQUThJsoiuSRirstEj9a5AdCCu
   _APPLET_PUBLIC_KEY: transparency.dev-aw-applet-ci+f6aefd80+AV1fgxtByjXuPjPfi0/7qTbEBlPGGCyxqr6ZlppoLOz3
