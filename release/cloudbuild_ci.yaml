@@ -113,11 +113,6 @@ substitutions:
   _FIRMWARE_COMPONENT: trusted-applet
   _TAMAGO_VERSION: '1.20.6'
   _TEST_TAG_NAME: '0.1.2'
-  # Signing-related.
-  _REGION: global
-  _KMS_APPLET_KEY: trusted-applet-ci
-  _KMS_APPLET_KEY_VERSION: '1'
-  _KMS_KEYRING: firmware-release-ci
   # Log-related.
   _ENTRIES_DIR: firmware-log-sequence
   _ORIGIN: transparency.dev/armored-witness/firmware_transparency/ci/0
