@@ -56,12 +56,6 @@ steps:
       - output/trusted_applet.elf
       - gs://${_FIRMWARE_BUCKET}/$(sha256sum output/trusted_applet.elf | cut -f1 -d" ")
   ### Construct log entry / Claimant Model statement.
-  - name: golang
-    args:
-      - go
-      - get
-      - github.com/transparency-dev/armored-witness/cmd/manifest
-  # Create the manifest.
   # This step needs to be a bash script in order to substitute the fake take
   # in the command args.
   - name: golang
@@ -69,7 +63,7 @@ steps:
     args:
       - -c
       - |
-        go run github.com/transparency-dev/armored-witness/cmd/manifest \
+        go run github.com/transparency-dev/armored-witness/cmd/manifest@${_ARMORED_WITNESS_REPO_VERSION} \
           create \
           --git_tag=$(cat /workspace/fake_tag) \
           --git_commit_fingerprint=${COMMIT_SHA} \
@@ -82,13 +76,8 @@ steps:
   - name: golang
     args:
       - go
-      - get
-      - github.com/transparency-dev/armored-witness/cmd/sign
-  - name: golang
-    args:
-      - go
       - run
-      - github.com/transparency-dev/armored-witness/cmd/sign
+      - github.com/transparency-dev/armored-witness/cmd/sign@${_ARMORED_WITNESS_REPO_VERSION}
       - --project_name=${PROJECT_ID}
       - --release=ci
       - --artefact=applet
@@ -128,6 +117,7 @@ substitutions:
   _FIRMWARE_BUCKET: armored-witness-firmware-ci
   _FIRMWARE_COMPONENT: trusted-applet
   _TAMAGO_VERSION: '1.20.6'
+  _ARMORED_WITNESS_REPO_VERSION: d37d6b19ec4dbd1cad3586ae8ba3ec913829d718
   # Log-related.
   _ENTRIES_DIR: firmware-log-sequence
   _ORIGIN: transparency.dev/armored-witness/firmware_transparency/ci/0
