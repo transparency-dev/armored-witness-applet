@@ -31,7 +31,7 @@ import (
 	"github.com/transparency-dev/armored-witness-common/release/firmware/update"
 	"github.com/transparency-dev/serverless-log/client"
 	"golang.org/x/mod/sumdb/note"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 )
 
 // These vars are set at compile time using the -X flag, see the Makefile.
