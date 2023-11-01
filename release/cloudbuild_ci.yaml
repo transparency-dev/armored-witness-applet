@@ -83,13 +83,6 @@ steps:
     args:
       - cat
       - output/trusted_applet_manifest
-  ### Copy the signed manifest to the public artifacts bucket.
-  - name: gcr.io/cloud-builders/gcloud
-    args:
-      - storage
-      - cp
-      - output/trusted_applet_manifest
-      - gs://${_FIRMWARE_BUCKET}/${_FIRMWARE_COMPONENT}/${_TEST_TAG_NAME}/trusted_applet_manifest
   ### Write the firmware release to the transparency log.
   # Copy the log entry to the sequence bucket, preparing to write to log.
   - name: gcr.io/cloud-builders/gcloud
