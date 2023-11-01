@@ -87,7 +87,7 @@ log_initialise:
 
 ## log_applet adds the trusted_applet_manifest file created during the build to the dev FT log.
 log_applet: LOG_STORAGE_DIR=$(DEV_LOG_DIR)/log
-log_applet: LOG_ARTEFACT_DIR=$(DEV_LOG_DIR)
+log_applet: LOG_ARTEFACT_DIR=$(DEV_LOG_DIR)/artefacts
 log_applet: ARTEFACT_HASH=$(shell sha256sum ${CURDIR}/bin/trusted_applet.elf | cut -f1 -d" ")
 log_applet:
 	@if [ "${LOG_PRIVATE_KEY}" == "" -o "${LOG_PUBLIC_KEY}" == "" ]; then \
