@@ -21,7 +21,7 @@ BUILD = ${BUILD_USER}@${BUILD_HOST} on ${BUILD_DATE}
 REV = $(shell git rev-parse --short HEAD 2> /dev/null)
 DEV_LOG_ORIGIN ?= "DEV.armoredwitness.transparency.dev/${USER}"
 GIT_SEMVER_TAG ?= $(shell (git describe --tags --exact-match --match 'v*.*.*' 2>/dev/null || git describe --match 'v*.*.*' --tags 2>/dev/null || git describe --tags 2>/dev/null || echo -n v0.0.${BUILD_EPOCH}+`git rev-parse HEAD`) | tail -c +2 )
-FT_BIN_URL ?= "http://$(shell hostname --fqdn):9944/"
+FT_BIN_URL ?= "http://$(shell hostname --fqdn):9944/artefacts/"
 FT_LOG_URL ?= "http://$(shell hostname --fqdn):9944/log/"
 FT_LOG_ORIGIN ?= $(DEV_LOG_ORIGIN)
 
