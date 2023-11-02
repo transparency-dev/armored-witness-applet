@@ -74,8 +74,8 @@ steps:
       - run
       - github.com/transparency-dev/armored-witness/cmd/sign
       - --project_name=${PROJECT_ID}
-      - --release="prod"
-      - --artefact="applet"
+      - --release=prod
+      - --artefact=applet
       - --manifest_file=output/trusted_applet_manifest_unsigned.json
       - --output_file=output/trusted_applet_manifest
   # Print the content of the signed manifest.
