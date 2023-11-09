@@ -24,6 +24,7 @@ GIT_SEMVER_TAG ?= $(shell (git describe --tags --exact-match --match 'v*.*.*' 2>
 FT_BIN_URL ?= "http://$(shell hostname --fqdn):9944/artefacts/"
 FT_LOG_URL ?= "http://$(shell hostname --fqdn):9944/log/"
 FT_LOG_ORIGIN ?= $(DEV_LOG_ORIGIN)
+REST_DISTRIBUTOR_BASE_URL ?= "https://api.transparency.dev"
 
 
 SHELL = /bin/bash
