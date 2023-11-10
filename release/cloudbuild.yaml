@@ -104,26 +104,40 @@ steps:
       - functions
       - call
       - sequence
-      - '--data'
-      - '{"entriesDir": "${_ENTRIES_DIR}", "origin": "${_ORIGIN}", "bucket": "${_LOG_NAME}"}'
+      - --data
+      - >
+        {
+          "entriesDir": "${_ENTRIES_DIR}",
+          "origin": "${_ORIGIN}",
+          "bucket": "${_LOG_NAME}",
+          "kmsKeyName": "ft-log-prod",
+          "kmsKeyRing": "firmware-release-prod",
+          "kmsKeyVersion": 1,
+          "kmsKeyLocation": "global",
+          "noteKeyName": "transparency.dev-aw-ftlog-prod"
+        }
   # Integrate log entry.
   - name: gcr.io/cloud-builders/gcloud
     args:
       - functions
       - call
       - integrate
-      - '--data'
-      - '{"origin": "${_ORIGIN}", "bucket": "${_LOG_NAME}"}'
+      - --data
+      - >
+        {
+          "origin": "${_ORIGIN}",
+          "bucket": "${_LOG_NAME}",
+          "kmsKeyName": "ft-log-prod",
+          "kmsKeyRing": "firmware-release-prod",
+          "kmsKeyVersion": 1,
+          "kmsKeyLocation": "global",
+          "noteKeyName": "transparency.dev-aw-ftlog-prod"
+        }
 substitutions:
   # Build-related.
   _FIRMWARE_BUCKET: armored-witness-firmware
   _FIRMWARE_COMPONENT: trusted-applet
   _TAMAGO_VERSION: '1.20.6'
-  # Signing-related.
-  _REGION: global
-  _KMS_APPLET_KEY: trusted-applet
-  _KMS_APPLET_KEY_VERSION: '1'
-  _KMS_KEYRING: firmware-release
   # Log-related.
   _ENTRIES_DIR: firmware-log-sequence
   _ORIGIN: transparency.dev/armored-witness/firmware_transparency/prod/0
