@@ -26,6 +26,8 @@ FT_LOG_URL ?= "http://$(shell hostname --fqdn):9944/log/"
 FT_LOG_ORIGIN ?= $(DEV_LOG_ORIGIN)
 REST_DISTRIBUTOR_BASE_URL ?= "https://api.transparency.dev"
 
+TAMAGO_SEMVER = $(shell [ -n "${TAMAGO}" -a -x "${TAMAGO}" ] && ${TAMAGO} version | sed 's/.*go\([0-9]\.[0-9]*\.[0-9]*\).*/\1/')
+MINIMUM_TAMAGO_VERSION=1.21.3
 
 SHELL = /bin/bash
 
@@ -156,6 +158,10 @@ check_tamago:
 		echo 'You need to set the TAMAGO variable to a compiled version of https://github.com/usbarmory/tamago-go'; \
 		exit 1; \
 	fi
+	@if [ "$(shell printf '%s\n' ${MINIMUM_TAMAGO_VERSION} ${TAMAGO_SEMVER} | sort -V | head -n1 )" != "${MINIMUM_TAMAGO_VERSION}" ]; then \
+		echo "You need TamaGo >= ${MINIMUM_TAMAGO_VERSION}, found ${TAMAGO_SEMVER}" ; \
+		exit 1; \
+	fi
 
 dcd:
 	cp -f $(GOMODCACHE)/$(TAMAGO_PKG)/board/usbarmory/mk2/imximage.cfg $(CURDIR)/bin/$(APP).dcd
@@ -169,7 +175,6 @@ $(APP).elf: check_tamago
 	cd $(DIR) && $(GOENV) $(TAMAGO) build -tags ${BUILD_TAGS} $(GOFLAGS) -o $(CURDIR)/bin/$(APP).elf
 
 
-$(APP)_manifest: TAMAGO_SEMVER=$(shell ${TAMAGO} version | sed 's/.*go\([0-9]\.[0-9]*\.[0-9]*\).*/\1/')
 $(APP)_manifest:
 	# Create manifest
 	@echo ---------- Manifest --------------
