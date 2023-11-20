@@ -37,6 +37,7 @@ import (
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/cmd"
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/storage"
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/storage/slots"
+	"github.com/transparency-dev/armored-witness-common/release/firmware/update"
 	"github.com/transparency-dev/armored-witness-os/api"
 	"github.com/transparency-dev/armored-witness-os/api/rpc"
 
@@ -230,20 +231,26 @@ func runWithNetworking(ctx context.Context) error {
 		return ctx.Err()
 	}
 
-	updateFetcher, updateClient, err := updater(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to create updater: %v", err)
-	}
-
 	// TODO(al): figure out where & how frequently we should be doing this.
 	// For now, since we're still developing/testing this, we'll be very aggressive
 	// checking for and installing updates.
 	go func() {
+		var updateFetcher *update.Fetcher
+		var updateClient *update.Updater
+		var err error
+
 		t := time.NewTicker(5 * time.Second)
 		defer t.Stop()
 		for {
 			select {
 			case <-t.C:
+				if updateFetcher == nil || updateClient == nil {
+					updateFetcher, updateClient, err = updater(ctx)
+					if err != nil {
+						log.Printf("Failed to create updater: %v", err)
+						continue
+					}
+				}
 				log.Print("Scanning for available updates")
 				if err := updateFetcher.Scan(ctx); err != nil {
 					log.Printf("UpdateFetcher.Scan: %v", err)
