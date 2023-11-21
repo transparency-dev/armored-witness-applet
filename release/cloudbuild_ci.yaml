@@ -116,7 +116,7 @@ substitutions:
   # Build-related.
   _FIRMWARE_BUCKET: armored-witness-firmware-ci
   _FIRMWARE_COMPONENT: trusted-applet
-  _TAMAGO_VERSION: '1.20.6'
+  _TAMAGO_VERSION: '1.21.3'
   _ARMORED_WITNESS_REPO_VERSION: d37d6b19ec4dbd1cad3586ae8ba3ec913829d718
   # Log-related.
   _ENTRIES_DIR: firmware-log-sequence
