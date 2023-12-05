@@ -44,7 +44,6 @@ import (
 	"github.com/transparency-dev/witness/monitoring"
 	"github.com/transparency-dev/witness/monitoring/prometheus"
 	"github.com/transparency-dev/witness/omniwitness"
-	"golang.org/x/mod/sumdb/note"
 	"k8s.io/klog/v2"
 
 	_ "golang.org/x/crypto/x509roots/fallback"
@@ -304,17 +303,8 @@ func runWithNetworking(ctx context.Context) error {
 	}()
 
 	// Set up and start omniwitness
-	signer, err := note.NewSigner(witnessSigningKey)
-	if err != nil {
-		return fmt.Errorf("failed to init signer: %v", err)
-	}
-	verifier, err := note.NewVerifier(witnessPublicKey)
-	if err != nil {
-		return fmt.Errorf("failed to init verifier: %v", err)
-	}
 	opConfig := omniwitness.OperatorConfig{
-		WitnessSigner:          signer,
-		WitnessVerifier:        verifier,
+		WitnessKey:             witnessSigningKey,
 		GithubUser:             GitHubUser,
 		GithubEmail:            GitHubEmail,
 		GithubToken:            GitHubToken,
