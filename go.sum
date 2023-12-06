@@ -78,12 +78,17 @@ github.com/transparency-dev/armored-witness-os v0.0.0-20230904142303-8cff7e12c21
 github.com/transparency-dev/armored-witness-os v0.0.0-20230904142303-8cff7e12c215/go.mod h1:WfH1eII946tTqjniWgozuWbJthgDEuSaeGE5jta+3Ew=
 github.com/transparency-dev/formats v0.0.0-20230920083814-0f75b1d4e813 h1:PHklaeYyhPsbhWt+MnKpBvJrsJGkPEaU1JutMj4wNqM=
 github.com/transparency-dev/formats v0.0.0-20230920083814-0f75b1d4e813/go.mod h1:J2NdDb6IhKIvF6MwCvKikz9/QStRylEtS2mv+En+jBg=
+github.com/transparency-dev/formats v0.0.0-20231205184308-949529efd6b3/go.mod h1:tY9Z9oBaYdQt4NWIhsFAtv0altwLk+K9Gg/2tbS0eBQ=
 github.com/transparency-dev/merkle v0.0.2 h1:Q9nBoQcZcgPamMkGn7ghV8XiTZ/kRxn1yCG81+twTK4=
 github.com/transparency-dev/merkle v0.0.2/go.mod h1:pqSy+OXefQ1EDUVmAJ8MUhHB9TXGuzVAT58PqBoHz1A=
 github.com/transparency-dev/serverless-log v0.0.0-20230922115421-a56a93b5681e h1:KlUufKQ9ub7NC26OI63F6TofPJxgE6QAqsJPQlg012g=
 github.com/transparency-dev/serverless-log v0.0.0-20230922115421-a56a93b5681e/go.mod h1:FWvVqFb4YXC41AzWnwZ5O11kWNtWoZ5jBMbfgHd9zH4=
 github.com/transparency-dev/witness v0.0.0-20230915104643-4681d15a938b h1:wqdCr8Cnus8XV49A60EvM/k++CVTNFfhBLPkid8lzNY=
 github.com/transparency-dev/witness v0.0.0-20230915104643-4681d15a938b/go.mod h1:bLBEbEqDhZnEk34v0kK+Wl7J87/Y3iv1ChW7yKx9Tno=
+github.com/transparency-dev/witness v0.0.0-20231204120204-a47abd07cd8d h1:kRflpXOQ2RppcRaoJw+4DVVqGmGcDMKL1RG9Pn9TQzU=
+github.com/transparency-dev/witness v0.0.0-20231204120204-a47abd07cd8d/go.mod h1:65x/6A7ZfFS5nVYPt15mQ8lXC1aqiqJWUkvO361QvKk=
+github.com/transparency-dev/witness v0.0.0-20231206140453-b65680d72383 h1:YGVJSmxB4SUS+MUOj15KH777bNJIXryCno1XLTJS6Q8=
+github.com/transparency-dev/witness v0.0.0-20231206140453-b65680d72383/go.mod h1:EDjG9YvxzDEiIsemaa9vnWJYoWKXthLJCGC6Grvk61U=
 github.com/usbarmory/GoTEE v0.0.0-20230914094934-f4f769daa5a9 h1:bVjcARGT+mwll/+no7bsCCC1UDldtuNXL00twGtLPGo=
 github.com/usbarmory/GoTEE v0.0.0-20230914094934-f4f769daa5a9/go.mod h1:mPJL62h2iMZwmu2cZ/tvjCyk0uSeq06n1UJBoigN2qY=
 github.com/usbarmory/imx-enet v0.0.0-20230622162703-9eec0bcf6bb4 h1:qdV3sa9B6hXs9W8mNhlpR5AW/VC1La1ytrt5ddHQx34=

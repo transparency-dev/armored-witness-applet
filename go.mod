@@ -12,10 +12,10 @@ require (
 	github.com/transparency-dev/armored-witness-boot v0.0.0-20230904140406-e2e16c7665b7
 	github.com/transparency-dev/armored-witness-common v0.0.0-20231031160117-eefcf9dd7f27
 	github.com/transparency-dev/armored-witness-os v0.0.0-20230904142303-8cff7e12c215
-	github.com/transparency-dev/formats v0.0.0-20230920083814-0f75b1d4e813
+	github.com/transparency-dev/formats v0.0.0-20231205184308-949529efd6b3
 	github.com/transparency-dev/merkle v0.0.2
 	github.com/transparency-dev/serverless-log v0.0.0-20230922115421-a56a93b5681e
-	github.com/transparency-dev/witness v0.0.0-20230915104643-4681d15a938b
+	github.com/transparency-dev/witness v0.0.0-20231206140453-b65680d72383
 	github.com/usbarmory/GoTEE v0.0.0-20230914094934-f4f769daa5a9
 	github.com/usbarmory/imx-enet v0.0.0-20230622162703-9eec0bcf6bb4
 	github.com/usbarmory/tamago v0.0.0-20230922151120-1f76695abebe
