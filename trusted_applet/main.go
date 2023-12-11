@@ -305,6 +305,8 @@ func runWithNetworking(ctx context.Context) error {
 	opConfig := omniwitness.OperatorConfig{
 		WitnessKey:             witnessSigningKey,
 		RestDistributorBaseURL: RestDistributorBaseURL,
+		FeedInterval:           30 * time.Second,
+		DistributeInterval:     5 * time.Second,
 	}
 	// TODO(mhutchinson): add a second listener for an admin API.
 	mainListener, err := listenCfg.Listen(ctx, "tcp", ":80")

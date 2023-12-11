@@ -15,7 +15,7 @@ require (
 	github.com/transparency-dev/formats v0.0.0-20231205184308-949529efd6b3
 	github.com/transparency-dev/merkle v0.0.2
 	github.com/transparency-dev/serverless-log v0.0.0-20230922115421-a56a93b5681e
-	github.com/transparency-dev/witness v0.0.0-20231206140453-b65680d72383
+	github.com/transparency-dev/witness v0.0.0-20231211160907-71bfa3432a4d
 	github.com/usbarmory/GoTEE v0.0.0-20230914094934-f4f769daa5a9
 	github.com/usbarmory/imx-enet v0.0.0-20230622162703-9eec0bcf6bb4
 	github.com/usbarmory/tamago v0.0.0-20230922151120-1f76695abebe
@@ -38,8 +38,6 @@ require (
 	github.com/golang/glog v1.2.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/btree v1.1.2 // indirect
-	github.com/google/go-github/v39 v39.2.0 // indirect
-	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gsora/fidati v0.0.0-20220824075547-eeb0a5f7d6c3 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -50,10 +48,8 @@ require (
 	github.com/prometheus/procfs v0.11.1 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
-	golang.org/x/oauth2 v0.15.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230822172742-b8732ec3820d // indirect
 )
