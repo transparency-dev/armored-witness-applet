@@ -31,9 +31,6 @@ MINIMUM_TAMAGO_VERSION=1.21.3
 
 SHELL = /bin/bash
 
-SIGN = $(shell type -p signify || type -p signify-openbsd || type -p minisign)
-SIGN_PWD ?= "armored-witness"
-
 APP := ""
 TEXT_START = 0x90010000 # ramStart (defined in mem.go under relevant tamago/soc package) + 0x10000
 
@@ -51,7 +48,6 @@ GOFLAGS = -tags ${BUILD_TAGS} -trimpath \
         -ldflags "-T ${TEXT_START} -E ${ENTRY_POINT} -R 0x1000 \
                   -X 'main.Build=${BUILD}' -X 'main.Revision=${REV}' -X 'main.Version=${GIT_SEMVER_TAG}' \
                   -X 'main.PublicKey=$(shell test ${PUBLIC_KEY} && cat ${PUBLIC_KEY} | tail -n 1)' \
-                  -X 'main.GitHubUser=${GITHUB_USER}' -X 'main.GitHubEmail=${GITHUB_EMAIL}' -X 'main.GitHubToken=${GITHUB_TOKEN}' \
                   -X 'main.RestDistributorBaseURL=${REST_DISTRIBUTOR_BASE_URL}' \
                   -X 'main.updateBinariesURL=${FT_BIN_URL}' \
                   -X 'main.updateLogURL=${FT_LOG_URL}' \
@@ -120,30 +116,8 @@ log_applet:
 
 #### ARM targets ####
 
-imx: $(APP).imx
 elf: $(APP).elf
 manifest: $(APP)_manifest
-
-$(APP).bin: CROSS_COMPILE=arm-none-eabi-
-$(APP).bin: $(APP).elf
-	$(CROSS_COMPILE)objcopy -j .text -j .rodata -j .shstrtab -j .typelink \
-	    -j .itablink -j .gopclntab -j .go.buildinfo -j .noptrdata -j .data \
-	    -j .bss --set-section-flags .bss=alloc,load,contents \
-	    -j .noptrbss --set-section-flags .noptrbss=alloc,load,contents \
-	    $(CURDIR)/bin/$(APP).elf -O binary $(CURDIR)/bin/$(APP).bin
-
-$(APP).imx: $(APP).bin $(APP).dcd
-	echo "## disabling TZASC bypass in DCD for pre-DDR initialization ##"; \
-	chmod 644 $(CURDIR)/bin/$(APP).dcd; \
-	echo "DATA 4 0x020e4024 0x00000001  # TZASC_BYPASS" >> $(CURDIR)/bin/$(APP).dcd; \
-	mkimage -n $(CURDIR)/bin/$(APP).dcd -T imximage -e $(TEXT_START) -d $(CURDIR)/bin/$(APP).bin $(CURDIR)/bin/$(APP).imx
-	# Copy entry point from ELF file
-	dd if=$(CURDIR)/bin/$(APP).elf of=$(CURDIR)/bin/$(APP).imx bs=1 count=4 skip=24 seek=4 conv=notrunc
-
-$(APP).dcd: check_tamago
-$(APP).dcd: GOMODCACHE=$(shell ${TAMAGO} env GOMODCACHE)
-$(APP).dcd: TAMAGO_PKG=$(shell grep "github.com/usbarmory/tamago v" go.mod | awk '{print $$1"@"$$2}')
-$(APP).dcd: dcd
 
 #### utilities ####
 
@@ -162,9 +136,6 @@ check_tamago:
 		echo "You need TamaGo >= ${MINIMUM_TAMAGO_VERSION}, found ${TAMAGO_SEMVER}" ; \
 		exit 1; \
 	fi
-
-dcd:
-	cp -f $(GOMODCACHE)/$(TAMAGO_PKG)/board/usbarmory/mk2/imximage.cfg $(CURDIR)/bin/$(APP).dcd
 
 clean:
 	@rm -fr $(CURDIR)/bin/*
