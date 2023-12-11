@@ -70,8 +70,7 @@ var (
 	Revision string
 	Version  string
 
-	GitHubUser, GitHubEmail, GitHubToken string
-	RestDistributorBaseURL               string
+	RestDistributorBaseURL string
 
 	cfg *api.Configuration
 
@@ -305,9 +304,6 @@ func runWithNetworking(ctx context.Context) error {
 	// Set up and start omniwitness
 	opConfig := omniwitness.OperatorConfig{
 		WitnessKey:             witnessSigningKey,
-		GithubUser:             GitHubUser,
-		GithubEmail:            GitHubEmail,
-		GithubToken:            GitHubToken,
 		RestDistributorBaseURL: RestDistributorBaseURL,
 	}
 	// TODO(mhutchinson): add a second listener for an admin API.
