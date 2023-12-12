@@ -48,12 +48,12 @@ steps:
     args:
       - go
       - get
-      - github.com/transparency-dev/armored-witness/cmd/manifest
+      - github.com/transparency-dev/armored-witness/cmd/manifest@${_ARMORED_WITNESS_REPO_VERSION}
   - name: golang
     args:
       - go
       - run
-      - github.com/transparency-dev/armored-witness/cmd/manifest
+      - github.com/transparency-dev/armored-witness/cmd/manifest@${_ARMORED_WITNESS_REPO_VERSION}
       - create
       - --git_tag=${TAG_NAME}
       - --git_commit_fingerprint=${COMMIT_SHA}
@@ -67,12 +67,12 @@ steps:
     args:
       - go
       - get
-      - github.com/transparency-dev/armored-witness/cmd/sign
+      - github.com/transparency-dev/armored-witness/cmd/sign@${_ARMORED_WITNESS_REPO_VERSION}
   - name: golang
     args:
       - go
       - run
-      - github.com/transparency-dev/armored-witness/cmd/sign
+      - github.com/transparency-dev/armored-witness/cmd/sign@${_ARMORED_WITNESS_REPO_VERSION}
       - --project_name=${PROJECT_ID}
       - --release=prod
       - --artefact=applet
@@ -116,6 +116,7 @@ steps:
       - '{"origin": "${_ORIGIN}", "bucket": "${_LOG_NAME}", "kmsKeyName": "ft-log-prod", "kmsKeyRing": "firmware-release-prod", "kmsKeyVersion": 1, "kmsKeyLocation": "global", "noteKeyName": "transparency.dev-aw-ftlog-prod"}'
 substitutions:
   # Build-related.
+  _ARMORED_WITNESS_REPO_VERSION: e7141b6db638c3a2cb23e354cedd2d2980d0fb3a
   _FIRMWARE_BUCKET: armored-witness-firmware
   _FIRMWARE_COMPONENT: trusted-applet
   _TAMAGO_VERSION: '1.21.3'
