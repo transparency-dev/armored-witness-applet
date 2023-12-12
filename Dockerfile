@@ -27,10 +27,14 @@ ENV TAMAGO=/usr/local/tamago-go/bin/go
 ENV FT_LOG_URL=${FT_LOG_URL} \
     FT_BIN_URL=${FT_BIN_URL} \
     LOG_ORIGIN=${LOG_ORIGIN} \
-    LOG_PUBLIC_KEY=${LOG_PUBLIC_KEY} \
-    APPLET_PUBLIC_KEY=${APPLET_PUBLIC_KEY} \
-    OS_PUBLIC_KEY1=${OS_PUBLIC_KEY1} \
-    OS_PUBLIC_KEY2=${OS_PUBLIC_KEY2} \
+    LOG_PUBLIC_KEY="/tmp/log.pub" \
+    APPLET_PUBLIC_KEY="/tmp/applet.pub" \
+    OS_PUBLIC_KEY1="/tmp/os1.pub" \
+    OS_PUBLIC_KEY2="/tmp/os2.pub" \
     GIT_SEMVER_TAG=${GIT_SEMVER_TAG}
 
+RUN echo "${APPLET_PUBLIC_KEY}" > /tmp/applet.pub
+RUN echo "${LOG_PUBLIC_KEY}" > /tmp/log.pub
+RUN echo "${OS_PUBLIC_KEY1}" > /tmp/os1.pub
+RUN echo "${OS_PUBLIC_KEY2}" > /tmp/os2.pub
 RUN make trusted_applet_nosign
