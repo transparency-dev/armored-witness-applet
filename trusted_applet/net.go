@@ -16,7 +16,7 @@ package main
 
 import (
 	"context"
-	"crypto/rand"
+	"crypto/sha256"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -35,6 +35,7 @@ import (
 
 	"github.com/beevik/ntp"
 	"github.com/transparency-dev/armored-witness-applet/third_party/dhcp"
+	"github.com/transparency-dev/armored-witness-os/api"
 	"golang.org/x/term"
 
 	"github.com/usbarmory/GoTEE/applet"
@@ -332,11 +333,10 @@ func (n *txNotification) WriteNotify() {
 	syscall.Write(TX, buf, uint(len(buf)))
 }
 
-func mac() string {
-	m := make([]uint8, 6)
-	if _, err := rand.Read(m); err != nil {
-		panic(fmt.Sprintf("failed to read %d bytes for randomised MAC address: %v", len(m), err))
-	}
+// mac creates a stable "local administered" MAC address for the network based on the
+// provided unit serial number.
+func mac(serial string) string {
+	m := sha256.Sum256([]byte(fmt.Sprintf("MAC:%s", serial)))
 	// The first byte of the MAC address has a couple of flags which must be set correctly:
 	// - Unicast(0)/multicast(1) in the least significant bit of the byte.
 	//   This must be set to unicast.
@@ -352,7 +352,12 @@ func startNetworking() (err error) {
 	// Set the default resolver from the config, if we're using DHCP this may be updated.
 	net.DefaultNS = []string{cfg.Resolver}
 
-	if iface, err = enet.Init(nil, cfg.IP, cfg.Netmask, mac(), cfg.Gateway, int(nicID)); err != nil {
+	var status api.Status
+	if err := syscall.Call("RPC.Status", nil, &status); err != nil {
+		return fmt.Errorf("failed to fetch Status: %v", err)
+	}
+
+	if iface, err = enet.Init(nil, cfg.IP, cfg.Netmask, mac(status.Serial), cfg.Gateway, int(nicID)); err != nil {
 		return
 	}
 
