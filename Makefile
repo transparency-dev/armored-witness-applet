@@ -19,11 +19,9 @@ BUILD_EPOCH := $(shell /bin/date -u "+%s")
 BUILD_TAGS = linkramsize,linkramstart,disable_fr_auth,linkprintk,nostatfs
 BUILD = ${BUILD_USER}@${BUILD_HOST} on ${BUILD_DATE}
 REV = $(shell git rev-parse --short HEAD 2> /dev/null)
-DEV_LOG_ORIGIN ?= "DEV.armoredwitness.transparency.dev/${USER}"
 GIT_SEMVER_TAG ?= $(shell (git describe --tags --exact-match --match 'v*.*.*' 2>/dev/null || git describe --match 'v*.*.*' --tags 2>/dev/null || git describe --tags 2>/dev/null || echo -n v0.0.${BUILD_EPOCH}+`git rev-parse HEAD`) | tail -c +2 )
 FT_BIN_URL ?= "http://$(shell hostname --fqdn):9944/artefacts/"
 FT_LOG_URL ?= "http://$(shell hostname --fqdn):9944/log/"
-FT_LOG_ORIGIN ?= $(DEV_LOG_ORIGIN)
 REST_DISTRIBUTOR_BASE_URL ?= "https://api.transparency.dev"
 
 TAMAGO_SEMVER = $(shell [ -n "${TAMAGO}" -a -x "${TAMAGO}" ] && ${TAMAGO} version | sed 's/.*go\([0-9]\.[0-9]*\.[0-9]*\).*/\1/')
@@ -47,11 +45,10 @@ ARCH = "arm"
 GOFLAGS = -tags ${BUILD_TAGS} -trimpath \
         -ldflags "-T ${TEXT_START} -E ${ENTRY_POINT} -R 0x1000 \
                   -X 'main.Build=${BUILD}' -X 'main.Revision=${REV}' -X 'main.Version=${GIT_SEMVER_TAG}' \
-                  -X 'main.PublicKey=$(shell test ${PUBLIC_KEY} && cat ${PUBLIC_KEY} | tail -n 1)' \
                   -X 'main.RestDistributorBaseURL=${REST_DISTRIBUTOR_BASE_URL}' \
                   -X 'main.updateBinariesURL=${FT_BIN_URL}' \
                   -X 'main.updateLogURL=${FT_LOG_URL}' \
-                  -X 'main.updateLogOrigin=${FT_LOG_ORIGIN}' \
+                  -X 'main.updateLogOrigin=${LOG_ORIGIN}' \
                   -X 'main.updateLogVerifier=$(shell cat ${LOG_PUBLIC_KEY})' \
                   -X 'main.updateAppletVerifier=$(shell cat ${APPLET_PUBLIC_KEY})' \
                   -X 'main.updateOSVerifier1=$(shell cat ${OS_PUBLIC_KEY1})' \
@@ -66,11 +63,11 @@ all: trusted_applet
 
 trusted_applet_nosign: APP=trusted_applet
 trusted_applet_nosign: DIR=$(CURDIR)/trusted_applet
-trusted_applet_nosign: elf
+trusted_applet_nosign: check_embed_env elf
 
 trusted_applet: APP=trusted_applet
 trusted_applet: DIR=$(CURDIR)/trusted_applet
-trusted_applet: check_signing_env elf manifest
+trusted_applet: check_embed_env elf manifest
 
 ## Targets for managing a local serverless log instance for dev/testing FT related bits.
 
@@ -79,7 +76,7 @@ log_initialise:
 	echo "(Re-)initialising log at ${LOG_STORAGE_DIR}"
 	go run github.com/transparency-dev/serverless-log/cmd/integrate@a56a93b5681e5dc231882ac9de435c21cb340846 \
 		--storage_dir=${LOG_STORAGE_DIR} \
-		--origin=${DEV_LOG_ORIGIN} \
+		--origin=${LOG_ORIGIN} \
 		--private_key=${LOG_PRIVATE_KEY} \
 		--public_key=${LOG_PUBLIC_KEY} \
 		--initialise
@@ -90,11 +87,11 @@ log_applet: LOG_ARTEFACT_DIR=$(DEV_LOG_DIR)/artefacts
 log_applet: ARTEFACT_HASH=$(shell sha256sum ${CURDIR}/bin/trusted_applet.elf | cut -f1 -d" ")
 log_applet:
 	@if [ "${LOG_PRIVATE_KEY}" == "" -o "${LOG_PUBLIC_KEY}" == "" ]; then \
-		@echo "You need to set LOG_PRIVATE_KEY and LOG_PUBLIC_KEY variables"; \
+		echo "You need to set LOG_PRIVATE_KEY and LOG_PUBLIC_KEY variables"; \
 		exit 1; \
 	fi
 	@if [ "${DEV_LOG_DIR}" == "" ]; then \
-		@echo "You need to set the DEV_LOG_DIR variable"; \
+		echo "You need to set the DEV_LOG_DIR variable"; \
 		exit 1; \
 	fi
 
@@ -103,12 +100,12 @@ log_applet:
 	fi
 	go run github.com/transparency-dev/serverless-log/cmd/sequence@a56a93b5681e5dc231882ac9de435c21cb340846 \
 		--storage_dir=${LOG_STORAGE_DIR} \
-		--origin=${DEV_LOG_ORIGIN} \
+		--origin=${LOG_ORIGIN} \
 		--public_key=${LOG_PUBLIC_KEY} \
 		--entries=${CURDIR}/bin/trusted_applet_manifest
 	-go run github.com/transparency-dev/serverless-log/cmd/integrate@a56a93b5681e5dc231882ac9de435c21cb340846 \
 		--storage_dir=${LOG_STORAGE_DIR} \
-		--origin=${DEV_LOG_ORIGIN} \
+		--origin=${LOG_ORIGIN} \
 		--private_key=${LOG_PRIVATE_KEY} \
 		--public_key=${LOG_PUBLIC_KEY}
 	@mkdir -p ${LOG_ARTEFACT_DIR}
@@ -121,9 +118,26 @@ manifest: $(APP)_manifest
 
 #### utilities ####
 
-check_signing_env:
-	@if [ "${APPLET_PRIVATE_KEY}" == "" ] || [ ! -f "${APPLET_PRIVATE_KEY}" ]; then \
-		echo 'You need to set the APPLET_PRIVATE_KEY variable to a valid signing key path'; \
+# Various strings need to be embedded into the binary, keys, log info, etc. check they are present.
+check_embed_env:
+	@if [ "${LOG_ORIGIN}" == "" ]; then \
+		echo 'You need to set the LOG_ORIGIN variable'; \
+		exit 1; \
+	fi
+	@if [ "${LOG_PUBLIC_KEY}" == "" ] || [ ! -f "${LOG_PUBLIC_KEY}" ]; then \
+		echo 'You need to set the LOG_PUBLIC_KEY variable to a valid note verifier key path'; \
+		exit 1; \
+	fi
+	@if [ "${APPLET_PUBLIC_KEY}" == "" ] || [ ! -f "${APPLET_PUBLIC_KEY}" ]; then \
+		echo 'You need to set the APPLET_PUBLIC_KEY variable to a valid note verifier key path'; \
+		exit 1; \
+	fi
+	@if [ "${OS_PUBLIC_KEY1}" == "" ] || [ ! -f "${OS_PUBLIC_KEY1}" ]; then \
+		echo 'You need to set the OS_PUBLIC_KEY1 variable to a valid note verifier key path'; \
+		exit 1; \
+	fi
+	@if [ "${OS_PUBLIC_KEY2}" == "" ] || [ ! -f "${OS_PUBLIC_KEY2}" ]; then \
+		echo 'You need to set the OS_PUBLIC_KEY2 variable to a valid note verifier key path'; \
 		exit 1; \
 	fi
 
@@ -147,6 +161,10 @@ $(APP).elf: check_tamago
 
 
 $(APP)_manifest:
+	@if [ "${APPLET_PRIVATE_KEY}" == "" ] || [ ! -f "${APPLET_PRIVATE_KEY}" ]; then \
+		echo 'You need to set the APPLET_PRIVATE_KEY variable to a valid note signing key path'; \
+		exit 1; \
+	fi
 	# Create manifest
 	@echo ---------- Manifest --------------
 	go run github.com/transparency-dev/armored-witness/cmd/manifest@228f2f6432babe1f1657e150ce0ca4a96ab394da \
