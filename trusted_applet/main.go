@@ -66,7 +66,6 @@ const (
 )
 
 var (
-	Build    string
 	Revision string
 	Version  string
 
@@ -96,9 +95,9 @@ func main() {
 	}
 	monitoring.SetMetricFactory(mf)
 
-	log.Printf("%s/%s (%s) • TEE user applet • %s %s",
+	log.Printf("%s/%s (%s) • TEE user applet • %s",
 		runtime.GOOS, runtime.GOARCH, runtime.Version(),
-		Revision, Build)
+		Revision)
 
 	// Verify if we are allowed to run on this unit by sending version
 	// information for rollback protection check.
