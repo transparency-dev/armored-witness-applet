@@ -153,7 +153,7 @@ clean:
 #### application target ####
 
 $(APP).elf: check_tamago
-	cd $(DIR) && $(GOENV) $(TAMAGO) build -tags ${BUILD_TAGS} $(GOFLAGS) -o $(CURDIR)/bin/$(APP).elf
+	cd $(DIR) && $(GOENV) $(TAMAGO) build $(GOFLAGS) -o $(CURDIR)/bin/$(APP).elf
 
 
 $(APP)_manifest:
