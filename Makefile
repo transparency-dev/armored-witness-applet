@@ -16,9 +16,9 @@ BUILD_EPOCH := $(shell /bin/date -u "+%s")
 BUILD_TAGS = linkramsize,linkramstart,disable_fr_auth,linkprintk,nostatfs
 REV = $(shell git rev-parse --short HEAD 2> /dev/null)
 GIT_SEMVER_TAG ?= $(shell (git describe --tags --exact-match --match 'v*.*.*' 2>/dev/null || git describe --match 'v*.*.*' --tags 2>/dev/null || git describe --tags 2>/dev/null || echo -n v0.0.${BUILD_EPOCH}+`git rev-parse HEAD`) | tail -c +2 )
-FT_BIN_URL ?= "http://$(shell hostname --fqdn):9944/artefacts/"
-FT_LOG_URL ?= "http://$(shell hostname --fqdn):9944/log/"
-REST_DISTRIBUTOR_BASE_URL ?= "https://api.transparency.dev"
+FT_BIN_URL ?= http://$(shell hostname --fqdn):9944/artefacts/
+FT_LOG_URL ?= http://$(shell hostname --fqdn):9944/log/
+REST_DISTRIBUTOR_BASE_URL ?= https://api.transparency.dev
 
 TAMAGO_SEMVER = $(shell [ -n "${TAMAGO}" -a -x "${TAMAGO}" ] && ${TAMAGO} version | sed 's/.*go\([0-9]\.[0-9]*\.[0-9]*\).*/\1/')
 MINIMUM_TAMAGO_VERSION=1.21.3
