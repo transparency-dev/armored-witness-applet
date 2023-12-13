@@ -12,12 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-BUILD_USER ?= $(shell whoami)
-BUILD_HOST ?= $(shell hostname)
-BUILD_DATE ?= $(shell /bin/date -u "+%Y-%m-%d %H:%M:%S")
 BUILD_EPOCH := $(shell /bin/date -u "+%s")
 BUILD_TAGS = linkramsize,linkramstart,disable_fr_auth,linkprintk,nostatfs
-BUILD = ${BUILD_USER}@${BUILD_HOST} on ${BUILD_DATE}
 REV = $(shell git rev-parse --short HEAD 2> /dev/null)
 GIT_SEMVER_TAG ?= $(shell (git describe --tags --exact-match --match 'v*.*.*' 2>/dev/null || git describe --match 'v*.*.*' --tags 2>/dev/null || git describe --tags 2>/dev/null || echo -n v0.0.${BUILD_EPOCH}+`git rev-parse HEAD`) | tail -c +2 )
 FT_BIN_URL ?= "http://$(shell hostname --fqdn):9944/artefacts/"
@@ -44,7 +40,7 @@ ARCH = "arm"
 
 GOFLAGS = -tags ${BUILD_TAGS} -trimpath \
         -ldflags "-T ${TEXT_START} -E ${ENTRY_POINT} -R 0x1000 \
-                  -X 'main.Build=${BUILD}' -X 'main.Revision=${REV}' -X 'main.Version=${GIT_SEMVER_TAG}' \
+                  -X 'main.Revision=${REV}' -X 'main.Version=${GIT_SEMVER_TAG}' \
                   -X 'main.RestDistributorBaseURL=${REST_DISTRIBUTOR_BASE_URL}' \
                   -X 'main.updateBinariesURL=${FT_BIN_URL}' \
                   -X 'main.updateLogURL=${FT_LOG_URL}' \
