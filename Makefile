@@ -38,7 +38,7 @@ ENTRY_POINT := _rt0_arm_tamago
 
 ARCH = "arm"
 
-GOFLAGS = -tags ${BUILD_TAGS} -trimpath \
+GOFLAGS = -tags ${BUILD_TAGS} -trimpath -buildvcs=false -buildmode=exe \
         -ldflags "-T ${TEXT_START} -E ${ENTRY_POINT} -R 0x1000 \
                   -X 'main.Revision=${REV}' -X 'main.Version=${GIT_SEMVER_TAG}' \
                   -X 'main.RestDistributorBaseURL=${REST_DISTRIBUTOR_BASE_URL}' \
