@@ -122,7 +122,7 @@ substitutions:
   # Log-related.
   _ENTRIES_DIR: firmware-log-sequence
   # This must correspond with the trailing number on the _FIRMWARE_BUCKET, _ORIGIN, _LOG_NAME values.
-  _KEY_VERSION: 1
+  _KEY_VERSION: '1'
   _ORIGIN: transparency.dev/armored-witness/firmware_transparency/ci/1
   _LOG_NAME: armored-witness-firmware-log-ci-1
   _LOG_BASE_URL: https://api.transparency.dev/armored-witness-firmware/ci/log/1/
