@@ -106,7 +106,7 @@ steps:
       - call
       - sequence
       - --data
-      - '{"entriesDir": "${_ENTRIES_DIR}", "origin": "${_ORIGIN}", "bucket": "${_LOG_NAME}", "kmsKeyName": "ft-log-prod", "kmsKeyRing": "firmware-release-prod", "kmsKeyVersion": 1, "kmsKeyLocation": "global", "noteKeyName": "transparency.dev-aw-ftlog-prod"}'
+      - '{"entriesDir": "${_ENTRIES_DIR}", "origin": "${_ORIGIN}", "bucket": "${_LOG_NAME}", "kmsKeyName": "ft-log-prod", "kmsKeyRing": "firmware-release-prod", "kmsKeyVersion": ${_KEY_VERSION}, "kmsKeyLocation": "global", "noteKeyName": "transparency.dev-aw-ftlog-prod"}'
   # Integrate log entry.
   - name: gcr.io/cloud-builders/gcloud
     args:
@@ -114,7 +114,7 @@ steps:
       - call
       - integrate
       - --data
-      - '{"origin": "${_ORIGIN}", "bucket": "${_LOG_NAME}", "kmsKeyName": "ft-log-prod", "kmsKeyRing": "firmware-release-prod", "kmsKeyVersion": 1, "kmsKeyLocation": "global", "noteKeyName": "transparency.dev-aw-ftlog-prod"}'
+      - '{"origin": "${_ORIGIN}", "bucket": "${_LOG_NAME}", "kmsKeyName": "ft-log-prod", "kmsKeyRing": "firmware-release-prod", "kmsKeyVersion": ${_KEY_VERSION}, "kmsKeyLocation": "global", "noteKeyName": "transparency.dev-aw-ftlog-prod"}'
 substitutions:
   # Build-related.
   _FIRMWARE_BUCKET: armored-witness-firmware
@@ -122,10 +122,12 @@ substitutions:
   _TAMAGO_VERSION: '1.21.3'
   # Log-related.
   _ENTRIES_DIR: firmware-log-sequence
-  _ORIGIN: transparency.dev/armored-witness/firmware_transparency/prod/0
+  # This must correspond with the trailing number on the _FIRMWARE_BUCKET, _ORIGIN, _LOG_NAME values.
+  _KEY_VERSION: '1'
+  _ORIGIN: transparency.dev/armored-witness/firmware_transparency/prod/1
   _LOG_NAME: armored-witness-firmware-log
-  _LOG_BASE_URL: https://storage.mtls.cloud.google.com/armored-witness-firmware-log/
-  _BIN_BASE_URL: https://storage.mtls.cloud.google.com/armored-witness-firmware/
+  _LOG_BASE_URL: https://api.transparency.dev/armored-witness-firmware/prod/log/1/
+  _BIN_BASE_URL: https://api.transparency.dev/armored-witness-firmware/prod/artefacts/1/
   _LOG_PUBLIC_KEY: transparency.dev-aw-ftlog-prod+1d0792e5+Aa3qdhefd2cc/98jV3blslJT2L+iFR8WKHeGcgFmyjnt
   _APPLET_PUBLIC_KEY: transparency.dev-aw-applet-prod+f022187a+AZSnFa8GxH+jHV6ahELk6peqVObbPKrYAdYyMjrzNF35
   _OS_PUBLIC_KEY1: transparency.dev-aw-os-prod+03170554+AV7mmRamQp6VC9CutzSXzqtNhYNyNmQQRcLX07F6qlC1
