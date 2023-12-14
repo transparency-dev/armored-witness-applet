@@ -91,20 +91,25 @@ steps:
       - output/trusted_applet_manifest
   ### Write the firmware release to the transparency log.
   # Copy the log entry to the sequence bucket, preparing to write to log.
+  #
+  # Use the SHA256 of the manifest as the directory to contain the entry that
+  # this trigger instance is trying to add to the log. This allows multiple
+  # triggers to run without colliding.
   - name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
     args:
-      - storage
-      - cp
-      - output/trusted_applet_manifest
-      - gs://${_LOG_NAME}/${_ENTRIES_DIR}/trusted_applet_manifest
+      - -c
+      - |
+        gcloud storage cp output/trusted_applet_manifest \
+        gs://${_LOG_NAME}/$(sha256sum output/trusted_applet_manifest | cut -f1 -d" ")/trusted_applet_manifest
   # Sequence log entry.
   - name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
     args:
-      - functions
-      - call
-      - sequence
-      - --data
-      - '{"entriesDir": "${_ENTRIES_DIR}", "origin": "${_ORIGIN}", "bucket": "${_LOG_NAME}", "kmsKeyName": "ft-log-ci", "kmsKeyRing": "firmware-release-ci", "kmsKeyVersion": ${_KEY_VERSION}, "kmsKeyLocation": "global", "noteKeyName": "transparency.dev-aw-ftlog-ci"}'
+      - -c
+      - |
+        gcloud functions call sequence \
+        --data="{\"entriesDir\": \"$(sha256sum output/trusted_applet_manifest | cut -f1 -d" ")\", \"origin\": \"${_ORIGIN}\", \"bucket\": \"${_LOG_NAME}\", \"kmsKeyName\": \"ft-log-ci\", \"kmsKeyRing\": \"firmware-release-ci\", \"kmsKeyVersion\": 1, \"kmsKeyLocation\": \"global\", \"noteKeyName\": \"transparency.dev-aw-ftlog-ci\"}"
   # Integrate log entry.
   - name: gcr.io/cloud-builders/gcloud
     args:
@@ -112,7 +117,16 @@ steps:
       - call
       - integrate
       - --data
-      - '{"origin": "${_ORIGIN}", "bucket": "${_LOG_NAME}", "kmsKeyName": "ft-log-ci", "kmsKeyRing": "firmware-release-ci", "kmsKeyVersion": ${_KEY_VERSION}, "kmsKeyLocation": "global", "noteKeyName": "transparency.dev-aw-ftlog-ci"}'
+      - '{"origin": "${_ORIGIN}", "bucket": "${_LOG_NAME}", "kmsKeyName": "ft-log-ci", "kmsKeyRing": "firmware-release-ci", "kmsKeyVersion": 1, "kmsKeyLocation": "global", "noteKeyName": "transparency.dev-aw-ftlog-ci"}'
+  # Clean up the file we added to the log bucket now that it's been integrated
+  # to the log.
+  - name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gcloud storage rm \
+        gs://${_LOG_NAME}/$(sha256sum output/trusted_applet_manifest | cut -f1 -d" ")/trusted_applet_manifest
 substitutions:
   # Build-related.
   _FIRMWARE_BUCKET: armored-witness-firmware-ci-1
