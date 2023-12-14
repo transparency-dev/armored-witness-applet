@@ -126,8 +126,8 @@ substitutions:
   _KEY_VERSION: 1
   _ORIGIN: transparency.dev/armored-witness/firmware_transparency/prod/1
   _LOG_NAME: armored-witness-firmware-log
-  _LOG_BASE_URL: https://api.transparency.dev/armored-witness-firmware/prod/log/1
-  _BIN_BASE_URL: https://api.transparency.dev/armored-witness-firmware/prod/artefacts/1
+  _LOG_BASE_URL: https://api.transparency.dev/armored-witness-firmware/prod/log/1/
+  _BIN_BASE_URL: https://api.transparency.dev/armored-witness-firmware/prod/artefacts/1/
   _LOG_PUBLIC_KEY: transparency.dev-aw-ftlog-prod+1d0792e5+Aa3qdhefd2cc/98jV3blslJT2L+iFR8WKHeGcgFmyjnt
   _APPLET_PUBLIC_KEY: transparency.dev-aw-applet-prod+f022187a+AZSnFa8GxH+jHV6ahELk6peqVObbPKrYAdYyMjrzNF35
   _OS_PUBLIC_KEY1: transparency.dev-aw-os-prod+03170554+AV7mmRamQp6VC9CutzSXzqtNhYNyNmQQRcLX07F6qlC1
