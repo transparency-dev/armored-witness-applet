@@ -3,7 +3,7 @@ module github.com/transparency-dev/armored-witness-applet
 go 1.20
 
 require (
-	github.com/beevik/ntp v1.3.0
+	github.com/beevik/ntp v1.3.1
 	github.com/coreos/go-semver v0.3.1
 	github.com/google/go-cmp v0.6.0
 	github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e
@@ -24,7 +24,7 @@ require (
 	golang.org/x/mod v0.14.0
 	golang.org/x/term v0.15.0
 	google.golang.org/grpc v1.60.1
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.32.0
 	gopkg.in/yaml.v3 v3.0.1
 	gvisor.dev/gvisor v0.0.0-20230614190805-57027c7d31f8
 	k8s.io/klog/v2 v2.110.1
