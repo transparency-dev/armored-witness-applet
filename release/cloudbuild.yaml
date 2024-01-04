@@ -102,26 +102,15 @@ steps:
       - -c
       - |
         gcloud storage cp output/trusted_applet_manifest \
-        gs://${_LOG_NAME}/${_ENTRIES_DIR}/$(sha256sum output/trusted_applet_manifest | cut -f1 -d" ")
+        gs://${_LOG_NAME}/${_ENTRIES_DIR}/$(sha256sum output/trusted_applet_manifest | cut -f1 -d" ")/trusted_applet_manifest
   # Sequence log entry.
   - name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
     args:
-      - functions
-      - call
-      - sequence
-      - --data
-      - >-
-        {
-          "entriesDir": "${_ENTRIES_DIR}",
-          "origin": "${_ORIGIN}",
-          "bucket": "${_LOG_NAME}",
-          "kmsKeyName": "ft-log-prod",
-          "kmsKeyRing": "firmware-release-prod",
-          "kmsKeyVersion": ${_KEY_VERSION},
-          "kmsKeyLocation": "global",
-          "noteKeyName": "transparency.dev-aw-ftlog-prod",
-          "checkpointCacheControl": "${_CHECKPOINT_CACHE}"
-        }
+      - -c
+      - |
+        gcloud functions call sequence \
+        --data="{\"entriesDir\": \"${_ENTRIES_DIR}/$(sha256sum output/trusted_applet_manifest | cut -f1 -d" ")\", \"origin\": \"${_ORIGIN}\", \"bucket\": \"${_LOG_NAME}\", \"kmsKeyName\": \"ft-log-prod\", \"kmsKeyRing\": \"firmware-release-prod\", \"kmsKeyVersion\": 1, \"kmsKeyLocation\": \"global\", \"noteKeyName\": \"transparency.dev-aw-ftlog-prod\", \"checkpointCacheControl\": \"${_CHECKPOINT_CACHE}\"}"
   # Integrate log entry.
   - name: gcr.io/cloud-builders/gcloud
     args:
@@ -148,7 +137,7 @@ steps:
       - -c
       - |
         gcloud storage rm \
-        gs://${_LOG_NAME}/${_ENTRIES_DIR}/$(sha256sum output/trusted_applet_manifest | cut -f1 -d" ")
+        gs://${_LOG_NAME}/${_ENTRIES_DIR}/$(sha256sum output/trusted_applet_manifest | cut -f1 -d" ")/trusted_applet_manifest
 substitutions:
   # Build-related.
   _FIRMWARE_BUCKET: armored-witness-firmware
