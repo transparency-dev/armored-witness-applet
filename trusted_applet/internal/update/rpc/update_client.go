@@ -25,6 +25,8 @@ import (
 	"github.com/usbarmory/GoTEE/syscall"
 )
 
+const fwUpdateChunkSize = 1 << 20
+
 // Client is an implementation of the Local interface which uses RPCs to the TrustedOS
 // to perform the updates.
 type Client struct {
@@ -43,34 +45,39 @@ func (r Client) GetInstalledVersions() (os, applet semver.Version, err error) {
 // InstallOS updates the OS to the version contained in the firmware bundle.
 // If the update is successful, the RPC will not return.
 func (r Client) InstallOS(fb firmware.Bundle) error {
-	log.Print("Requesting OS install from OS...")
-	fu := &rpc.FirmwareUpdate{
-		Image: fb.Firmware,
-		Proof: config.ProofBundle{
-			Checkpoint:     fb.Checkpoint,
-			LogIndex:       fb.Index,
-			InclusionProof: fb.InclusionProof,
-			Manifest:       fb.Manifest,
-		},
-	}
-	return syscall.Call("RPC.InstallOS", fu, nil)
-
+	return sendChunkedUpdate("OS", "RPC.InstallOS", fb)
 }
 
 // InstallApplet updates the Applet to the version contained in the firmware bundle.
 // If the update is successful, the RPC will not return.
 func (r Client) InstallApplet(fb firmware.Bundle) error {
-	log.Print("Requesting applet install from OS...")
-	fu := &rpc.FirmwareUpdate{
-		Image: fb.Firmware,
-		Proof: config.ProofBundle{
-			Checkpoint:     fb.Checkpoint,
-			LogIndex:       fb.Index,
-			InclusionProof: fb.InclusionProof,
-			Manifest:       fb.Manifest,
-		},
+	return sendChunkedUpdate("applet", "RPC.InstallApplet", fb)
+}
+
+// sendChunkedUpdate sends a chunked OS or Applet firmware update request via one or
+// more RPCs to the OS.
+func sendChunkedUpdate(t string, rpcName string, fb firmware.Bundle) error {
+	log.Printf("Requesting %s install from OS...", t)
+	fu := &rpc.FirmwareUpdate{}
+	for i := uint(0); ; i++ {
+		fu.Sequence = i
+		size := fwUpdateChunkSize
+		if rem := len(fb.Firmware); size >= rem {
+			fu.Proof = config.ProofBundle{
+				Checkpoint:     fb.Checkpoint,
+				LogIndex:       fb.Index,
+				InclusionProof: fb.InclusionProof,
+				Manifest:       fb.Manifest,
+			}
+			size = rem
+		}
+		fu.Image = fb.Firmware[:size]
+		fb.Firmware = fb.Firmware[size:]
+		log.Printf("Sending %s chunk %d", t, i)
+		if err := syscall.Call(rpcName, fu, nil); err != nil {
+			return err
+		}
 	}
-	return syscall.Call("RPC.InstallApplet", fu, nil)
 }
 
 // Reboot instructs the device to reboot after new firmware is installed.
