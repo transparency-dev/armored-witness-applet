@@ -63,22 +63,14 @@ steps:
         --tamago_version=${_TAMAGO_VERSION} \
         --raw \
         --output_file=output/trusted_applet_manifest_unsigned.json
-  # Sign the log entry.
-  - name: golang
-    args:
-      - go
-      - run
-      - github.com/transparency-dev/armored-witness/cmd/sign
-      - --project_name=${PROJECT_ID}
-      - --release=ci
-      - --artefact=applet
-      - --manifest_file=output/trusted_applet_manifest_unsigned.json
-      - --output_file=output/trusted_applet_manifest
-  # Print the content of the signed manifest.
+  # TODO: sign the log entry with github.com/transparency-dev/armored-witness/cmd/sign
+  # after we create presubmit keys.
+  #
+  # Print the content of the manifest.
   - name: bash
     args:
       - cat
-      - output/trusted_applet_manifest
+      - output/trusted_applet_manifest_unsigned.json
 substitutions:
   # Build-related.
   _TAMAGO_VERSION: '1.21.3'
