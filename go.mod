@@ -11,7 +11,7 @@ require (
 	github.com/prometheus/client_golang v1.18.0
 	github.com/transparency-dev/armored-witness-boot v0.0.0-20230904140406-e2e16c7665b7
 	github.com/transparency-dev/armored-witness-common v0.0.0-20231031160117-eefcf9dd7f27
-	github.com/transparency-dev/armored-witness-os v0.0.0-20230904142303-8cff7e12c215
+	github.com/transparency-dev/armored-witness-os v0.0.0-20240108152453-1d7ba4685285
 	github.com/transparency-dev/formats v0.0.0-20231205184308-949529efd6b3
 	github.com/transparency-dev/merkle v0.0.2
 	github.com/transparency-dev/serverless-log v0.0.0-20231215122707-66f68a7705f5
