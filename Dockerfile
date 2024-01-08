@@ -9,6 +9,7 @@ ARG APPLET_PUBLIC_KEY
 ARG OS_PUBLIC_KEY1
 ARG OS_PUBLIC_KEY2
 ARG GIT_SEMVER_TAG
+ARG REST_DISTRIBUTOR_BASE_URL
 
 # Install dependencies.
 RUN apt-get update && apt-get install -y git make wget
@@ -23,6 +24,12 @@ COPY . .
 # Set Tamago path for Make rule.
 ENV TAMAGO=/usr/local/tamago-go/bin/go
 
+# The Makefile expects verifiers to be stored in files, so do that.
+RUN echo "${APPLET_PUBLIC_KEY}" > /tmp/applet.pub
+RUN echo "${LOG_PUBLIC_KEY}" > /tmp/log.pub
+RUN echo "${OS_PUBLIC_KEY1}" > /tmp/os1.pub
+RUN echo "${OS_PUBLIC_KEY2}" > /tmp/os2.pub
+
 # Firmware transparency parameters for output binary.
 ENV FT_LOG_URL=${FT_LOG_URL} \
     FT_BIN_URL=${FT_BIN_URL} \
@@ -31,10 +38,7 @@ ENV FT_LOG_URL=${FT_LOG_URL} \
     APPLET_PUBLIC_KEY="/tmp/applet.pub" \
     OS_PUBLIC_KEY1="/tmp/os1.pub" \
     OS_PUBLIC_KEY2="/tmp/os2.pub" \
-    GIT_SEMVER_TAG=${GIT_SEMVER_TAG}
+    GIT_SEMVER_TAG=${GIT_SEMVER_TAG} \
+    REST_DISTRIBUTOR_BASE_URL=${REST_DISTRIBUTOR_BASE_URL}
 
-RUN echo "${APPLET_PUBLIC_KEY}" > /tmp/applet.pub
-RUN echo "${LOG_PUBLIC_KEY}" > /tmp/log.pub
-RUN echo "${OS_PUBLIC_KEY1}" > /tmp/os1.pub
-RUN echo "${OS_PUBLIC_KEY2}" > /tmp/os2.pub
 RUN make trusted_applet_nosign
