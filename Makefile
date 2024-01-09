@@ -21,7 +21,7 @@ FT_LOG_URL ?= http://$(shell hostname --fqdn):9944/log/
 REST_DISTRIBUTOR_BASE_URL ?= https://api.transparency.dev
 
 TAMAGO_SEMVER = $(shell [ -n "${TAMAGO}" -a -x "${TAMAGO}" ] && ${TAMAGO} version | sed 's/.*go\([0-9]\.[0-9]*\.[0-9]*\).*/\1/')
-MINIMUM_TAMAGO_VERSION=1.21.3
+MINIMUM_TAMAGO_VERSION=1.21.5
 
 SHELL = /bin/bash
 

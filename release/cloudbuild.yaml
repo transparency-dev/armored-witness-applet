@@ -153,7 +153,7 @@ substitutions:
   # Build-related.
   _FIRMWARE_BUCKET: armored-witness-firmware
   _FIRMWARE_COMPONENT: trusted-applet
-  _TAMAGO_VERSION: '1.21.3'
+  _TAMAGO_VERSION: '1.21.5'
   # Log-related.
   _ENTRIES_DIR: firmware-log-sequence
   # This must correspond with the trailing number on the _FIRMWARE_BUCKET, _ORIGIN, _LOG_NAME values.
