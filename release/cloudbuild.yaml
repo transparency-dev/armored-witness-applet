@@ -48,13 +48,8 @@ steps:
   - name: golang
     args:
       - go
-      - get
-      - github.com/transparency-dev/armored-witness/cmd/manifest
-  - name: golang
-    args:
-      - go
       - run
-      - github.com/transparency-dev/armored-witness/cmd/manifest
+      - github.com/transparency-dev/armored-witness/cmd/manifest@main
       - create
       - --git_tag=${TAG_NAME}
       - --git_commit_fingerprint=${COMMIT_SHA}
@@ -67,13 +62,8 @@ steps:
   - name: golang
     args:
       - go
-      - get
-      - github.com/transparency-dev/armored-witness/cmd/sign
-  - name: golang
-    args:
-      - go
       - run
-      - github.com/transparency-dev/armored-witness/cmd/sign
+      - github.com/transparency-dev/armored-witness/cmd/sign@main
       - --project_name=${PROJECT_ID}
       - --release=prod
       - --artefact=applet
@@ -153,7 +143,7 @@ substitutions:
   # Build-related.
   _FIRMWARE_BUCKET: armored-witness-firmware
   _FIRMWARE_COMPONENT: trusted-applet
-  _TAMAGO_VERSION: '1.21.3'
+  _TAMAGO_VERSION: '1.21.5'
   # Log-related.
   _ENTRIES_DIR: firmware-log-sequence
   # This must correspond with the trailing number on the _FIRMWARE_BUCKET, _ORIGIN, _LOG_NAME values.
