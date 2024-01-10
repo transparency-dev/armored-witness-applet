@@ -48,13 +48,8 @@ steps:
   - name: golang
     args:
       - go
-      - get
-      - github.com/transparency-dev/armored-witness/cmd/manifest
-  - name: golang
-    args:
-      - go
       - run
-      - github.com/transparency-dev/armored-witness/cmd/manifest
+      - github.com/transparency-dev/armored-witness/cmd/manifest@main
       - create
       - --git_tag=${TAG_NAME}
       - --git_commit_fingerprint=${COMMIT_SHA}
@@ -67,13 +62,8 @@ steps:
   - name: golang
     args:
       - go
-      - get
-      - github.com/transparency-dev/armored-witness/cmd/sign
-  - name: golang
-    args:
-      - go
       - run
-      - github.com/transparency-dev/armored-witness/cmd/sign
+      - github.com/transparency-dev/armored-witness/cmd/sign@main
       - --project_name=${PROJECT_ID}
       - --release=prod
       - --artefact=applet
