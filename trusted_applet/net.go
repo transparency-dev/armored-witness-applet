@@ -367,16 +367,7 @@ func startNetworking() (err error) {
 	// hook interface into Go runtime
 	net.SocketFunc = iface.Socket
 
-	http.DefaultClient = &http.Client{
-		Transport: &http.Transport{
-			ForceAttemptHTTP2:     true,
-			IdleConnTimeout:       1 * time.Second,
-			TLSHandshakeTimeout:   30 * time.Second,
-			ExpectContinueTimeout: 30 * time.Second,
-			DisableKeepAlives:     true,
-		},
-		Timeout: httpTimeout,
-	}
+	http.DefaultClient.Timeout = httpTimeout
 
 	return
 }
