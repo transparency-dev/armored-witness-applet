@@ -79,6 +79,7 @@ var (
 func init() {
 	log.SetFlags(log.Ltime)
 	log.SetOutput(os.Stdout)
+	runtime.Exit = applet.Exit
 }
 
 func main() {
