@@ -208,5 +208,5 @@ func readHTTP(ctx context.Context, u *url.URL, timeout time.Duration, logProgres
 		klog.Infof("Downloading %q: finished", u.String())
 	}
 
-	return b, fmt.Errorf("io.ReadAll(): %v", err)
+	return b, nil
 }
