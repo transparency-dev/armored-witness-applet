@@ -85,7 +85,7 @@ func updater(ctx context.Context) (*update.Fetcher, *update.Updater, error) {
 
 	updateFetcher, err := update.NewFetcher(ctx,
 		update.FetcherOpts{
-			LogFetcher:     newFetcher(logBaseURL, 10*time.Second, false),
+			LogFetcher:     newFetcher(logBaseURL, 30*time.Second, false),
 			LogOrigin:      updateLogOrigin,
 			LogVerifier:    logVerifier,
 			BinaryFetcher:  binFetcher,
@@ -171,13 +171,10 @@ func readHTTP(ctx context.Context, u *url.URL, timeout time.Duration, logProgres
 	if err != nil {
 		return nil, err
 	}
-	hc := http.DefaultClient
-	if timeout > 0 {
-		// Clone DefaultClient and set a timeout.
-		dc := *hc
-		hc = &dc
-		hc.Timeout = timeout
-	}
+	// Clone DefaultClient and set a timeout.
+	dc := *http.DefaultClient
+	hc := &dc
+	hc.Timeout = timeout
 	resp, err := hc.Do(req.WithContext(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("http.Client.Do(): %v", err)
