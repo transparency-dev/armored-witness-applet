@@ -30,8 +30,12 @@ import (
 	"gvisor.dev/gvisor/pkg/buffer"
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/header"
+	"gvisor.dev/gvisor/pkg/tcpip/network/arp"
 	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
+	"gvisor.dev/gvisor/pkg/tcpip/transport/icmp"
+	"gvisor.dev/gvisor/pkg/tcpip/transport/tcp"
+	"gvisor.dev/gvisor/pkg/tcpip/transport/udp"
 
 	"github.com/beevik/ntp"
 	"github.com/transparency-dev/armored-witness-applet/third_party/dhcp"
@@ -357,7 +361,18 @@ func startNetworking() (err error) {
 		return fmt.Errorf("failed to fetch Status: %v", err)
 	}
 
-	if iface, err = enet.Init(nil, cfg.IP, cfg.Netmask, mac(status.Serial), cfg.Gateway, int(nicID)); err != nil {
+	s := stack.New(stack.Options{
+		NetworkProtocols: []stack.NetworkProtocolFactory{
+			ipv4.NewProtocol,
+			arp.NewProtocol,
+		},
+		TransportProtocols: []stack.TransportProtocolFactory{
+			tcp.NewProtocol,
+			icmp.NewProtocol4,
+			udp.NewProtocol,
+		},
+	})
+	if iface, err = enet.Init(nil, cfg.IP, cfg.Netmask, mac(status.Serial), cfg.Gateway, int(nicID), s); err != nil {
 		return
 	}
 
