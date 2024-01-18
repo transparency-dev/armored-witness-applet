@@ -77,13 +77,9 @@ github.com/transparency-dev/witness v0.0.0-20231211160907-71bfa3432a4d h1:LNQTAk
 github.com/transparency-dev/witness v0.0.0-20231211160907-71bfa3432a4d/go.mod h1:mg5H4pN0t1A1p/w+lzyDi4pajUkQ/2bQ9mfgGreivvU=
 github.com/usbarmory/GoTEE v0.0.0-20230914094934-f4f769daa5a9 h1:bVjcARGT+mwll/+no7bsCCC1UDldtuNXL00twGtLPGo=
 github.com/usbarmory/GoTEE v0.0.0-20230914094934-f4f769daa5a9/go.mod h1:mPJL62h2iMZwmu2cZ/tvjCyk0uSeq06n1UJBoigN2qY=
-github.com/usbarmory/imx-enet v0.0.0-20230622162703-9eec0bcf6bb4 h1:qdV3sa9B6hXs9W8mNhlpR5AW/VC1La1ytrt5ddHQx34=
-github.com/usbarmory/imx-enet v0.0.0-20230622162703-9eec0bcf6bb4/go.mod h1:T7T/0Fejbnj4y/uIVDcNPT1gnKNMmPsYnnshdWFuz+o=
 github.com/usbarmory/imx-enet v0.0.0-20240118082141-5f2c2e71410a h1:7tiZ7L6ZQ4CCrpQHoSNUnKNZZsV39JY2u81TvzGzLTg=
 github.com/usbarmory/imx-enet v0.0.0-20240118082141-5f2c2e71410a/go.mod h1:T7T/0Fejbnj4y/uIVDcNPT1gnKNMmPsYnnshdWFuz+o=
 github.com/usbarmory/tamago v0.0.0-20220823080407-04f05cf2a5a3/go.mod h1:Lok79mjbJnhoBGqhX5cCUsZtSemsQF5FNZW+2R1dRr8=
-github.com/usbarmory/tamago v0.0.0-20230922151120-1f76695abebe h1:h3PrTFE6iPJzyYz+/2iyIPCUS5yyuqPHRCMsW2IXk3k=
-github.com/usbarmory/tamago v0.0.0-20230922151120-1f76695abebe/go.mod h1:uCPXcPo8SZulhZPz8irfVqzwVlPZ45w7CTJxkfxueGA=
 github.com/usbarmory/tamago v0.0.0-20240118094434-dfe6a899d3a7 h1:t+T08niBplMpzl0OOPyr4rDMhscFyfjA6oQAFfcoZ1c=
 github.com/usbarmory/tamago v0.0.0-20240118094434-dfe6a899d3a7/go.mod h1:uCPXcPo8SZulhZPz8irfVqzwVlPZ45w7CTJxkfxueGA=
 golang.org/x/crypto v0.18.0 h1:PGVlW0xEltQnzFZ55hkuX5+KLyrMYhHld1YHO4AKcdc=
