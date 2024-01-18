@@ -180,7 +180,7 @@ func readHTTP(ctx context.Context, u *url.URL, timeout time.Duration, logProgres
 	}
 	resp, err := hc.Do(req.WithContext(ctx))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("http.Client.Do(): %v", err)
 	}
 	switch resp.StatusCode {
 	case http.StatusNotFound:
@@ -211,5 +211,5 @@ func readHTTP(ctx context.Context, u *url.URL, timeout time.Duration, logProgres
 		klog.Infof("Downloading %q: finished", u.String())
 	}
 
-	return b, err
+	return b, fmt.Errorf("io.ReadAll(): %v", err)
 }
