@@ -5,7 +5,7 @@ steps:
   # containing our tag in the shared workspace which other steps can inspect.
   - name: bash
     script: |
-      date +'0.0.%s-incompatible' > /workspace/fake_tag
+      date +'0.3.%s-incompatible' > /workspace/fake_tag
       cat /workspace/fake_tag
   ### Build the Trusted Applet and upload it to GCS.
   # Build an image containing the trusted applet artifacts with the Dockerfile.
