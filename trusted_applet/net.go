@@ -361,18 +361,21 @@ func startNetworking() (err error) {
 		return fmt.Errorf("failed to fetch Status: %v", err)
 	}
 
-	s := stack.New(stack.Options{
-		NetworkProtocols: []stack.NetworkProtocolFactory{
-			ipv4.NewProtocol,
-			arp.NewProtocol,
-		},
-		TransportProtocols: []stack.TransportProtocolFactory{
-			tcp.NewProtocol,
-			icmp.NewProtocol4,
-			udp.NewProtocol,
-		},
-	})
-	if iface, err = enet.Init(nil, cfg.IP, cfg.Netmask, mac(status.Serial), cfg.Gateway, int(nicID), s); err != nil {
+	iface = &enet.Interface{
+		Stack: stack.New(stack.Options{
+			NetworkProtocols: []stack.NetworkProtocolFactory{
+				ipv4.NewProtocol,
+				arp.NewProtocol,
+			},
+			TransportProtocols: []stack.TransportProtocolFactory{
+				tcp.NewProtocol,
+				icmp.NewProtocol4,
+				udp.NewProtocol,
+			},
+		}),
+	}
+
+	if err = iface.Init(nil, cfg.IP, cfg.Netmask, mac(status.Serial), cfg.Gateway); err != nil {
 		return
 	}
 

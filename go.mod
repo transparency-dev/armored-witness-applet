@@ -17,7 +17,7 @@ require (
 	github.com/transparency-dev/serverless-log v0.0.0-20231215122707-66f68a7705f5
 	github.com/transparency-dev/witness v0.0.0-20231211160907-71bfa3432a4d
 	github.com/usbarmory/GoTEE v0.0.0-20230914094934-f4f769daa5a9
-	github.com/usbarmory/imx-enet v0.0.0-20240118082141-5f2c2e71410a
+	github.com/usbarmory/imx-enet v0.0.0-20240119111743-39ba6fac5320
 	github.com/usbarmory/tamago v0.0.0-20240118094434-dfe6a899d3a7
 	golang.org/x/crypto v0.18.0
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
