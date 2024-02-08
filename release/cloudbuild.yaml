@@ -158,5 +158,5 @@ substitutions:
   _OS_PUBLIC_KEY1: transparency.dev-aw-os-prod+03170554+AV7mmRamQp6VC9CutzSXzqtNhYNyNmQQRcLX07F6qlC1
   _OS_PUBLIC_KEY2: TODO
   _REST_DISTRIBUTOR_BASE_URL: https://api.transparency.dev
-  _BEE: 1
+  _BEE: '1'
   _CHECKPOINT_CACHE: 'public, max-age=30'
