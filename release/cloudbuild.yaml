@@ -13,6 +13,7 @@ steps:
       - --build-arg=OS_PUBLIC_KEY1=${_OS_PUBLIC_KEY1}
       - --build-arg=OS_PUBLIC_KEY2=${_OS_PUBLIC_KEY2}
       - --build-arg=REST_DISTRIBUTOR_BASE_URL=${_REST_DISTRIBUTOR_BASE_URL}
+      - --build-arg=BEE=${_BEE}
       - -t
       - builder-image
       # Path is relative to the root of the repo.
@@ -157,4 +158,5 @@ substitutions:
   _OS_PUBLIC_KEY1: transparency.dev-aw-os-prod+03170554+AV7mmRamQp6VC9CutzSXzqtNhYNyNmQQRcLX07F6qlC1
   _OS_PUBLIC_KEY2: TODO
   _REST_DISTRIBUTOR_BASE_URL: https://api.transparency.dev
+  _BEE: 1
   _CHECKPOINT_CACHE: 'public, max-age=30'

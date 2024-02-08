@@ -10,6 +10,7 @@ ARG OS_PUBLIC_KEY1
 ARG OS_PUBLIC_KEY2
 ARG GIT_SEMVER_TAG
 ARG REST_DISTRIBUTOR_BASE_URL
+ARG BEE
 
 # Install dependencies.
 RUN apt-get update && apt-get install -y git make wget
@@ -39,6 +40,7 @@ ENV FT_LOG_URL=${FT_LOG_URL} \
     OS_PUBLIC_KEY1="/tmp/os1.pub" \
     OS_PUBLIC_KEY2="/tmp/os2.pub" \
     GIT_SEMVER_TAG=${GIT_SEMVER_TAG} \
-    REST_DISTRIBUTOR_BASE_URL=${REST_DISTRIBUTOR_BASE_URL}
+    REST_DISTRIBUTOR_BASE_URL=${REST_DISTRIBUTOR_BASE_URL} \
+    BEE=${BEE}
 
 RUN make trusted_applet_nosign
