@@ -51,24 +51,19 @@ func deriveWitnessKey() {
 	if !status.HAB {
 		prefix = "DEV:"
 	}
-	
+
 	// Use a counter from the RPMB as a key diversifier to ensure we get a fresh
 	// key whenever the device is wiped.
 	var counter uint32
-	if hab {
+	if status.HAB {
 		if err := syscall.Call("RPC.ReadIdentityCounterRPMB", nil, &counter); err != nil {
 			log.Fatalf("Failed to read identity counter in RPMB, %v", err)
-		}
-	} else {
-		if err := syscall.Call("RPC.ReadIdentityCounterMMC", nil, &counter); err != nil {
-			log.Fatalf("Failed to read identity counter in MMC, %v", err)
 		}
 	}
 
 	witnessSigningKey, witnessPublicKey = deriveNoteSigner(
 		fmt.Sprint(counter),
 		status.Serial,
-		status.HAB,
 		func(rnd io.Reader) string {
 			return fmt.Sprintf("%sArmoredWitness-%s", prefix, randomName(rnd))
 		})
@@ -76,11 +71,11 @@ func deriveWitnessKey() {
 
 // deriveNoteSigner uses the h/w secret to derive a new note.Signer.
 //
-// diversifier should uniquely specify the key's intended usage, uniqueID should be the
-// device's h/w unique identifier, hab should reflect the device's secure boot status, and keyName
-// should be a function which will return the name for the key - it may use the provided Reader as
-// a source of entropy while generating the name if needed.
-func deriveNoteSigner(diversifier uniqueID string, hab bool, keyName func(io.Reader) string) (string, string) {
+// diversifier should uniquely specify the key's intended usage, uniqueID
+// should be the device's h/w unique identifier, and keyName should be a
+// function which will return the name for the key - it may use the provided
+// Reader as a source of entropy while generating the name if needed.
+func deriveNoteSigner(diversifier string, uniqueID string, keyName func(io.Reader) string) (string, string) {
 	// We'll use the provided RPC call to do the derivation in h/w, but since this is based on
 	// AES it expects the diversifier to be 16 bytes long.
 	// We'll hash our diversifier text and truncate to 16 bytes, and use that:
