@@ -74,13 +74,15 @@ func updater(ctx context.Context) (*update.Fetcher, *update.Updater, error) {
 		return nil, nil, fmt.Errorf("binaries URL invalid: %v", err)
 	}
 	bf := newFetcher(binBaseURL, 5*time.Minute, true)
-	binFetcher := func(ctx context.Context, r ftlog.FirmwareRelease) ([]byte, error) {
+	binFetcher := func(ctx context.Context, r ftlog.FirmwareRelease) ([]byte, []byte, error) {
 		p, err := update.BinaryPath(r)
 		if err != nil {
-			return nil, fmt.Errorf("BinaryPath: %v", err)
+			return nil, nil, fmt.Errorf("BinaryPath: %v", err)
 		}
 		klog.Infof("Fetching %v bin from %q", r.Component, p)
-		return bf(ctx, p)
+		// We don't auto-update the bootloader, so no need to fetch HAB signatures.
+		bin, err := bf(ctx, p)
+		return bin, nil, err
 	}
 
 	updateFetcher, err := update.NewFetcher(ctx,
