@@ -72,6 +72,7 @@ steps:
           --firmware_file=output/trusted_applet.elf \
           --firmware_type=TRUSTED_APPLET \
           --tamago_version=${_TAMAGO_VERSION} \
+          --build_env="BEE=${_BEE}" \
           --raw \
           --output_file=output/trusted_applet_manifest_unsigned.json
   # Sign the log entry.
