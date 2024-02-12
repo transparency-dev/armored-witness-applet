@@ -62,7 +62,7 @@ func deriveWitnessKey() {
 	}
 
 	witnessSigningKey, witnessPublicKey = deriveNoteSigner(
-		fmt.Sprint(counter),
+		fmt.Sprintf("%s%d", prefix, counter),
 		status.Serial,
 		func(rnd io.Reader) string {
 			return fmt.Sprintf("%sArmoredWitness-%s", prefix, randomName(rnd))
