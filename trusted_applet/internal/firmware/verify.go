@@ -20,7 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/transparency-dev/armored-witness-applet/api"
+	"github.com/transparency-dev/armored-witness-common/release/firmware/ftlog"
 	"github.com/transparency-dev/formats/log"
 	"github.com/transparency-dev/merkle/proof"
 	"github.com/transparency-dev/merkle/rfc6962"
@@ -58,7 +58,7 @@ func (v *BundleVerifier) Verify(b Bundle) error {
 		return fmt.Errorf("ParseCheckpoint(): %v", err)
 	}
 	manifestHash := rfc6962.DefaultHasher.HashLeaf(b.Manifest)
-	manifest := api.FirmwareRelease{}
+	manifest := ftlog.FirmwareRelease{}
 	if err := json.Unmarshal(b.Manifest, &manifest); err != nil {
 		return fmt.Errorf("Unmarshal(): %v", err)
 	}
