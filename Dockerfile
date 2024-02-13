@@ -10,6 +10,8 @@ ARG OS_PUBLIC_KEY1
 ARG OS_PUBLIC_KEY2
 ARG GIT_SEMVER_TAG
 ARG REST_DISTRIBUTOR_BASE_URL
+# Build environment variables. In addition to routing these through to the make
+# command, they MUST also be committed to in the manifest.
 ARG BEE
 
 # Install dependencies.
