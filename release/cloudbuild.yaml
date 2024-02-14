@@ -57,6 +57,14 @@ steps:
       - --firmware_file=output/trusted_applet.elf
       - --firmware_type=TRUSTED_APPLET
       - --tamago_version=${_TAMAGO_VERSION}
+      - --build_env=FT_LOG_URL=${_LOG_BASE_URL}
+      - --build_env=FT_BIN_URL=${_BIN_BASE_URL}
+      - --build_env=LOG_ORIGIN=${_ORIGIN}
+      - --build_env=LOG_PUBLIC_KEY=${_LOG_PUBLIC_KEY}
+      - --build_env=APPLET_PUBLIC_KEY=${_APPLET_PUBLIC_KEY}
+      - --build_env=OS_PUBLIC_KEY1=${_OS_PUBLIC_KEY1}
+      - --build_env=OS_PUBLIC_KEY2=${_OS_PUBLIC_KEY2}
+      - --build_env=REST_DISTRIBUTOR_BASE_URL=${_REST_DISTRIBUTOR_BASE_URL}
       - --build_env=BEE=${_BEE}
       - --raw
       - --output_file=output/trusted_applet_manifest_unsigned.json
