@@ -163,7 +163,7 @@ $(APP)_manifest:
 	fi
 	# Create manifest
 	@echo ---------- Manifest --------------
-	go run github.com/transparency-dev/armored-witness/cmd/manifest@228f2f6432babe1f1657e150ce0ca4a96ab394da \
+	go run github.com/transparency-dev/armored-witness/cmd/manifest@2035e0372794bad33016cb8dbd6f43784ae1d9ca \
 		create \
 		--git_tag=${GIT_SEMVER_TAG} \
 		--git_commit_fingerprint="${REV}" \
