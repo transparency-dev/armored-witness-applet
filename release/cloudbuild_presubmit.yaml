@@ -71,6 +71,8 @@ steps:
     args:
       - cat
       - output/trusted_applet_manifest_unsigned.json
+options:
+  logging: CLOUD_LOGGING_ONLY
 substitutions:
   # Build-related.
   _TAMAGO_VERSION: '1.21.5'

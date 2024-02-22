@@ -157,6 +157,8 @@ steps:
       - |
         gcloud storage rm \
         gs://${_LOG_NAME}/${_ENTRIES_DIR}/$(sha256sum output/trusted_applet_manifest | cut -f1 -d" ")/trusted_applet_manifest
+options:
+  logging: CLOUD_LOGGING_ONLY
 substitutions:
   # Build-related.
   _FIRMWARE_BUCKET: armored-witness-firmware-ci-1
