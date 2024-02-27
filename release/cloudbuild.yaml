@@ -117,7 +117,7 @@ steps:
           \"bucket\": \"${_LOG_NAME}\",
           \"kmsKeyName\": \"ft-log-prod\",
           \"kmsKeyRing\": \"firmware-release-prod\",
-          \"kmsKeyVersion\": 1,
+          \"kmsKeyVersion\": \"${_KEY_VERSION}\",
           \"kmsKeyLocation\": \"global\",
           \"noteKeyName\": \"transparency.dev-aw-ftlog-prod\",
           \"checkpointCacheControl\": \"${_CHECKPOINT_CACHE}\"
@@ -135,7 +135,7 @@ steps:
           "bucket": "${_LOG_NAME}",
           "kmsKeyName": "ft-log-prod",
           "kmsKeyRing": "firmware-release-prod",
-          "kmsKeyVersion": ${_KEY_VERSION},
+          "kmsKeyVersion": "${_KEY_VERSION}",
           "kmsKeyLocation": "global",
           "noteKeyName": "transparency.dev-aw-ftlog-prod",
           "checkpointCacheControl": "${_CHECKPOINT_CACHE}"
