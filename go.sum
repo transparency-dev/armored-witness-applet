@@ -77,6 +77,8 @@ github.com/transparency-dev/witness v0.0.0-20231211160907-71bfa3432a4d h1:LNQTAk
 github.com/transparency-dev/witness v0.0.0-20231211160907-71bfa3432a4d/go.mod h1:mg5H4pN0t1A1p/w+lzyDi4pajUkQ/2bQ9mfgGreivvU=
 github.com/transparency-dev/witness v0.0.0-20240227091858-21f71f22230a h1:M9M9CMomAceKZEZh6BzafRqFrIxsiIju9cKFaJDWOgk=
 github.com/transparency-dev/witness v0.0.0-20240227091858-21f71f22230a/go.mod h1:ix0eYRxfCGHeDez7FxdbFLDmNMX3gKZj1Lu2UPi7y14=
+github.com/transparency-dev/witness v0.0.0-20240228174335-491a6c5299b3 h1:mtSAEKrVVfBogCos9HNgmnbxlIgxp9oPARmcspAirQo=
+github.com/transparency-dev/witness v0.0.0-20240228174335-491a6c5299b3/go.mod h1:ix0eYRxfCGHeDez7FxdbFLDmNMX3gKZj1Lu2UPi7y14=
 github.com/usbarmory/GoTEE v0.0.0-20230914094934-f4f769daa5a9 h1:bVjcARGT+mwll/+no7bsCCC1UDldtuNXL00twGtLPGo=
 github.com/usbarmory/GoTEE v0.0.0-20230914094934-f4f769daa5a9/go.mod h1:mPJL62h2iMZwmu2cZ/tvjCyk0uSeq06n1UJBoigN2qY=
 github.com/usbarmory/imx-enet v0.0.0-20240119111743-39ba6fac5320 h1:zd4GOx89DukdusWfNV+GGtLgF1bYWDd7Zf2FVsOrmgg=
