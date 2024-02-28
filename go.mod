@@ -11,15 +11,15 @@ require (
 	github.com/prometheus/client_golang v1.18.0
 	github.com/transparency-dev/armored-witness-boot v0.0.0-20230904140406-e2e16c7665b7
 	github.com/transparency-dev/armored-witness-common v0.0.0-20240220112235-78461719cb5e
-	github.com/transparency-dev/armored-witness-os v0.0.0-20240108152453-1d7ba4685285
+	github.com/transparency-dev/armored-witness-os v0.0.0-20240228140638-ad572e0498ea
 	github.com/transparency-dev/formats v0.0.0-20231205184308-949529efd6b3
 	github.com/transparency-dev/merkle v0.0.2
 	github.com/transparency-dev/serverless-log v0.0.0-20231215122707-66f68a7705f5
 	github.com/transparency-dev/witness v0.0.0-20240227091858-21f71f22230a
 	github.com/usbarmory/GoTEE v0.0.0-20230914094934-f4f769daa5a9
 	github.com/usbarmory/imx-enet v0.0.0-20240119111743-39ba6fac5320
-	github.com/usbarmory/tamago v0.0.0-20240118094434-dfe6a899d3a7
-	golang.org/x/crypto v0.19.0
+	github.com/usbarmory/tamago v0.0.0-20240221155748-0ac9f6f8a2b7
+	golang.org/x/crypto v0.20.0
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
 	golang.org/x/mod v0.15.0
 	golang.org/x/term v0.17.0
@@ -47,9 +47,9 @@ require (
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
-	golang.org/x/net v0.20.0 // indirect
+	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
-	golang.org/x/time v0.3.0 // indirect
+	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240123012728-ef4313101c80 // indirect
 )
