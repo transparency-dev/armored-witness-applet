@@ -160,8 +160,9 @@ steps:
 options:
   logging: CLOUD_LOGGING_ONLY
 substitutions:
-  # Note that these MUST all be strings, since YAML may decide to interpret some things
-  # as strings, ints, booleans, etc. Let's keep these all quoted.
+  # Note that to be a valid CloudBuild config these MUST all be strings.
+  # Without explicit quotes, some things may be interpreted as other types since
+  # this is a YAML file, so to avoid future tears let's keep these all quoted.
   #
   # Build-related.
   _FIRMWARE_BUCKET: 'armored-witness-firmware-ci-2'
