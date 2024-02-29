@@ -15,7 +15,7 @@ require (
 	github.com/transparency-dev/formats v0.0.0-20231205184308-949529efd6b3
 	github.com/transparency-dev/merkle v0.0.2
 	github.com/transparency-dev/serverless-log v0.0.0-20231215122707-66f68a7705f5
-	github.com/transparency-dev/witness v0.0.0-20240227091858-21f71f22230a
+	github.com/transparency-dev/witness v0.0.0-20240228174335-491a6c5299b3
 	github.com/usbarmory/GoTEE v0.0.0-20230914094934-f4f769daa5a9
 	github.com/usbarmory/imx-enet v0.0.0-20240119111743-39ba6fac5320
 	github.com/usbarmory/tamago v0.0.0-20240221155748-0ac9f6f8a2b7
@@ -35,7 +35,6 @@ require (
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
-	github.com/golang/glog v1.2.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/btree v1.1.2 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
