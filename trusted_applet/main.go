@@ -23,6 +23,9 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+
+	// TODO: remove
+	"net/http/pprof"
 	"strings"
 	"time"
 
@@ -291,6 +294,10 @@ func runWithNetworking(ctx context.Context) error {
 	go func() {
 		srvMux := http.NewServeMux()
 		srvMux.Handle("/metrics", promhttp.Handler())
+		srvMux.HandleFunc("/debug/pprof/", pprof.Index)
+		srvMux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		srvMux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		srvMux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
 		srv := &http.Server{
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,
