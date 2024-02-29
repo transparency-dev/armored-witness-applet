@@ -23,6 +23,9 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+
+	// TODO: remove
+	_ "net/http/pprof"
 	"strings"
 	"time"
 
