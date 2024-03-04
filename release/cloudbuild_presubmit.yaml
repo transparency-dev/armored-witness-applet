@@ -79,7 +79,7 @@ substitutions:
   # this is a YAML file, so to avoid future tears let's keep these all quoted.
   #
   # Build-related.
-  _TAMAGO_VERSION: '1.21.5'
+  _TAMAGO_VERSION: '1.22.0'
   # Log-related.
   _ORIGIN: 'transparency.dev/armored-witness/firmware_transparency/presubmit/0'
   _LOG_PUBLIC_KEY: 'transparency.dev-aw-ftlog-ci+f5479c1e+AR6gW0mycDtL17iM2uvQUThJsoiuSRirstEj9a5AdCCu'
