@@ -17,7 +17,7 @@ require (
 	github.com/transparency-dev/serverless-log v0.0.0-20231215122707-66f68a7705f5
 	github.com/transparency-dev/witness v0.0.0-20240304140949-83bd5e126be2
 	github.com/usbarmory/GoTEE v0.0.0-20230914094934-f4f769daa5a9
-	github.com/usbarmory/imx-enet v0.0.0-20240119111743-39ba6fac5320
+	github.com/usbarmory/imx-enet v0.0.0-20240304151238-5b3010d57ea3
 	github.com/usbarmory/tamago v0.0.0-20240221155748-0ac9f6f8a2b7
 	golang.org/x/crypto v0.20.0
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
@@ -26,7 +26,7 @@ require (
 	google.golang.org/grpc v1.62.0
 	google.golang.org/protobuf v1.32.0
 	gopkg.in/yaml.v3 v3.0.1
-	gvisor.dev/gvisor v0.0.0-20240109032559-fc0349e3ac32
+	gvisor.dev/gvisor v0.0.0-20240303010120-901d232cd101
 	k8s.io/klog/v2 v2.120.1
 )
 

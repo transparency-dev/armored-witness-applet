@@ -309,7 +309,7 @@ func rx(buf []byte) {
 }
 
 func tx() (buf []byte) {
-	var pkt stack.PacketBufferPtr
+	var pkt *stack.PacketBuffer
 
 	if pkt = iface.NIC.Link.Read(); pkt.IsNil() {
 		return
@@ -392,9 +392,10 @@ func startNetworking() (err error) {
 				Timeout:   30 * time.Second,
 				KeepAlive: 30 * time.Second,
 			}).DialContext,
-			ForceAttemptHTTP2:     true,
+			ForceAttemptHTTP2:     false,
 			MaxIdleConns:          100,
 			IdleConnTimeout:       90 * time.Second,
+			ResponseHeaderTimeout: 10 * time.Second,
 			TLSHandshakeTimeout:   10 * time.Second,
 			ExpectContinueTimeout: 1 * time.Second,
 		},
