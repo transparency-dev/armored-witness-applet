@@ -19,10 +19,10 @@ require (
 	github.com/usbarmory/GoTEE v0.0.0-20230914094934-f4f769daa5a9
 	github.com/usbarmory/imx-enet v0.0.0-20240304151238-5b3010d57ea3
 	github.com/usbarmory/tamago v0.0.0-20240221155748-0ac9f6f8a2b7
-	golang.org/x/crypto v0.20.0
+	golang.org/x/crypto v0.21.0
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
-	golang.org/x/mod v0.15.0
-	golang.org/x/term v0.17.0
+	golang.org/x/mod v0.16.0
+	golang.org/x/term v0.18.0
 	google.golang.org/grpc v1.62.0
 	google.golang.org/protobuf v1.32.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -47,7 +47,7 @@ require (
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240123012728-ef4313101c80 // indirect
 )
