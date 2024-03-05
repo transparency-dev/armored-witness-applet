@@ -6,7 +6,7 @@ https://github.com/transparency-dev/armored-witness-os.
 
 ## Introduction
 
-TODO
+TODO.
 
 ## Supported hardware
 
