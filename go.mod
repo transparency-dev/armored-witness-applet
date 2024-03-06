@@ -18,8 +18,8 @@ require (
 	github.com/transparency-dev/witness v0.0.0-20240304140949-83bd5e126be2
 	github.com/usbarmory/GoTEE v0.0.0-20240215171108-77a6b38432d5
 	github.com/usbarmory/imx-enet v0.0.0-20240304151238-5b3010d57ea3
-	go.mercari.io/go-dnscache v0.3.0
 	github.com/usbarmory/tamago v0.0.0-20240306113720-d7dd77b4ed17
+	go.mercari.io/go-dnscache v0.3.0
 	golang.org/x/crypto v0.21.0
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
 	golang.org/x/mod v0.16.0
