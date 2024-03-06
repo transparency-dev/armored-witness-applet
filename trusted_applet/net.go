@@ -163,10 +163,14 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 					defer func() { fDone <- true }()
 
 					log.Println("DHCP: running f")
-					if err := f(childCtx); err != nil {
-						log.Printf("runDHCP f: %v", err)
+					for {
+						if err := f(childCtx); err != nil {
+							log.Printf("runDHCP f: %v", err)
+							if errors.Is(err, context.Canceled) {
+								break
+							}
+						}
 					}
-					log.Println("DHCP: f exited")
 				}(childCtx)
 			}
 		} else {

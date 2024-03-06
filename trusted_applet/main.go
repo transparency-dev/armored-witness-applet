@@ -226,8 +226,19 @@ func runWithNetworking(ctx context.Context) error {
 	// Update status with latest IP address too.
 	syscall.Call("RPC.SetWitnessStatus", rpc.WitnessStatus{Identity: witnessPublicKey, IP: addr.Address.String()}, nil)
 
+	// Avoid the situation where, at boot, we get a DHCP lease and then immediately update our
+	// local clock from 1970 to now, whereupon we consider the DHCP lease invalid and have to tear down
+	// the witness etc. below.
+	coldStart := time.Now().Before(time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC))
+
 	select {
 	case <-runNTP(ctx):
+		if coldStart {
+			klog.Info("Large NTP date change detected, waiting for network to restart...")
+			// Give a bit of space so we don't spin while we wait for DHCP to do its thing.
+			time.Sleep(time.Second)
+			return nil
+		}
 	case <-ctx.Done():
 		return ctx.Err()
 	}
