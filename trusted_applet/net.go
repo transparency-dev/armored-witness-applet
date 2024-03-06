@@ -30,6 +30,7 @@ import (
 	"gvisor.dev/gvisor/pkg/buffer"
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/header"
+	"gvisor.dev/gvisor/pkg/tcpip/link/channel"
 	"gvisor.dev/gvisor/pkg/tcpip/network/arp"
 	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
@@ -379,8 +380,46 @@ func startNetworking() (err error) {
 		}),
 	}
 
-	if err = iface.Init(nil, cfg.IP, cfg.Netmask, mac(status.Serial), cfg.Gateway); err != nil {
-		return
+	if cfg.DHCP {
+		// This is essentially the contents of enet.Init (plus enet.configure)
+		// with anything to do with setting up static IP addresses/routes
+		// stripped out.
+		//
+		// TODO(al): Refactor imx-enet to make this cleaner
+		macAddress := mac(status.Serial)
+		linkAddress, err := net.ParseMAC(macAddress)
+		if err != nil {
+			return fmt.Errorf("invalid MAC: %v", err)
+		}
+
+		if iface.NICID == 0 {
+			iface.NICID = enet.NICID
+		}
+
+		gvHWAddress, err := tcpip.ParseMACAddress(macAddress)
+		if err != nil {
+			return fmt.Errorf("invalid MAC: %v", err)
+		}
+		iface.Link = channel.New(256, enet.MTU, gvHWAddress)
+		iface.Link.LinkEPCapabilities |= stack.CapabilityResolutionRequired
+
+		linkEP := stack.LinkEndpoint(iface.Link)
+
+		if err := iface.Stack.CreateNIC(iface.NICID, linkEP); err != nil {
+			return fmt.Errorf("%v", err)
+		}
+
+		iface.NIC = &enet.NIC{
+			MAC:    linkAddress,
+			Link:   iface.Link,
+			Device: nil,
+		}
+		err = iface.NIC.Init()
+
+	} else {
+		if err = iface.Init(nil, cfg.IP, cfg.Netmask, mac(status.Serial), cfg.Gateway); err != nil {
+			return
+		}
 	}
 
 	iface.EnableICMP()
