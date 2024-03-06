@@ -78,6 +78,8 @@ github.com/usbarmory/imx-enet v0.0.0-20240304151238-5b3010d57ea3/go.mod h1:oQC2U
 github.com/usbarmory/tamago v0.0.0-20220823080407-04f05cf2a5a3/go.mod h1:Lok79mjbJnhoBGqhX5cCUsZtSemsQF5FNZW+2R1dRr8=
 github.com/usbarmory/tamago v0.0.0-20240221155748-0ac9f6f8a2b7 h1:zHNDOW33rstGX2xusw6SdYF2lXgYTMvnjHzFsy/SUrg=
 github.com/usbarmory/tamago v0.0.0-20240221155748-0ac9f6f8a2b7/go.mod h1:uCPXcPo8SZulhZPz8irfVqzwVlPZ45w7CTJxkfxueGA=
+go.mercari.io/go-dnscache v0.3.0 h1:x5CLQvIHHPm7uq1A3ihAHAyynpUnEpHmj+sfbPjK7ec=
+go.mercari.io/go-dnscache v0.3.0/go.mod h1:k+iiZhIW/8Lykwr05O5Xms5tOfo42Rz8Hwnts1JUYNE=
 golang.org/x/crypto v0.21.0 h1:X31++rzVUdKhX5sWmSOFZxx8UW/ldWx55cbf08iNAMA=
 golang.org/x/crypto v0.21.0/go.mod h1:0BP7YvVV9gBbVKyeTG0Gyn+gZm94bibOW5BjDEYAOMs=
 golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0 h1:8O72LEpJNccHmjb2Q3Eca5knb/Up8wX5YrBFBdlKQyg=

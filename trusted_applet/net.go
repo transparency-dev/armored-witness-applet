@@ -41,6 +41,7 @@ import (
 	"github.com/beevik/ntp"
 	"github.com/transparency-dev/armored-witness-applet/third_party/dhcp"
 	"github.com/transparency-dev/armored-witness-os/api"
+	"go.mercari.io/go-dnscache"
 	"golang.org/x/term"
 
 	"github.com/usbarmory/GoTEE/applet"
@@ -63,6 +64,10 @@ const (
 
 	// Timeout for any http requests.
 	httpTimeout = 30 * time.Second
+
+	// DNS cache settings.
+	dnsUpdateFreq    = 1 * time.Minute
+	dnsUpdateTimeout = 5 * time.Second
 )
 
 // Trusted OS syscalls
@@ -425,16 +430,20 @@ func startNetworking() (err error) {
 	iface.EnableICMP()
 	iface.Link.AddNotify(&txNotification{})
 
+	resolver, err := dnscache.New(dnsUpdateFreq, dnsUpdateTimeout)
+	if err != nil {
+		return fmt.Errorf("failed to create DNS cache: %v", err)
+	}
 	// hook interface into Go runtime
 	net.SocketFunc = iface.Socket
 	http.DefaultClient = &http.Client{
 		Timeout: httpTimeout,
 		Transport: &http.Transport{
-			DisableKeepAlives: true,
-			DialContext: (&net.Dialer{
+			DialContext: dnscache.DialFunc(resolver, (&net.Dialer{
 				Timeout:   30 * time.Second,
 				KeepAlive: 30 * time.Second,
-			}).DialContext,
+			}).DialContext),
+			DisableKeepAlives:     true,
 			ForceAttemptHTTP2:     false,
 			MaxIdleConns:          100,
 			IdleConnTimeout:       90 * time.Second,
