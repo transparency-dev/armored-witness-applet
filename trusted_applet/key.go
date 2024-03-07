@@ -38,16 +38,24 @@ var (
 	witnessPublicKeyAttestation string
 )
 
-// deriveWitnessKey creates this witness' signing identity by deriving a key
-// based on the hardware's unique internal secret key and a counter stored in the RPMB
-// (currently always zero).
+// deriveIdentityKeys creates this witness' signing and attestation identities.
+//
+// Keys are derived using the OS' DeriveKey RPC, which in turn uses the hardware
+// secret along with several diversification parameters including one passed in
+// from this function.
+//
+// The witness signing ID diversifier includes the value of securely stored counter
+// which will be incremented each time a new identity is required.
+//
+// The device attestation identity uses a static diversifier, and so is intended
+// to remain stable throughout the lifetime of the (fused) device.
 //
 // TODO(al): The derived key should change if the device is wiped.
 //
-// Since we never store this derived key anywhere, for any given device this
-// function MUST reproduce the same key on each boot (until the device is wiped,
-// at which point a new stable key should be returned).
-func deriveWitnessKey() {
+// Since we never store these derived keys anywhere, for any given device (and,
+// in the case of the witness ID, counter) this function MUST reproduce the
+// same key on each boot.
+func deriveIdentityKeys() {
 	var status api.Status
 	if err := syscall.Call("RPC.Status", nil, &status); err != nil {
 		log.Fatalf("Failed to fetch Status: %v", err)
@@ -108,7 +116,6 @@ func attestID(status *api.Status, pubkey string) (string, string) {
 	if err != nil {
 		panic(fmt.Errorf("failed to create attestation signer: %v", err))
 	}
-
 	attestation, err := note.Sign(aN, aSigner)
 	if err != nil {
 		panic(fmt.Errorf("failed to sign witness ID attestation: %v", err))

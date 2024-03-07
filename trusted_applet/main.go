@@ -153,7 +153,7 @@ func main() {
 	defer syscall.Call("RPC.LED", rpc.LEDStatus{Name: "blue", On: false}, nil)
 
 	// (Re-)create our witness identity based on the device's internal secret key.
-	deriveWitnessKey()
+	deriveIdentityKeys()
 	// Update our status in OS so custodian can inspect our signing identity even if there's no network.
 	syscall.Call("RPC.SetWitnessStatus", rpc.WitnessStatus{
 		Identity:          witnessPublicKey,
