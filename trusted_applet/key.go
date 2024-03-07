@@ -30,39 +30,97 @@ import (
 )
 
 var (
-	witnessPublicKey  string
-	witnessSigningKey string
+	// attestPublicKey can be used to verify that a given witnessPublicKey
+	// was derived on a known device.
+	attestPublicKey             string
+	witnessPublicKey            string
+	witnessSigningKey           string
+	witnessPublicKeyAttestation string
 )
 
-// deriveWitnessKey creates this witness' signing identity by deriving a key
-// based on the hardware's unique internal secret key.
+// deriveIdentityKeys creates this witness' signing and attestation identities.
+//
+// Keys are derived using the OS' DeriveKey RPC, which in turn uses the hardware
+// secret along with several diversification parameters including one passed in
+// from this function.
+//
+// The witness signing ID diversifier includes the value of securely stored counter
+// which will be incremented each time a new identity is required.
+//
+// The device attestation identity uses a static diversifier, and so is intended
+// to remain stable throughout the lifetime of the (fused) device.
 //
 // TODO(al): The derived key should change if the device is wiped.
 //
-// Since we never store this derived key anywhere, for any given device this
-// function MUST reproduce the same key on each boot (until the device is wiped,
-// at which point a new stable key should be returned).
-func deriveWitnessKey() {
+// Since we never store these derived keys anywhere, for any given device (and,
+// in the case of the witness ID, counter) this function MUST reproduce the
+// same key on each boot.
+func deriveIdentityKeys() {
 	var status api.Status
 	if err := syscall.Call("RPC.Status", nil, &status); err != nil {
 		log.Fatalf("Failed to fetch Status: %v", err)
 	}
 
-	// We should add an obvious prefix to key names when we're running without secure boot
+	// Add an obvious prefix to key names when we're running without secure boot
 	prefix := ""
 	if !status.HAB {
 		prefix = "DEV:"
 	}
 
-	// TODO(al): We'll switch to using a counter from the RPMB to ensure we get a fresh key
-	// whenever the device is wiped. For now we'll just use a static diversifier.
 	witnessSigningKey, witnessPublicKey = deriveNoteSigner(
-		fmt.Sprintf("%sWitnessKey-test", prefix),
+		fmt.Sprintf("%sWitnessKey-id:%d", prefix, status.IdentityCounter),
 		status.Serial,
 		status.HAB,
 		func(rnd io.Reader) string {
 			return fmt.Sprintf("%sArmoredWitness-%s", prefix, randomName(rnd))
 		})
+
+	attestPublicKey, witnessPublicKeyAttestation = attestID(&status, witnessPublicKey)
+
+}
+
+// attestID creates a signer which is forever static for a fused device, and uses
+// that to sign a note which binds the passed in witness ID to this device's
+// serial number and current identity counter.
+//
+// The attestation note contents is formatted like so:
+//
+//	"ArmoredWitness ID attestation v1"
+//	<Device serial string>
+//	<Witness identity counter in decimal>
+//	<Witness identity note verifier string>
+//
+// Returns the note verifier string which can be used to open the note, and the note containing the witness ID attestation.
+func attestID(status *api.Status, pubkey string) (string, string) {
+	// Add an obvious prefix to key names when we're running without secure boot
+	prefix := ""
+	if !status.HAB {
+		prefix = "DEV:"
+	}
+
+	// The diversifier or key names in here MUST NOT be changed, or we'll
+	// break the invariant that this key is static for the lifetime of the
+	// (fused) device!
+	attestSigner, attestPublicKey := deriveNoteSigner(
+		fmt.Sprintf("%sID-Attestation", prefix),
+		status.Serial,
+		status.HAB,
+		func(_ io.Reader) string {
+			return fmt.Sprintf("%sAW-ID-Attestation-%s", prefix, status.Serial)
+		})
+
+	aN := &note.Note{
+		Text: fmt.Sprintf("ArmoredWitness ID attestation v1\n%s\n%d\n%s\n", status.Serial, status.IdentityCounter, witnessPublicKey),
+	}
+	aSigner, err := note.NewSigner(attestSigner)
+	if err != nil {
+		panic(fmt.Errorf("failed to create attestation signer: %v", err))
+	}
+	attestation, err := note.Sign(aN, aSigner)
+	if err != nil {
+		panic(fmt.Errorf("failed to sign witness ID attestation: %v", err))
+	}
+	return attestPublicKey, string(attestation)
 }
 
 // deriveNoteSigner uses the h/w secret to derive a new note.Signer.

@@ -153,9 +153,16 @@ func main() {
 	defer syscall.Call("RPC.LED", rpc.LEDStatus{Name: "blue", On: false}, nil)
 
 	// (Re-)create our witness identity based on the device's internal secret key.
-	deriveWitnessKey()
+	deriveIdentityKeys()
 	// Update our status in OS so custodian can inspect our signing identity even if there's no network.
-	syscall.Call("RPC.SetWitnessStatus", rpc.WitnessStatus{Identity: witnessPublicKey}, nil)
+	syscall.Call("RPC.SetWitnessStatus", rpc.WitnessStatus{
+		Identity:          witnessPublicKey,
+		IDAttestPublicKey: attestPublicKey,
+		AttestedID:        witnessPublicKeyAttestation,
+	}, nil)
+
+	log.Printf("Attestation key:\n%s", attestPublicKey)
+	log.Printf("Attested identity key:\n%s", witnessPublicKeyAttestation)
 
 	go func() {
 		l := true
@@ -224,7 +231,12 @@ func runWithNetworking(ctx context.Context) error {
 	}
 	log.Printf("TA Version:%s MAC:%s IP:%s GW:%s DNS:%s", Version, iface.NIC.MAC.String(), addr, iface.Stack.GetRouteTable(), net.DefaultNS)
 	// Update status with latest IP address too.
-	syscall.Call("RPC.SetWitnessStatus", rpc.WitnessStatus{Identity: witnessPublicKey, IP: addr.Address.String()}, nil)
+	syscall.Call("RPC.SetWitnessStatus", rpc.WitnessStatus{
+		Identity:          witnessPublicKey,
+		IDAttestPublicKey: attestPublicKey,
+		AttestedID:        witnessPublicKeyAttestation,
+		IP:                addr.Address.String(),
+	}, nil)
 
 	// Avoid the situation where, at boot, we get a DHCP lease and then immediately update our
 	// local clock from 1970 to now, whereupon we consider the DHCP lease invalid and have to tear down
