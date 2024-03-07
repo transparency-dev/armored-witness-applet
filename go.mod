@@ -24,7 +24,7 @@ require (
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
 	golang.org/x/mod v0.16.0
 	golang.org/x/term v0.18.0
-	google.golang.org/grpc v1.62.0
+	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
 	gopkg.in/yaml.v3 v3.0.1
 	gvisor.dev/gvisor v0.0.0-20240303010120-901d232cd101
