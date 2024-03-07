@@ -71,7 +71,7 @@ func deriveWitnessKey() {
 
 }
 
-// attestID creates a signer which is forever static for this device, and uses
+// attestID creates a signer which is forever static for a fused device, and uses
 // that to sign a note which binds the passed in witness ID to this device's
 // serial number and current identity counter.
 //
@@ -90,6 +90,9 @@ func attestID(status *api.Status, pubkey string) (string, string) {
 		prefix = "DEV:"
 	}
 
+	// The diversifier or key names in here MUST NOT be changed, or we'll
+	// break the invariant that this key is static for the lifetime of the
+	// (fused) device!
 	attestSigner, attestPublicKey := deriveNoteSigner(
 		fmt.Sprintf("%sID-Attestation", prefix),
 		status.Serial,
