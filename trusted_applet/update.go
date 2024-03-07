@@ -47,6 +47,9 @@ var (
 // updater returns an updater struct configured from the compiled-in
 // parameters above.
 func updater(ctx context.Context) (*update.Fetcher, *update.Updater, error) {
+	if updateLogURL[len(updateLogURL)-1] != '/' {
+		updateLogURL += "/"
+	}
 	logBaseURL, err := url.Parse(updateLogURL)
 	if err != nil {
 		return nil, nil, fmt.Errorf("firmware log URL invalid: %v", err)
@@ -69,6 +72,9 @@ func updater(ctx context.Context) (*update.Fetcher, *update.Updater, error) {
 		return nil, nil, fmt.Errorf("invalid OS verifier 2: %v", err)
 	}
 
+	if updateBinariesURL[len(updateBinariesURL)-1] != '/' {
+		updateBinariesURL += "/"
+	}
 	binBaseURL, err := url.Parse(updateBinariesURL)
 	if err != nil {
 		return nil, nil, fmt.Errorf("binaries URL invalid: %v", err)
