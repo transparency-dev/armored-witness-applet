@@ -15,7 +15,7 @@ require (
 	github.com/transparency-dev/formats v0.0.0-20231205184308-949529efd6b3
 	github.com/transparency-dev/merkle v0.0.2
 	github.com/transparency-dev/serverless-log v0.0.0-20231215122707-66f68a7705f5
-	github.com/transparency-dev/witness v0.0.0-20240304140949-83bd5e126be2
+	github.com/transparency-dev/witness v0.0.0-20240311170858-5de1177dc362
 	github.com/usbarmory/GoTEE v0.0.0-20240215171108-77a6b38432d5
 	github.com/usbarmory/imx-enet v0.0.0-20240304151238-5b3010d57ea3
 	github.com/usbarmory/tamago v0.0.0-20240306113720-d7dd77b4ed17
