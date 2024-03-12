@@ -20,7 +20,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"regexp"
@@ -37,6 +36,7 @@ import (
 	"gvisor.dev/gvisor/pkg/tcpip/transport/icmp"
 	"gvisor.dev/gvisor/pkg/tcpip/transport/tcp"
 	"gvisor.dev/gvisor/pkg/tcpip/transport/udp"
+	"k8s.io/klog/v2"
 
 	"github.com/beevik/ntp"
 	"github.com/transparency-dev/armored-witness-applet/third_party/dhcp"
@@ -117,12 +117,12 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 
 	// acquired handles our dhcp.Client events - acquiring, releasing, renewing DHCP leases.
 	acquired := func(oldAddr, newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
-		log.Printf("DHCPC: lease update - old: %v, new: %v", oldAddr.String(), newAddr.String())
+		klog.Infof("DHCPC: lease update - old: %v, new: %v", oldAddr.String(), newAddr.String())
 		// Handled renewals first, old and new addresses will be equivalent in this case.
 		// We may still have to reconfigure the networking stack, even though our assigned IP
 		// isn't changing, the DHCP server could have changed routing or DNS info.
 		if oldAddr.Address == newAddr.Address && oldAddr.PrefixLen == newAddr.PrefixLen {
-			log.Printf("DHCPC: existing lease on %v renewed", newAddr.String())
+			klog.Infof("DHCPC: existing lease on %v renewed", newAddr.String())
 			// reconfigure network stuff in-case DNS or gateway routes have changed.
 			configureNetFromDHCP(newAddr, cfg)
 			// f should already be running, no need to interfere with it.
@@ -135,12 +135,12 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 			// Since we're changing our primary IP address we must tell f to exit,
 			// and wait for it to do so
 			cancelChild()
-			log.Print("Waiting for child to complete...")
+			klog.Info("Waiting for child to complete...")
 			<-fDone
 
-			log.Printf("DHCPC: Releasing %v", oldAddr.String())
+			klog.Infof("DHCPC: Releasing %v", oldAddr.String())
 			if err := iface.Stack.RemoveAddress(nicID, oldAddr.Address); err != nil {
-				log.Printf("Failed to remove expired address from stack: %v", err)
+				klog.Errorf("Failed to remove expired address from stack: %v", err)
 			}
 		}
 
@@ -148,14 +148,14 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 		// we'll configure our stack to use it, along with whatever routes and DNS info
 		// we've been sent.
 		if !newAddr.Address.Unspecified() {
-			log.Printf("DHCPC: Acquired %v", newAddr.String())
+			klog.Infof("DHCPC: Acquired %v", newAddr.String())
 
 			newProtoAddr := tcpip.ProtocolAddress{
 				Protocol:          ipv4.ProtocolNumber,
 				AddressWithPrefix: newAddr,
 			}
 			if err := iface.Stack.AddProtocolAddress(nicID, newProtoAddr, stack.AddressProperties{PEB: stack.FirstPrimaryEndpoint}); err != nil {
-				log.Printf("Failed to add newly acquired address to stack: %v", err)
+				klog.Errorf("Failed to add newly acquired address to stack: %v", err)
 			} else {
 				configureNetFromDHCP(newAddr, cfg)
 
@@ -168,10 +168,10 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 					// Signal when we exit:
 					defer func() { fDone <- true }()
 
-					log.Println("DHCP: running f")
+					klog.Info("DHCP: running f")
 					for {
 						if err := f(childCtx); err != nil {
-							log.Printf("runDHCP f: %v", err)
+							klog.Errorf("runDHCP f: %v", err)
 							if errors.Is(err, context.Canceled) {
 								break
 							}
@@ -180,13 +180,13 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 				}(childCtx)
 			}
 		} else {
-			log.Printf("DHCPC: no address acquired")
+			klog.Infof("DHCPC: no address acquired")
 		}
 	}
 
 	// Start the DHCP client.
 	c := dhcp.NewClient(iface.Stack, nicID, iface.Link.LinkAddress(), 30*time.Second, time.Second, time.Second, acquired)
-	log.Println("Starting DHCPClient...")
+	klog.Info("Starting DHCPClient...")
 	c.Run(ctx)
 }
 
@@ -200,7 +200,7 @@ func configureNetFromDHCP(newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
 			resolver := fmt.Sprintf("%s:53", r.String())
 			resolvers = append(resolvers, resolver)
 		}
-		log.Printf("DHCPC: Using DNS server(s) %v", resolvers)
+		klog.Infof("DHCPC: Using DNS server(s) %v", resolvers)
 		net.DefaultNS = resolvers
 	}
 	// Set up routing for new address
@@ -212,7 +212,7 @@ func configureNetFromDHCP(newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
 	if len(cfg.Router) > 0 {
 		for _, gw := range cfg.Router {
 			table = append(table, tcpip.Route{Destination: header.IPv4EmptySubnet, Gateway: gw, NIC: nicID})
-			log.Printf("DHCPC: Using Gateway %v", gw)
+			klog.Infof("DHCPC: Using Gateway %v", gw)
 		}
 	}
 	iface.Stack.SetRouteTable(table)
@@ -222,7 +222,7 @@ func configureNetFromDHCP(newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
 // Returns a channel which become closed once we have obtained an initial time.
 func runNTP(ctx context.Context) chan bool {
 	if cfg.NTPServer == "" {
-		log.Println("NTP disabled.")
+		klog.Info("NTP disabled.")
 		return nil
 	}
 
@@ -241,7 +241,7 @@ func runNTP(ctx context.Context) chan bool {
 
 			ip, err := net.DefaultResolver.LookupIP(ctx, "ip4", cfg.NTPServer)
 			if err != nil {
-				log.Printf("Failed to resolve NTP server %q: %v", DefaultNTP, err)
+				klog.Errorf("Failed to resolve NTP server %q: %v", DefaultNTP, err)
 				continue
 			}
 			ntpR, err := ntp.QueryWithOptions(
@@ -249,11 +249,11 @@ func runNTP(ctx context.Context) chan bool {
 				ntp.QueryOptions{},
 			)
 			if err != nil {
-				log.Printf("Failed to get NTP time: %v", err)
+				klog.Errorf("Failed to get NTP time: %v", err)
 				continue
 			}
 			if err := ntpR.Validate(); err != nil {
-				log.Printf("got invalid time from NTP server: %v", err)
+				klog.Errorf("got invalid time from NTP server: %v", err)
 				continue
 			}
 			applet.ARM.SetTimer(ntpR.Time.UnixNano())
