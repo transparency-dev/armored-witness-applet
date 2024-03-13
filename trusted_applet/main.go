@@ -22,6 +22,7 @@ import (
 	"net"
 	"net/http"
 	"runtime"
+	"sync"
 
 	// TODO: remove
 	"net/http/pprof"
@@ -78,6 +79,22 @@ var (
 	persistence *storage.SlotPersistence
 )
 
+var (
+	doOnce                       sync.Once
+	counterWitnessStarted        monitoring.Counter
+	counterFirmwareUpdateAttempt monitoring.Counter
+	counterFirmwareUpdateSuccess monitoring.Counter
+)
+
+func initMetrics() {
+	doOnce.Do(func() {
+		mf := monitoring.GetMetricFactory()
+		counterWitnessStarted = mf.NewCounter("witness_started", "Number of times the witness was started")
+		counterFirmwareUpdateAttempt = mf.NewCounter("firmware_update_attempt", "Number of times the updater ran to check if firmware could be updated")
+		counterFirmwareUpdateSuccess = mf.NewCounter("firmware_update_success", "Number of times the updater suceeded when checking if firmware could be updated. This does not mean that firmware was installed. It more closely resembles a NOOP for firmware update.")
+	})
+}
+
 func init() {
 	runtime.Exit = applet.Exit
 }
@@ -95,6 +112,7 @@ func main() {
 		Prefix: "omniwitness_",
 	}
 	monitoring.SetMetricFactory(mf)
+	initMetrics()
 
 	klog.Infof("%s/%s (%s) • TEE user applet • %s",
 		runtime.GOOS, runtime.GOARCH, runtime.Version(),
@@ -272,6 +290,7 @@ func runWithNetworking(ctx context.Context) error {
 						continue
 					}
 				}
+				counterFirmwareUpdateAttempt.Inc()
 				klog.V(1).Info("Scanning for available updates")
 				if err := updateFetcher.Scan(ctx); err != nil {
 					klog.Errorf("UpdateFetcher.Scan: %v", err)
@@ -280,6 +299,7 @@ func runWithNetworking(ctx context.Context) error {
 				if err := updateClient.Update(ctx); err != nil {
 					klog.Errorf("Update: %v", err)
 				}
+				counterFirmwareUpdateSuccess.Inc()
 			case <-ctx.Done():
 				return
 			}
@@ -347,6 +367,7 @@ func runWithNetworking(ctx context.Context) error {
 
 	klog.Info("Starting witness...")
 	klog.Infof("I am %q", witnessPublicKey)
+	counterWitnessStarted.Inc()
 	if err := omniwitness.Main(ctx, opConfig, persistence, mainListener, http.DefaultClient); err != nil {
 		return fmt.Errorf("omniwitness.Main failed: %v", err)
 	}
