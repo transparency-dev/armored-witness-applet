@@ -21,7 +21,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"os"
 	"runtime"
 
 	// TODO: remove
@@ -80,12 +79,11 @@ var (
 )
 
 func init() {
-	log.SetFlags(log.Ltime)
-	log.SetOutput(os.Stdout)
 	runtime.Exit = applet.Exit
 }
 
 func main() {
+	klog.InitFlags(nil)
 	flag.Set("vmodule", "journal=1,slots=1,storage=1")
 	flag.Set("v", "1")
 	flag.Set("logtostderr", "true")
@@ -280,7 +278,6 @@ func runWithNetworking(ctx context.Context) error {
 					klog.Errorf("UpdateFetcher.Scan: %v", err)
 					continue
 				}
-				klog.Info("Attempting update")
 				if err := updateClient.Update(ctx); err != nil {
 					klog.Errorf("Update: %v", err)
 				}
