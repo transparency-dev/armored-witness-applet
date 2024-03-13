@@ -19,13 +19,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"regexp"
 	"sort"
 	"strings"
 	"text/tabwriter"
 
 	"golang.org/x/term"
+	"k8s.io/klog/v2"
 )
 
 const maxBufferSize = 102400
@@ -59,7 +59,7 @@ func msg(format string, args ...interface{}) {
 	s += fmt.Sprintf(format, args...)
 	s += strings.Repeat(separator, separatorSize-len(s))
 
-	log.Println(s)
+	klog.Info(s)
 }
 
 func confirm(term *term.Terminal) bool {
@@ -139,7 +139,7 @@ func Console(term *term.Terminal) {
 		}
 
 		if err != nil {
-			log.Printf("readline error: %v", err)
+			klog.Errorf("readline error: %v", err)
 			continue
 		}
 
@@ -148,7 +148,7 @@ func Console(term *term.Terminal) {
 				break
 			}
 
-			log.Printf("command error: %v", err)
+			klog.Errorf("command error: %v", err)
 		}
 	}
 }

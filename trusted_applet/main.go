@@ -21,7 +21,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"os"
 	"runtime"
 
 	// TODO: remove
@@ -80,12 +79,11 @@ var (
 )
 
 func init() {
-	log.SetFlags(log.Ltime)
-	log.SetOutput(os.Stdout)
 	runtime.Exit = applet.Exit
 }
 
 func main() {
+	klog.InitFlags(nil)
 	flag.Set("vmodule", "journal=1,slots=1,storage=1")
 	flag.Set("v", "1")
 	flag.Set("logtostderr", "true")
@@ -99,7 +97,7 @@ func main() {
 	}
 	monitoring.SetMetricFactory(mf)
 
-	log.Printf("%s/%s (%s) • TEE user applet • %s",
+	klog.Infof("%s/%s (%s) • TEE user applet • %s",
 		runtime.GOOS, runtime.GOARCH, runtime.Version(),
 		Revision)
 
@@ -131,7 +129,7 @@ func main() {
 	// received one.
 	var cfgResp []byte
 	if err := syscall.Call("RPC.Config", cfg.Bytes(), &cfgResp); err != nil {
-		log.Printf("TA configuration error, %v", err)
+		klog.Errorf("TA configuration error, %v", err)
 	}
 
 	if len(cfgResp) > 0 {
@@ -146,7 +144,7 @@ func main() {
 	}
 
 	for _, line := range strings.Split(status.Print(), "\n") {
-		log.Print(line)
+		klog.Info(line)
 	}
 
 	syscall.Call("RPC.LED", rpc.LEDStatus{Name: "blue", On: true}, nil)
@@ -161,8 +159,8 @@ func main() {
 		AttestedID:        witnessPublicKeyAttestation,
 	}, nil)
 
-	log.Printf("Attestation key:\n%s", attestPublicKey)
-	log.Printf("Attested identity key:\n%s", witnessPublicKeyAttestation)
+	klog.Infof("Attestation key:\n%s", attestPublicKey)
+	klog.Infof("Attested identity key:\n%s", witnessPublicKeyAttestation)
 
 	go func() {
 		l := true
@@ -193,7 +191,7 @@ func main() {
 	reinit := false
 	if reinit {
 		for i := 10; i > 0; i-- {
-			log.Printf("Erasing in %ds", i)
+			klog.Infof("Erasing in %ds", i)
 			time.Sleep(time.Second)
 		}
 		if err := part.Erase(); err != nil {
@@ -229,7 +227,7 @@ func runWithNetworking(ctx context.Context) error {
 	if tcpErr != nil {
 		return fmt.Errorf("runWithNetworking has no network configured: %v", tcpErr)
 	}
-	log.Printf("TA Version:%s MAC:%s IP:%s GW:%s DNS:%s", Version, iface.NIC.MAC.String(), addr, iface.Stack.GetRouteTable(), net.DefaultNS)
+	klog.Infof("TA Version:%s MAC:%s IP:%s GW:%s DNS:%s", Version, iface.NIC.MAC.String(), addr, iface.Stack.GetRouteTable(), net.DefaultNS)
 	// Update status with latest IP address too.
 	syscall.Call("RPC.SetWitnessStatus", rpc.WitnessStatus{
 		Identity:          witnessPublicKey,
@@ -271,18 +269,17 @@ func runWithNetworking(ctx context.Context) error {
 				if updateFetcher == nil || updateClient == nil {
 					updateFetcher, updateClient, err = updater(ctx)
 					if err != nil {
-						log.Printf("Failed to create updater: %v", err)
+						klog.Errorf("Failed to create updater: %v", err)
 						continue
 					}
 				}
-				log.Print("Scanning for available updates")
+				klog.Info("Scanning for available updates")
 				if err := updateFetcher.Scan(ctx); err != nil {
-					log.Printf("UpdateFetcher.Scan: %v", err)
+					klog.Errorf("UpdateFetcher.Scan: %v", err)
 					continue
 				}
-				log.Print("Attempting update")
 				if err := updateClient.Update(ctx); err != nil {
-					log.Printf("Update: %v", err)
+					klog.Errorf("Update: %v", err)
 				}
 			case <-ctx.Done():
 				return
@@ -297,9 +294,9 @@ func runWithNetworking(ctx context.Context) error {
 		return fmt.Errorf("TA could not initialize SSH listener, %v", err)
 	}
 	defer func() {
-		log.Println("Closing ssh port")
+		klog.Info("Closing ssh port")
 		if err := sshListener.Close(); err != nil {
-			log.Printf("Error closing ssh port: %v", err)
+			klog.Errorf("Error closing ssh port: %v", err)
 		}
 	}()
 	go startSSHServer(ctx, sshListener, addr.Address.String(), 22, cmd.Console)
@@ -309,9 +306,9 @@ func runWithNetworking(ctx context.Context) error {
 		return fmt.Errorf("TA could not initialize metrics listener, %v", err)
 	}
 	defer func() {
-		log.Println("Closing metrics port (8081)")
+		klog.Info("Closing metrics port (8081)")
 		if err := metricsListener.Close(); err != nil {
-			log.Printf("Error closing ssh port: %v", err)
+			klog.Errorf("Error closing ssh port: %v", err)
 		}
 	}()
 	go func() {
@@ -345,12 +342,12 @@ func runWithNetworking(ctx context.Context) error {
 	}
 	defer func() {
 		if err := mainListener.Close(); err != nil {
-			log.Printf("mainListener: %v", err)
+			klog.Errorf("mainListener: %v", err)
 		}
 	}()
 
-	log.Println("Starting witness...")
-	log.Printf("I am %q", witnessPublicKey)
+	klog.Info("Starting witness...")
+	klog.Infof("I am %q", witnessPublicKey)
 	if err := omniwitness.Main(ctx, opConfig, persistence, mainListener, http.DefaultClient); err != nil {
 		return fmt.Errorf("omniwitness.Main failed: %v", err)
 	}
@@ -363,7 +360,7 @@ func openStorage() *slots.Partition {
 	if err := syscall.Call("RPC.CardInfo", nil, &info); err != nil {
 		klog.Exitf("Failed to get cardinfo: %v", err)
 	}
-	log.Printf("CardInfo: %+v", info)
+	klog.Infof("CardInfo: %+v", info)
 	// dev is our access to the MMC storage.
 	dev := &storage.Device{CardInfo: &info}
 	bs := dev.BlockSize()

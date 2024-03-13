@@ -19,12 +19,12 @@
 package storage
 
 import (
-	"log"
 	"runtime"
 
 	"github.com/transparency-dev/armored-witness-os/api/rpc"
 	"github.com/usbarmory/GoTEE/syscall"
 	"github.com/usbarmory/tamago/soc/nxp/usdhc"
+	"k8s.io/klog/v2"
 )
 
 var (
@@ -72,7 +72,7 @@ func (d *Device) WriteBlocks(lba uint, b []byte) (uint, error) {
 		runtime.Gosched()
 
 		if err := syscall.Call("RPC.WriteBlocks", &xfer, nil); err != nil {
-			log.Printf("syscall.Write(%d, ...) = %v", xfer.LBA, err)
+			klog.Infof("syscall.Write(%d, ...) = %v", xfer.LBA, err)
 			return 0, err
 		}
 		b = b[bl:]
@@ -103,7 +103,7 @@ func (d *Device) ReadBlocks(lba uint, b []byte) error {
 
 		var readBuf []byte
 		if err := syscall.Call("RPC.Read", xfer, &readBuf); err != nil {
-			log.Printf("syscall.Read(%d, %d) = %v", xfer.Offset, xfer.Size, err)
+			klog.Errorf("syscall.Read(%d, %d) = %v", xfer.Offset, xfer.Size, err)
 			return err
 		}
 		copy(b, readBuf)

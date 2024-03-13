@@ -16,13 +16,12 @@
 package rpc
 
 import (
-	"log"
-
 	"github.com/coreos/go-semver/semver"
 	"github.com/transparency-dev/armored-witness-boot/config"
 	"github.com/transparency-dev/armored-witness-common/release/firmware"
 	"github.com/transparency-dev/armored-witness-os/api/rpc"
 	"github.com/usbarmory/GoTEE/syscall"
+	"k8s.io/klog/v2"
 )
 
 const fwUpdateChunkSize = 1 << 20
@@ -57,7 +56,7 @@ func (r Client) InstallApplet(fb firmware.Bundle) error {
 // sendChunkedUpdate sends a chunked OS or Applet firmware update request via one or
 // more RPCs to the OS.
 func sendChunkedUpdate(t string, rpcName string, fb firmware.Bundle) error {
-	log.Printf("Requesting %s install from OS...", t)
+	klog.Infof("Requesting %s install from OS...", t)
 	fu := &rpc.FirmwareUpdate{}
 	for i := uint(0); ; i++ {
 		fu.Sequence = i
@@ -73,7 +72,7 @@ func sendChunkedUpdate(t string, rpcName string, fb firmware.Bundle) error {
 		}
 		fu.Image = fb.Firmware[:size]
 		fb.Firmware = fb.Firmware[size:]
-		log.Printf("Sending %s chunk %d", t, i)
+		klog.Infof("Sending %s chunk %d", t, i)
 		if err := syscall.Call(rpcName, fu, nil); err != nil {
 			return err
 		}

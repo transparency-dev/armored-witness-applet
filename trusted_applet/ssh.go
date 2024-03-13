@@ -28,6 +28,7 @@ import (
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/term"
+	"k8s.io/klog/v2"
 )
 
 type consoleHandler func(term *term.Terminal)
@@ -41,7 +42,7 @@ func handleChannel(newChannel ssh.NewChannel, handler consoleHandler) {
 	conn, requests, err := newChannel.Accept()
 
 	if err != nil {
-		log.Printf("error accepting channel, %v", err)
+		klog.Errorf("error accepting channel, %v", err)
 		return
 	}
 
@@ -56,7 +57,7 @@ func handleChannel(newChannel ssh.NewChannel, handler consoleHandler) {
 
 		handler(term)
 
-		log.Printf("closing ssh connection")
+		klog.Infof("closing ssh connection")
 	}()
 
 	go func() {
@@ -72,14 +73,14 @@ func handleChannel(newChannel ssh.NewChannel, handler consoleHandler) {
 			case "pty-req":
 				// p10, 6.2.  Requesting a Pseudo-Terminal, RFC4254
 				if reqSize < 4 {
-					log.Printf("malformed pty-req request")
+					klog.Errorf("malformed pty-req request")
 					continue
 				}
 
 				termVariableSize := int(req.Payload[3])
 
 				if reqSize < 4+termVariableSize+8 {
-					log.Printf("malformed pty-req request")
+					klog.Errorf("malformed pty-req request")
 					continue
 				}
 
@@ -92,7 +93,7 @@ func handleChannel(newChannel ssh.NewChannel, handler consoleHandler) {
 			case "window-change":
 				// p10, 6.7.  Window Dimension Change Message, RFC4254
 				if reqSize < 8 {
-					log.Printf("malformed window-change request")
+					klog.Errorf("malformed window-change request")
 					continue
 				}
 
@@ -128,14 +129,14 @@ func startSSHServer(ctx context.Context, listener net.Listener, addr string, por
 		log.Fatal("key conversion error: ", err)
 	}
 
-	log.Printf("TA starting ssh server (%s) at %s:%d", ssh.FingerprintSHA256(signer.PublicKey()), addr, port)
+	klog.Infof("TA starting ssh server (%s) at %s:%d", ssh.FingerprintSHA256(signer.PublicKey()), addr, port)
 
 	srv.AddHostKey(signer)
 
 	connsToClose := []*ssh.ServerConn{}
 	defer func() {
 		for _, sc := range connsToClose {
-			log.Printf("Closing SSH connection from %s", sc.RemoteAddr())
+			klog.Infof("Closing SSH connection from %s", sc.RemoteAddr())
 			sc.Close()
 		}
 	}()
@@ -143,26 +144,26 @@ func startSSHServer(ctx context.Context, listener net.Listener, addr string, por
 	for {
 		select {
 		case <-ctx.Done():
-			log.Printf("SSH server exiting: %v", ctx.Err())
+			klog.Infof("SSH server exiting: %v", ctx.Err())
 			return
 		default:
 		}
 		conn, err := listener.Accept()
 
 		if err != nil {
-			log.Printf("error accepting connection, %v", err)
+			klog.Errorf("error accepting connection, %v", err)
 			continue
 		}
 
 		sshConn, chans, reqs, err := ssh.NewServerConn(conn, srv)
 
 		if err != nil {
-			log.Printf("error accepting handshake, %v", err)
+			klog.Errorf("error accepting handshake, %v", err)
 			continue
 		}
 		connsToClose = append(connsToClose, sshConn)
 
-		log.Printf("new ssh connection from %s (%s)", sshConn.RemoteAddr(), sshConn.ClientVersion())
+		klog.Infof("new ssh connection from %s (%s)", sshConn.RemoteAddr(), sshConn.ClientVersion())
 
 		go ssh.DiscardRequests(reqs)
 		go handleChannels(chans, handler)
