@@ -83,6 +83,7 @@ var (
 	doOnce                       sync.Once
 	counterWitnessStarted        monitoring.Counter
 	counterFirmwareUpdateAttempt monitoring.Counter
+	counterFirmwareUpdateSuccess monitoring.Counter
 )
 
 func initMetrics() {
@@ -90,6 +91,7 @@ func initMetrics() {
 		mf := monitoring.GetMetricFactory()
 		counterWitnessStarted = mf.NewCounter("witness_started", "Number of times the witness was started")
 		counterFirmwareUpdateAttempt = mf.NewCounter("firmware_update_attempt", "Number of times the updater ran to check if firmware could be updated")
+		counterFirmwareUpdateSuccess = mf.NewCounter("firmware_update_success", "Number of times the updater suceeded when checking if firmware could be updated. This does not mean that firmware was installed. It more closely resembles a NOOP for firmware update.")
 	})
 }
 
@@ -288,12 +290,8 @@ func runWithNetworking(ctx context.Context) error {
 						continue
 					}
 				}
-<<<<<<< HEAD
-				klog.V(1).Info("Scanning for available updates")
-=======
 				counterFirmwareUpdateAttempt.Inc()
 				klog.V(1).Info("Scanning for available updates")
->>>>>>> af92d87 (Metrics for witness start and self-update)
 				if err := updateFetcher.Scan(ctx); err != nil {
 					klog.Errorf("UpdateFetcher.Scan: %v", err)
 					continue
@@ -301,6 +299,7 @@ func runWithNetworking(ctx context.Context) error {
 				if err := updateClient.Update(ctx); err != nil {
 					klog.Errorf("Update: %v", err)
 				}
+				counterFirmwareUpdateSuccess.Inc()
 			case <-ctx.Done():
 				return
 			}
