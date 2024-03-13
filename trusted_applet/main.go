@@ -85,7 +85,6 @@ func init() {
 func main() {
 	klog.InitFlags(nil)
 	flag.Set("vmodule", "journal=1,slots=1,storage=1")
-	flag.Set("v", "1")
 	flag.Set("logtostderr", "true")
 	flag.Parse()
 
@@ -273,7 +272,7 @@ func runWithNetworking(ctx context.Context) error {
 						continue
 					}
 				}
-				klog.Info("Scanning for available updates")
+				klog.V(1).Info("Scanning for available updates")
 				if err := updateFetcher.Scan(ctx); err != nil {
 					klog.Errorf("UpdateFetcher.Scan: %v", err)
 					continue
