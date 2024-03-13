@@ -231,6 +231,10 @@ func main() {
 			klog.Exitf("runWithNetworking: %v", err)
 		}
 	}
+
+	// This forces the linker to keep the symbol present which is necessary for the inspect()
+	// function in the OS to work.
+	runtime.CallOnG0()
 }
 
 // runWithNetworking should only be called when we have an IP network configured.
