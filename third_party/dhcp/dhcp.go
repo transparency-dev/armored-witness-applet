@@ -283,6 +283,7 @@ const (
 	//   of 4.
 	optRouter           optionCode = 3
 	optDomainNameServer optionCode = 6
+	optHostname         optionCode = 12
 	optDomainName       optionCode = 15
 	optReqIPAddr        optionCode = 50
 	optLeaseTime        optionCode = 51
@@ -308,7 +309,7 @@ func (code optionCode) lenValid(l int) bool {
 		return l == 1
 	case optRouter, optDomainNameServer:
 		return l%4 == 0
-	case optMessage, optDomainName, optClientID:
+	case optMessage, optDomainName, optClientID, optHostname:
 		return l >= 1
 	case optParamReq:
 		return true // no fixed length

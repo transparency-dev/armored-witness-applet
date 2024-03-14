@@ -102,7 +102,7 @@ func init() {
 // ensure that networking clients/services are only run while a leased IP is held.
 //
 // This function blocks until the passed-in ctx is Done.
-func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) error) {
+func runDHCP(ctx context.Context, nicID tcpip.NICID, clientID string, hostname string, f func(context.Context) error) {
 	// This context tracks the lifetime of the IP lease we get (if any) from the DHCP server.
 	// We'll only know what that lease is once we acquire the new IP, which happens inside
 	// the aquired func below.
@@ -185,7 +185,7 @@ func runDHCP(ctx context.Context, nicID tcpip.NICID, f func(context.Context) err
 	}
 
 	// Start the DHCP client.
-	c := dhcp.NewClient(iface.Stack, nicID, iface.Link.LinkAddress(), 30*time.Second, time.Second, time.Second, acquired)
+	c := dhcp.NewClient(iface.Stack, nicID, iface.Link.LinkAddress(), clientID, hostname, 30*time.Second, time.Second, time.Second, acquired)
 	klog.Info("Starting DHCPClient...")
 	c.Run(ctx)
 }

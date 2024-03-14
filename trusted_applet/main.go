@@ -43,6 +43,7 @@ import (
 	"github.com/transparency-dev/armored-witness-common/release/firmware/update"
 	"github.com/transparency-dev/armored-witness-os/api"
 	"github.com/transparency-dev/armored-witness-os/api/rpc"
+	"github.com/transparency-dev/formats/note"
 
 	"github.com/transparency-dev/witness/monitoring"
 	"github.com/transparency-dev/witness/monitoring/prometheus"
@@ -225,7 +226,11 @@ func main() {
 
 	// Wait for a DHCP address to be assigned if that's what we're configured to do
 	if cfg.DHCP {
-		runDHCP(ctx, nicID, runWithNetworking)
+		hostname := "armoredwitness"
+		if v, err := note.NewVerifier(witnessPublicKey); err == nil {
+			hostname = cleanForDNS(v.Name())
+		}
+		runDHCP(ctx, nicID, fmt.Sprintf("AW-%s", status.Serial), hostname, runWithNetworking)
 	} else {
 		if err := runWithNetworking(ctx); err != nil && err != context.Canceled {
 			klog.Exitf("runWithNetworking: %v", err)
@@ -235,6 +240,17 @@ func main() {
 	// This forces the linker to keep the symbol present which is necessary for the inspect()
 	// function in the OS to work.
 	runtime.CallOnG0()
+}
+
+func cleanForDNS(s string) string {
+	return strings.Map(func(r rune) rune {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9', r == '-':
+			return r
+		default:
+			return '-'
+		}
+	}, s)
 }
 
 // runWithNetworking should only be called when we have an IP network configured.
