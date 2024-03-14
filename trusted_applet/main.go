@@ -21,6 +21,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"regexp"
 	"runtime"
 	"sync"
 
@@ -29,6 +30,8 @@ import (
 	"strings"
 	"time"
 
+	prom "github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/usbarmory/GoTEE/applet"
@@ -92,6 +95,11 @@ func initMetrics() {
 		counterWitnessStarted = mf.NewCounter("witness_started", "Number of times the witness was started")
 		counterFirmwareUpdateAttempt = mf.NewCounter("firmware_update_attempt", "Number of times the updater ran to check if firmware could be updated")
 		counterFirmwareUpdateSuccess = mf.NewCounter("firmware_update_success", "Number of times the updater suceeded when checking if firmware could be updated. This does not mean that firmware was installed. It more closely resembles a NOOP for firmware update.")
+		// Unfortunately, the default prom gatherer has _some_ Go collectors, but not all, so we have to
+		// unregister it in order to be able to register the newer way with expanded coverage.
+		// error for dupes.
+		prom.Unregister(prom.NewGoCollector())
+		prom.Register(collectors.NewGoCollector(collectors.WithGoCollectorRuntimeMetrics(collectors.GoRuntimeMetricsRule{Matcher: regexp.MustCompile("/.*")})))
 	})
 }
 
