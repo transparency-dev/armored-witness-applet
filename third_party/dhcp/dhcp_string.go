@@ -77,6 +77,7 @@ func _() {
 	_ = x[optSubnetMask-1]
 	_ = x[optRouter-3]
 	_ = x[optDomainNameServer-6]
+	_ = x[optHostname-12]
 	_ = x[optDomainName-15]
 	_ = x[optReqIPAddr-50]
 	_ = x[optLeaseTime-51]
@@ -98,6 +99,7 @@ const (
 	_optionCode_name_5 = "optDHCPMsgTypeoptDHCPServeroptParamReqoptMessage"
 	_optionCode_name_6 = "optRenewalTimeoptRebindingTime"
 	_optionCode_name_7 = "optClientID"
+	_optionCode_name_8 = "optHostname"
 )
 
 var (
@@ -127,6 +129,8 @@ func (i optionCode) String() string {
 		return _optionCode_name_6[_optionCode_index_6[i]:_optionCode_index_6[i+1]]
 	case i == 61:
 		return _optionCode_name_7
+	case i == 12:
+		return _optionCode_name_8
 	default:
 		return "optionCode(" + strconv.FormatInt(int64(i), 10) + ")"
 	}

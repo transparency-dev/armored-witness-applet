@@ -37,6 +37,8 @@ type Client struct {
 	// info holds the Client's state as type Info.
 	info atomic.Value
 
+	clientID     string
+	hostname     string
 	acquiredFunc AcquiredFunc
 
 	wq waiter.Queue
@@ -124,9 +126,11 @@ type Info struct {
 //
 // TODO: use (*stack.Stack).NICInfo()[nicid].LinkAddress instead of passing
 // linkAddr when broadcasting on multiple interfaces works.
-func NewClient(s *stack.Stack, nicid tcpip.NICID, linkAddr tcpip.LinkAddress, acquisition, backoff, retransmission time.Duration, acquiredFunc AcquiredFunc) *Client {
+func NewClient(s *stack.Stack, nicid tcpip.NICID, linkAddr tcpip.LinkAddress, clientID, hostname string, acquisition, backoff, retransmission time.Duration, acquiredFunc AcquiredFunc) *Client {
 	c := &Client{
 		stack:          s,
+		clientID:       clientID,
+		hostname:       hostname,
 		acquiredFunc:   acquiredFunc,
 		sem:            make(chan struct{}, 1),
 		rand:           rand.New(rand.NewSource(time.Now().UnixNano())),
@@ -476,6 +480,12 @@ func acquire(ctx context.Context, c *Client, info *Info) (Config, error) {
 			15, // domain name
 			6,  // domain name server
 		}},
+	}
+	if c.clientID != "" {
+		commonOpts = append(commonOpts, option{optClientID, []byte(c.clientID)})
+	}
+	if c.hostname != "" {
+		commonOpts = append(commonOpts, option{optHostname, []byte(c.hostname)})
 	}
 	requestedAddr := info.Addr
 	if info.State == initSelecting {
