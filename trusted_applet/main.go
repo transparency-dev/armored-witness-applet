@@ -240,8 +240,10 @@ func main() {
 		}
 		runDHCP(ctx, nicID, fmt.Sprintf("AW-%s", status.Serial), hostname, runWithNetworking)
 	} else {
-		if err := runWithNetworking(ctx); err != nil && err != context.Canceled {
-			klog.Exitf("runWithNetworking: %v", err)
+		for {
+			if err := runWithNetworking(ctx); err != nil && err != context.Canceled {
+				klog.Exitf("runWithNetworking: %v", err)
+			}
 		}
 	}
 
