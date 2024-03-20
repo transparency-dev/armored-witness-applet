@@ -242,7 +242,7 @@ func main() {
 	} else {
 		for {
 			if err := runWithNetworking(ctx); err != nil && err != context.Canceled {
-				klog.Exitf("runWithNetworking: %v", err)
+				klog.Warningf("runWithNetworking: %v", err)
 			}
 		}
 	}
