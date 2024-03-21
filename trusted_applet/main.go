@@ -38,7 +38,6 @@ import (
 	"google.golang.org/protobuf/proto"
 	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
 
-	"github.com/transparency-dev/armored-witness-applet/trusted_applet/cmd"
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/storage"
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/storage/slots"
 	"github.com/transparency-dev/armored-witness-common/release/firmware/update"
@@ -335,18 +334,6 @@ func runWithNetworking(ctx context.Context) error {
 	}()
 
 	listenCfg := &net.ListenConfig{}
-
-	sshListener, err := listenCfg.Listen(ctx, "tcp", ":22")
-	if err != nil {
-		return fmt.Errorf("TA could not initialize SSH listener, %v", err)
-	}
-	defer func() {
-		klog.Info("Closing ssh port")
-		if err := sshListener.Close(); err != nil {
-			klog.Errorf("Error closing ssh port: %v", err)
-		}
-	}()
-	go startSSHServer(ctx, sshListener, addr.Address.String(), 22, cmd.Console)
 
 	metricsListener, err := listenCfg.Listen(ctx, "tcp", ":8081")
 	if err != nil {

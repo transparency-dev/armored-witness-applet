@@ -22,8 +22,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"regexp"
-	"strings"
 	"time"
 
 	"gvisor.dev/gvisor/pkg/buffer"
@@ -42,13 +40,10 @@ import (
 	"github.com/transparency-dev/armored-witness-applet/third_party/dhcp"
 	"github.com/transparency-dev/armored-witness-os/api"
 	"go.mercari.io/go-dnscache"
-	"golang.org/x/term"
 
 	"github.com/usbarmory/GoTEE/applet"
 	"github.com/usbarmory/GoTEE/syscall"
 	enet "github.com/usbarmory/imx-enet"
-
-	"github.com/transparency-dev/armored-witness-applet/trusted_applet/cmd"
 )
 
 // default Trusted Applet network settings
@@ -83,15 +78,6 @@ var (
 )
 
 func init() {
-	cmd.Add(cmd.Cmd{
-		Name:    "dns",
-		Args:    1,
-		Pattern: regexp.MustCompile(`^dns (.*)`),
-		Syntax:  "<fqdn>",
-		Help:    "resolve domain (requires routing)",
-		Fn:      dnsCmd,
-	})
-
 	net.DefaultNS = []string{DefaultResolver}
 }
 
@@ -270,23 +256,6 @@ func runNTP(ctx context.Context) chan bool {
 	}(ctx)
 
 	return r
-}
-
-func dnsCmd(_ *term.Terminal, arg []string) (res string, err error) {
-	if iface == nil {
-		return "", errors.New("network is unavailable")
-	}
-
-	r, err := net.LookupHost(arg[0])
-
-	if err != nil {
-		return fmt.Sprintf("query error: %v", err), nil
-	}
-	if len(r) == 0 {
-		return "", errors.New("no results returned")
-	}
-
-	return strings.Join(r, ", "), nil
 }
 
 func rxFromEth(buf []byte) int {
