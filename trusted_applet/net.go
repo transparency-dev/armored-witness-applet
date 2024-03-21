@@ -39,6 +39,8 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/beevik/ntp"
+	"github.com/cloudflare/roughtime"
+	"github.com/cloudflare/roughtime/client"
 	"github.com/transparency-dev/armored-witness-applet/third_party/dhcp"
 	"github.com/transparency-dev/armored-witness-os/api"
 	"go.mercari.io/go-dnscache"
@@ -261,6 +263,53 @@ func runNTP(ctx context.Context) chan bool {
 			// We've got some sort of sensible time set now, so check in with NTP
 			// much less frequently.
 			i = time.Hour
+			if r != nil {
+				// Signal that we've got an initial time.
+				close(r)
+				r = nil
+			}
+		}
+	}(ctx)
+
+	return r
+}
+
+// runRoughTime starts periodically attempting to sync time with RoughTime.
+// Returns a channel which becomes closed once we have obtained an initial time.
+func runRoughTime(ctx context.Context) chan bool {
+	log.Print("Starting roughtime")
+	r := make(chan bool)
+	rtMaxRadius := 10 * time.Second
+
+	go func(ctx context.Context) {
+		// Get the system clock's current time, then immediately query the Roughtime
+		// servers.
+		t0 := time.Now()
+
+		// i specifies the interval between checking in with the RoughTime servers.
+		i := 10 * time.Second // time.Hour
+		for {
+			log.Print("Starting roughtime loop")
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(i):
+			}
+
+			log.Print("Roughtime querying...")
+			res := client.Do(roughtime.Ecosystem, client.DefaultQueryAttempts, 10*time.Second, nil)
+
+			// Compute the average difference between t0 and the time reported by each
+			// server, rejecting those responses whose radii are too large. (Note that
+			// this accounts for network delay.)
+			delta, err := client.AvgDeltaWithRadiusThresh(res, t0, rtMaxRadius)
+			if err != nil {
+				log.Printf("Failed to calculate RoughTime average delta: %v", err)
+			}
+			rt := time.Now().Add(delta)
+			log.Printf("RoughTime: %v", rt)
+			applet.ARM.SetTimer(rt.UnixNano())
+
 			if r != nil {
 				// Signal that we've got an initial time.
 				close(r)

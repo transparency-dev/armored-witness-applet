@@ -288,18 +288,6 @@ func runWithNetworking(ctx context.Context) error {
 	// the witness etc. below.
 	coldStart := time.Now().Before(time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC))
 
-	select {
-	case <-runNTP(ctx):
-		if coldStart {
-			klog.Info("Large NTP date change detected, waiting for network to restart...")
-			// Give a bit of space so we don't spin while we wait for DHCP to do its thing.
-			time.Sleep(time.Second)
-			return nil
-		}
-	case <-ctx.Done():
-		return ctx.Err()
-	}
-
 	// TODO(al): figure out where & how frequently we should be doing this.
 	// For now, since we're still developing/testing this, we'll be very aggressive
 	// checking for and installing updates.
@@ -335,6 +323,19 @@ func runWithNetworking(ctx context.Context) error {
 			}
 		}
 	}()
+
+	select {
+	case <-runRoughTime(ctx):
+	//case <-runNTP(ctx):
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+	if coldStart {
+		klog.Info("Large NTP date change detected, waiting for network to restart...")
+		// Give a bit of space so we don't spin while we wait for DHCP to do its thing.
+		time.Sleep(time.Second)
+		return nil
+	}
 
 	listenCfg := &net.ListenConfig{}
 
