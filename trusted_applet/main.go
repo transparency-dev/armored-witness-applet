@@ -67,6 +67,10 @@ const (
 	// slotSizeBytes is the size of each individual slot in the partition.
 	// Changing this is overwhelmingly likely to result in data loss.
 	slotSizeBytes = 512 << 10
+
+	// updateCheckInterval is the time between checking the FT Log for firmware
+	// updates.
+	updateCheckInterval = 5 * time.Minute
 )
 
 var (
@@ -297,41 +301,7 @@ func runWithNetworking(ctx context.Context) error {
 		return ctx.Err()
 	}
 
-	// TODO(al): figure out where & how frequently we should be doing this.
-	// For now, since we're still developing/testing this, we'll be very aggressive
-	// checking for and installing updates.
-	go func() {
-		var updateFetcher *update.Fetcher
-		var updateClient *update.Updater
-		var err error
-
-		t := time.NewTicker(5 * time.Second)
-		defer t.Stop()
-		for {
-			select {
-			case <-t.C:
-				if updateFetcher == nil || updateClient == nil {
-					updateFetcher, updateClient, err = updater(ctx)
-					if err != nil {
-						klog.Errorf("Failed to create updater: %v", err)
-						continue
-					}
-				}
-				counterFirmwareUpdateAttempt.Inc()
-				klog.V(1).Info("Scanning for available updates")
-				if err := updateFetcher.Scan(ctx); err != nil {
-					klog.Errorf("UpdateFetcher.Scan: %v", err)
-					continue
-				}
-				if err := updateClient.Update(ctx); err != nil {
-					klog.Errorf("Update: %v", err)
-				}
-				counterFirmwareUpdateSuccess.Inc()
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
+	go updateChecker(ctx, updateCheckInterval)
 
 	listenCfg := &net.ListenConfig{}
 
@@ -365,7 +335,6 @@ func runWithNetworking(ctx context.Context) error {
 		FeedInterval:           30 * time.Second,
 		DistributeInterval:     5 * time.Second,
 	}
-	// TODO(mhutchinson): add a second listener for an admin API.
 	mainListener, err := listenCfg.Listen(ctx, "tcp", ":80")
 	if err != nil {
 		return fmt.Errorf("could not initialize HTTP listener: %v", err)
@@ -384,6 +353,39 @@ func runWithNetworking(ctx context.Context) error {
 	}
 
 	return ctx.Err()
+}
+
+func updateChecker(ctx context.Context, i time.Duration) {
+	var updateFetcher *update.Fetcher
+	var updateClient *update.Updater
+	var err error
+
+	t := time.NewTicker(i)
+	defer t.Stop()
+	for {
+		select {
+		case <-t.C:
+			if updateFetcher == nil || updateClient == nil {
+				updateFetcher, updateClient, err = updater(ctx)
+				if err != nil {
+					klog.Errorf("Failed to create updater: %v", err)
+					continue
+				}
+			}
+			counterFirmwareUpdateAttempt.Inc()
+			klog.V(1).Info("Scanning for available updates")
+			if err := updateFetcher.Scan(ctx); err != nil {
+				klog.Errorf("UpdateFetcher.Scan: %v", err)
+				continue
+			}
+			if err := updateClient.Update(ctx); err != nil {
+				klog.Errorf("Update: %v", err)
+			}
+			counterFirmwareUpdateSuccess.Inc()
+		case <-ctx.Done():
+			return
+		}
+	}
 }
 
 func openStorage() *slots.Partition {
