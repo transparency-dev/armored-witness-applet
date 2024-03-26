@@ -57,12 +57,12 @@ github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
-github.com/transparency-dev/armored-witness-boot v0.0.0-20230904140406-e2e16c7665b7 h1:3xrmiN4hwWi3nxvDo9asUWrNCjaPYBhF+rHpW97Fde0=
-github.com/transparency-dev/armored-witness-boot v0.0.0-20230904140406-e2e16c7665b7/go.mod h1:GTj2zM9nwFe7G7gaXzIbkKJ/PkZfvVq4TdNiA6CBsdo=
+github.com/transparency-dev/armored-witness-boot v0.1.0 h1:OBlz71PCmPju9cDI1VEmyhBG+Vvxg5q+dBlkdUsTjM0=
+github.com/transparency-dev/armored-witness-boot v0.1.0/go.mod h1:XpiSLWNiDplWVYjtR1FY/wyFqiWK++5pLCiYe3PZZC8=
 github.com/transparency-dev/armored-witness-common v0.0.0-20240313170947-0b19d0fb8b95 h1:qOh9vp/TLfJ1X46bk756se0wdlKHSV2TrGUMa3kz91w=
 github.com/transparency-dev/armored-witness-common v0.0.0-20240313170947-0b19d0fb8b95/go.mod h1:cb6aKsLVU2OUk8+UjD8xvzxU84miHXLMHJaxO2gHDus=
-github.com/transparency-dev/armored-witness-os v0.0.0-20240326114511-629ad8bc5b4b h1:D0+uu/RcrL4W9k++WVM9G+wZ83MNMVhzRqEqIGou/N4=
-github.com/transparency-dev/armored-witness-os v0.0.0-20240326114511-629ad8bc5b4b/go.mod h1:PjkT/Q6oFehQTDhOWJJqTDzdAwk1IOqmJ7n/vHaPmK8=
+github.com/transparency-dev/armored-witness-os v0.1.0 h1:Sm9DFCjX7S6+cNUpmdV52q5ZHBiM4zK5FxfLeKVyIbw=
+github.com/transparency-dev/armored-witness-os v0.1.0/go.mod h1:PjkT/Q6oFehQTDhOWJJqTDzdAwk1IOqmJ7n/vHaPmK8=
 github.com/transparency-dev/formats v0.0.0-20231205184308-949529efd6b3 h1:Mpx9pqc7bKrx2QQxKL3SPbLIGH4gTBR1ZFrNuKq3CcY=
 github.com/transparency-dev/formats v0.0.0-20231205184308-949529efd6b3/go.mod h1:tY9Z9oBaYdQt4NWIhsFAtv0altwLk+K9Gg/2tbS0eBQ=
 github.com/transparency-dev/merkle v0.0.2 h1:Q9nBoQcZcgPamMkGn7ghV8XiTZ/kRxn1yCG81+twTK4=
