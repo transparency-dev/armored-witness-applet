@@ -11,19 +11,17 @@ require (
 	github.com/prometheus/client_golang v1.19.0
 	github.com/transparency-dev/armored-witness-boot v0.0.0-20230904140406-e2e16c7665b7
 	github.com/transparency-dev/armored-witness-common v0.0.0-20240313170947-0b19d0fb8b95
-	github.com/transparency-dev/armored-witness-os v0.0.0-20240307124337-0836749ea681
+	github.com/transparency-dev/armored-witness-os v0.0.0-20240326114511-629ad8bc5b4b
 	github.com/transparency-dev/formats v0.0.0-20231205184308-949529efd6b3
-	github.com/transparency-dev/merkle v0.0.2
 	github.com/transparency-dev/serverless-log v0.0.0-20231215122707-66f68a7705f5
 	github.com/transparency-dev/witness v0.0.0-20240311170858-5de1177dc362
-	github.com/usbarmory/GoTEE v0.0.0-20240215171108-77a6b38432d5
+	github.com/usbarmory/GoTEE v0.0.0-20240314122327-40179239ad36
 	github.com/usbarmory/imx-enet v0.0.0-20240304151238-5b3010d57ea3
-	github.com/usbarmory/tamago v0.0.0-20240306113720-d7dd77b4ed17
+	github.com/usbarmory/tamago v0.0.0-20240321170635-3bf2d607eccb
 	go.mercari.io/go-dnscache v0.3.0
 	golang.org/x/crypto v0.21.0
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
 	golang.org/x/mod v0.16.0
-	golang.org/x/term v0.18.0
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -39,13 +37,14 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/btree v1.1.2 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
-	github.com/gsora/fidati v0.0.0-20220824075547-eeb0a5f7d6c3 // indirect
+	github.com/gsora/fidati v0.0.0-20230806170658-ab651720d7c3 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/matryer/is v1.4.1 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
+	github.com/transparency-dev/merkle v0.0.2 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect

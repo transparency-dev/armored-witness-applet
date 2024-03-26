@@ -305,25 +305,27 @@ func runWithNetworking(ctx context.Context) error {
 
 	listenCfg := &net.ListenConfig{}
 
-	metricsListener, err := listenCfg.Listen(ctx, "tcp", ":8081")
+	adminListener, err := listenCfg.Listen(ctx, "tcp", ":8081")
 	if err != nil {
-		return fmt.Errorf("TA could not initialize metrics listener, %v", err)
+		return fmt.Errorf("TA could not initialize admin listener, %v", err)
 	}
 	defer func() {
-		klog.Info("Closing metrics port (8081)")
-		if err := metricsListener.Close(); err != nil {
-			klog.Errorf("Error closing ssh port: %v", err)
+		klog.Info("Closing admin port (8081)")
+		if err := adminListener.Close(); err != nil {
+			klog.Errorf("Error closing admin port: %v", err)
 		}
 	}()
 	go func() {
 		srvMux := http.NewServeMux()
 		srvMux.Handle("/metrics", promhttp.Handler())
+		srvMux.Handle("/crashlog", &logHandler{RPC: "RPC.CrashLog"})
+		srvMux.Handle("/consolelog", &logHandler{RPC: "RPC.ConsoleLog"})
 		srv := &http.Server{
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,
 			Handler:      srvMux,
 		}
-		if err := srv.Serve(metricsListener); err != http.ErrServerClosed {
+		if err := srv.Serve(adminListener); err != http.ErrServerClosed {
 			klog.Errorf("Error serving metrics: %v", err)
 		}
 	}()
@@ -411,4 +413,19 @@ func openStorage() *slots.Partition {
 		klog.Exitf("Failed to open partition: %v", err)
 	}
 	return p
+}
+
+type logHandler struct {
+	RPC string
+}
+
+func (c *logHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+	var l []byte
+	if err := syscall.Call(c.RPC, nil, &l); err != nil {
+		klog.Errorf("Failed to fetch log from %v: %v", c.RPC, err)
+		res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	res.Header().Add("Content-Type", "text/plain")
+	res.Write(l)
 }
