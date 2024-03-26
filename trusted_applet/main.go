@@ -301,7 +301,7 @@ func runWithNetworking(ctx context.Context) error {
 		return ctx.Err()
 	}
 
-	go updateChecker(ctx, updateCheckInterval)
+	triggerUpdate := updateChecker(ctx, updateCheckInterval)
 
 	listenCfg := &net.ListenConfig{}
 
@@ -320,6 +320,11 @@ func runWithNetworking(ctx context.Context) error {
 		srvMux.Handle("/metrics", promhttp.Handler())
 		srvMux.Handle("/crashlog", &logHandler{RPC: "RPC.CrashLog"})
 		srvMux.Handle("/consolelog", &logHandler{RPC: "RPC.ConsoleLog"})
+		srvMux.HandleFunc("/updatecheck", func(w http.ResponseWriter, _ *http.Request) {
+			triggerUpdate <- struct{}{}
+			w.Header().Add("Content-Type", "text/plain")
+			w.Write([]byte("ok, check /consolelog!"))
+		})
 		srv := &http.Server{
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,
@@ -357,37 +362,58 @@ func runWithNetworking(ctx context.Context) error {
 	return ctx.Err()
 }
 
-func updateChecker(ctx context.Context, i time.Duration) {
+func updateChecker(ctx context.Context, i time.Duration) chan<- struct{} {
 	var updateFetcher *update.Fetcher
 	var updateClient *update.Updater
 	var err error
 
-	t := time.NewTicker(i)
-	defer t.Stop()
-	for {
-		select {
-		case <-t.C:
-			if updateFetcher == nil || updateClient == nil {
-				updateFetcher, updateClient, err = updater(ctx)
-				if err != nil {
-					klog.Errorf("Failed to create updater: %v", err)
+	trigger := make(chan struct{}, 1)
+
+	go func(ctx context.Context) {
+		t := time.NewTicker(i)
+		defer t.Stop()
+		for {
+			select {
+			case <-t.C:
+				trigger <- struct{}{}
+			case <-ctx.Done():
+				close(trigger)
+				return
+			}
+		}
+	}(ctx)
+
+	go func(ctx context.Context) {
+		for {
+			select {
+			case _, ok := <-trigger:
+				if !ok {
+					return
+				}
+				if updateFetcher == nil || updateClient == nil {
+					updateFetcher, updateClient, err = updater(ctx)
+					if err != nil {
+						klog.Errorf("Failed to create updater: %v", err)
+						continue
+					}
+				}
+				counterFirmwareUpdateAttempt.Inc()
+				klog.V(1).Info("Scanning for available updates")
+				if err := updateFetcher.Scan(ctx); err != nil {
+					klog.Errorf("UpdateFetcher.Scan: %v", err)
 					continue
 				}
+				if err := updateClient.Update(ctx); err != nil {
+					klog.Errorf("Update: %v", err)
+				}
+				counterFirmwareUpdateSuccess.Inc()
+			case <-ctx.Done():
+				return
 			}
-			counterFirmwareUpdateAttempt.Inc()
-			klog.V(1).Info("Scanning for available updates")
-			if err := updateFetcher.Scan(ctx); err != nil {
-				klog.Errorf("UpdateFetcher.Scan: %v", err)
-				continue
-			}
-			if err := updateClient.Update(ctx); err != nil {
-				klog.Errorf("Update: %v", err)
-			}
-			counterFirmwareUpdateSuccess.Inc()
-		case <-ctx.Done():
-			return
 		}
-	}
+	}(ctx)
+
+	return trigger
 }
 
 func openStorage() *slots.Partition {
