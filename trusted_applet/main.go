@@ -130,8 +130,8 @@ func main() {
 
 	// Verify if we are allowed to run on this unit by sending version
 	// information for rollback protection check.
-	if err := syscall.Call("RPC.Version", Version, nil); err != nil {
-		log.Fatalf("TA version check error, %v", err)
+	if err := syscall.Call("RPC.Version", strings.TrimPrefix(Version, "v"), nil); err != nil {
+		log.Fatalf("TA version check error for version %q: %v", Version, err)
 	}
 	// Set default configuration, the applet is reponsible of implementing
 	// its own configuration storage strategy.
