@@ -9,9 +9,9 @@ require (
 	github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e
 	github.com/machinebox/progress v0.2.0
 	github.com/prometheus/client_golang v1.19.0
-	github.com/transparency-dev/armored-witness-boot v0.0.0-20230904140406-e2e16c7665b7
+	github.com/transparency-dev/armored-witness-boot v0.1.0
 	github.com/transparency-dev/armored-witness-common v0.0.0-20240313170947-0b19d0fb8b95
-	github.com/transparency-dev/armored-witness-os v0.0.0-20240326114511-629ad8bc5b4b
+	github.com/transparency-dev/armored-witness-os v0.1.2
 	github.com/transparency-dev/formats v0.0.0-20231205184308-949529efd6b3
 	github.com/transparency-dev/serverless-log v0.0.0-20231215122707-66f68a7705f5
 	github.com/transparency-dev/witness v0.0.0-20240311170858-5de1177dc362
