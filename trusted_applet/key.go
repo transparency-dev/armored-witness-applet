@@ -38,6 +38,8 @@ var (
 	witnessPublicKey            string
 	witnessSigningKey           string
 	witnessPublicKeyAttestation string
+	bastionSigningKey           ed25519.PrivateKey
+	bastionIDAttestation        string
 )
 
 // deriveIdentityKeys creates this witness' signing and attestation identities.
@@ -69,6 +71,8 @@ func deriveIdentityKeys() {
 		prefix = "DEV:"
 	}
 
+	// Other than via the identity counter, the diversifier and key name in here
+	// MUST NOT be changed, or we'll break the invariant that this key is static.
 	witnessSigningKey, witnessPublicKey = deriveNoteSigner(
 		fmt.Sprintf("%sWitnessKey-id:%d", prefix, status.IdentityCounter),
 		status.Serial,
@@ -90,6 +94,18 @@ func deriveIdentityKeys() {
 	// were derived on a known armored witness unit.
 	witnessPublicKeyAttestation = attestID(&status, witnessPublicKey)
 
+	// Other than via the counter, the diversifier and key name in here
+	// MUST NOT be changed, or we'll break the invariant that this key is static.
+	bastionSec, bastionPub := deriveEd25519(
+		fmt.Sprintf("%sBastionKey-id:0", prefix),
+		status.Serial)
+	bastionSigningKey = bastionSec
+	bastionID := fmt.Sprintf("%064x", sha256.Sum256(bastionPub))
+
+	// Attest to the bastion ID so we can convince others that this ID
+	// was derived on a known armored witness unit
+	bastionIDAttestation = attestBastion(&status, bastionID)
+
 }
 
 // attestID uses attestSigningKey to sign a note which binds the passed in witness ID to this device's
@@ -106,6 +122,24 @@ func deriveIdentityKeys() {
 func attestID(status *api.Status, pubkey string) string {
 	aN := &note.Note{
 		Text: fmt.Sprintf("ArmoredWitness ID attestation v1\n%s\n%d\n%s\n", status.Serial, status.IdentityCounter, witnessPublicKey),
+	}
+	return attestNote(status, aN)
+}
+
+// attestBastion uses attestSigningKey to sign a note which binds the passed in witness ID to this device's
+// serial number and current identity counter.
+//
+// The witness ID attestation note contents is formatted like so:
+//
+//	"ArmoredWitness BastionID attestation v1"
+//	<Device serial string>
+//	<Witness BastionID counter in decimal>
+//	<Witness BastionID ASCII hex string>
+//
+// Returns the note verifier string which can be used to open the note, and the note containing the witness ID attestation.
+func attestBastion(status *api.Status, bastionID string) string {
+	aN := &note.Note{
+		Text: fmt.Sprintf("ArmoredWitness BastionID attestation v1\n%s\n%d\n%s\n", status.Serial, 0, bastionID),
 	}
 	return attestNote(status, aN)
 }
