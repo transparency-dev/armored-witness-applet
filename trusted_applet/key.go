@@ -129,18 +129,7 @@ func attestNote(status *api.Status, aN *note.Note) string {
 // should be a function which will return the name for the key - it may use the provided Reader as
 // a source of entropy while generating the name if needed.
 func deriveNoteSigner(diversifier string, uniqueID string, keyName func(io.Reader) string) (string, string) {
-	// We'll use the provided RPC call to do the derivation in h/w, but since this is based on
-	// AES it expects the diversifier to be 16 bytes long.
-	// We'll hash our diversifier text and truncate to 16 bytes, and use that:
-	diversifierHash := sha256.Sum256([]byte(diversifier))
-	var aesKey [sha256.Size]byte
-	if err := syscall.Call("RPC.DeriveKey", ([aes.BlockSize]byte)(diversifierHash[:aes.BlockSize]), &aesKey); err != nil {
-		log.Fatalf("Failed to derive h/w key, %v", err)
-	}
-
-	r := hkdf.New(sha256.New, aesKey[:], []byte(uniqueID), nil)
-
-	// And finally generate our note keypair
+	r := deriveHKDF(diversifier, uniqueID)
 	sec, pub, err := note.GenerateKey(r, keyName(r))
 	if err != nil {
 		log.Fatalf("Failed to generate derived note key: %v", err)
@@ -158,4 +147,20 @@ func randomName(rnd io.Reader) string {
 
 	ng := namegenerator.NewNameGenerator(int64(binary.LittleEndian.Uint64(nSeed)))
 	return ng.Generate()
+}
+
+// deriveHKDF uses the OS' DeriveKey RPC to get a reproducible AES key from the hardware,
+// and uses that, along with the passed in uniqueID, to produce bytes from a HKDF which may
+// be used to produce other types of key.
+func deriveHKDF(diversifier string, uniqueID string) io.Reader {
+	// We'll use the provided RPC call to do the derivation in h/w, but since this is based on
+	// AES it expects the diversifier to be 16 bytes long.
+	// We'll hash our diversifier text and truncate to 16 bytes, and use that:
+	diversifierHash := sha256.Sum256([]byte(diversifier))
+	var aesKey [sha256.Size]byte
+	if err := syscall.Call("RPC.DeriveKey", ([aes.BlockSize]byte)(diversifierHash[:aes.BlockSize]), &aesKey); err != nil {
+		log.Fatalf("Failed to derive h/w key, %v", err)
+	}
+
+	return hkdf.New(sha256.New, aesKey[:], []byte(uniqueID), nil)
 }
