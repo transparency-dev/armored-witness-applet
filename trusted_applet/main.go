@@ -184,6 +184,7 @@ func main() {
 		Identity:          witnessPublicKey,
 		IDAttestPublicKey: attestPublicKey,
 		AttestedID:        witnessPublicKeyAttestation,
+		AttestedBastionID: bastionIDAttestation,
 	}, nil)
 
 	klog.Infof("Attestation key:\n%s", attestPublicKey)
@@ -281,6 +282,7 @@ func runWithNetworking(ctx context.Context) error {
 		Identity:          witnessPublicKey,
 		IDAttestPublicKey: attestPublicKey,
 		AttestedID:        witnessPublicKeyAttestation,
+		AttestedBastionID: bastionIDAttestation,
 		IP:                addr.Address.String(),
 	}, nil)
 
