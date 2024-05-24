@@ -30,6 +30,7 @@ import (
 )
 
 var (
+	attestSigningKey string
 	// attestPublicKey can be used to verify that a given witnessPublicKey
 	// was derived on a known device.
 	attestPublicKey             string
@@ -70,20 +71,30 @@ func deriveIdentityKeys() {
 	witnessSigningKey, witnessPublicKey = deriveNoteSigner(
 		fmt.Sprintf("%sWitnessKey-id:%d", prefix, status.IdentityCounter),
 		status.Serial,
-		status.HAB,
 		func(rnd io.Reader) string {
 			return fmt.Sprintf("%sArmoredWitness-%s", prefix, randomName(rnd))
 		})
 
-	attestPublicKey, witnessPublicKeyAttestation = attestID(&status, witnessPublicKey)
+	// The diversifier or key names in here MUST NOT be changed, or we'll
+	// break the invariant that this attestation key is static for the *lifetime of the
+	// (fused) device*!
+	attestSigningKey, attestPublicKey = deriveNoteSigner(
+		fmt.Sprintf("%sID-Attestation", prefix),
+		status.Serial,
+		func(_ io.Reader) string {
+			return fmt.Sprintf("%sAW-ID-Attestation-%s", prefix, status.Serial)
+		})
+
+	// Attest to the witness ID so we can convince others that successive witness IDs
+	// were derived on a known armored witness unit.
+	witnessPublicKeyAttestation = attestID(&status, witnessPublicKey)
 
 }
 
-// attestID creates a signer which is forever static for a fused device, and uses
-// that to sign a note which binds the passed in witness ID to this device's
+// attestID uses attestSigningKey to sign a note which binds the passed in witness ID to this device's
 // serial number and current identity counter.
 //
-// The attestation note contents is formatted like so:
+// The witness ID attestation note contents is formatted like so:
 //
 //	"ArmoredWitness ID attestation v1"
 //	<Device serial string>
@@ -91,28 +102,15 @@ func deriveIdentityKeys() {
 //	<Witness identity note verifier string>
 //
 // Returns the note verifier string which can be used to open the note, and the note containing the witness ID attestation.
-func attestID(status *api.Status, pubkey string) (string, string) {
-	// Add an obvious prefix to key names when we're running without secure boot
-	prefix := ""
-	if !status.HAB {
-		prefix = "DEV:"
-	}
-
-	// The diversifier or key names in here MUST NOT be changed, or we'll
-	// break the invariant that this key is static for the lifetime of the
-	// (fused) device!
-	attestSigner, attestPublicKey := deriveNoteSigner(
-		fmt.Sprintf("%sID-Attestation", prefix),
-		status.Serial,
-		status.HAB,
-		func(_ io.Reader) string {
-			return fmt.Sprintf("%sAW-ID-Attestation-%s", prefix, status.Serial)
-		})
-
+func attestID(status *api.Status, pubkey string) string {
 	aN := &note.Note{
 		Text: fmt.Sprintf("ArmoredWitness ID attestation v1\n%s\n%d\n%s\n", status.Serial, status.IdentityCounter, witnessPublicKey),
 	}
-	aSigner, err := note.NewSigner(attestSigner)
+	return attestNote(status, aN)
+}
+
+func attestNote(status *api.Status, aN *note.Note) string {
+	aSigner, err := note.NewSigner(attestSigningKey)
 	if err != nil {
 		panic(fmt.Errorf("failed to create attestation signer: %v", err))
 	}
@@ -120,7 +118,8 @@ func attestID(status *api.Status, pubkey string) (string, string) {
 	if err != nil {
 		panic(fmt.Errorf("failed to sign witness ID attestation: %v", err))
 	}
-	return attestPublicKey, string(attestation)
+
+	return string(attestation)
 }
 
 // deriveNoteSigner uses the h/w secret to derive a new note.Signer.
@@ -129,7 +128,7 @@ func attestID(status *api.Status, pubkey string) (string, string) {
 // device's h/w unique identifier, hab should reflect the device's secure boot status, and keyName
 // should be a function which will return the name for the key - it may use the provided Reader as
 // a source of entropy while generating the name if needed.
-func deriveNoteSigner(diversifier string, uniqueID string, hab bool, keyName func(io.Reader) string) (string, string) {
+func deriveNoteSigner(diversifier string, uniqueID string, keyName func(io.Reader) string) (string, string) {
 	// We'll use the provided RPC call to do the derivation in h/w, but since this is based on
 	// AES it expects the diversifier to be 16 bytes long.
 	// We'll hash our diversifier text and truncate to 16 bytes, and use that:
