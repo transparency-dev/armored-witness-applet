@@ -16,6 +16,7 @@ package main
 
 import (
 	"crypto/aes"
+	"crypto/ed25519"
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
@@ -135,6 +136,19 @@ func deriveNoteSigner(diversifier string, uniqueID string, keyName func(io.Reade
 		log.Fatalf("Failed to generate derived note key: %v", err)
 	}
 	return sec, pub
+}
+
+// deriveEd25519 uses the hardware secret to device a new ed25519 keypair.
+//
+// diversifier should uniquely specify the key's intended usage, uniqueID should be the
+// device's h/w unique identifier.
+func deriveEd25519(diversifier string, uniqueID string) (ed25519.PrivateKey, ed25519.PublicKey) {
+	r := deriveHKDF(diversifier, uniqueID)
+	pub, priv, err := ed25519.GenerateKey(r)
+	if err != nil {
+		log.Fatalf("Failed to generate derived ed25519 key: %v", err)
+	}
+	return priv, pub
 }
 
 // randomName generates a random human-friendly name.
