@@ -12,9 +12,9 @@ require (
 	github.com/transparency-dev/armored-witness-boot v0.1.0
 	github.com/transparency-dev/armored-witness-common v0.0.0-20240313170947-0b19d0fb8b95
 	github.com/transparency-dev/armored-witness-os v0.1.3-0.20240524123036-bdd4b0b96386
-	github.com/transparency-dev/formats v0.0.0-20231205184308-949529efd6b3
-	github.com/transparency-dev/serverless-log v0.0.0-20231215122707-66f68a7705f5
-	github.com/transparency-dev/witness v0.0.0-20240311170858-5de1177dc362
+	github.com/transparency-dev/formats v0.0.0-20240610130149-01e8727bec75
+	github.com/transparency-dev/serverless-log v0.0.0-20240408141044-5d483a81bdb7
+	github.com/transparency-dev/witness v0.0.0-20240612131802-aa0e8e37a478
 	github.com/usbarmory/GoTEE v0.0.0-20240314122327-40179239ad36
 	github.com/usbarmory/imx-enet v0.0.0-20240304151238-5b3010d57ea3
 	github.com/usbarmory/tamago v0.0.0-20240321170635-3bf2d607eccb
@@ -31,7 +31,7 @@ require (
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
+	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/google/btree v1.1.2 // indirect
@@ -45,7 +45,7 @@ require (
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/transparency-dev/merkle v0.0.2 // indirect
 	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/sync v0.6.0 // indirect
+	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
