@@ -328,6 +328,17 @@ func runWithNetworking(ctx context.Context) error {
 			w.Header().Add("Content-Type", "text/plain")
 			w.Write([]byte("ok, check /consolelog!"))
 		})
+		srvMux.HandleFunc("/status", func(w http.ResponseWriter, _ *http.Request) {
+			var s api.Status
+			if err := syscall.Call("RPC.Status", nil, &s); err != nil {
+				w.Header().Add("Content-Type", "text/plain")
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(err.Error()))
+				return
+			}
+			w.Header().Add("Content-Type", "text/plain")
+			w.Write([]byte(s.Print()))
+		})
 		srv := &http.Server{
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,
