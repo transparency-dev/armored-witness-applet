@@ -19,6 +19,7 @@ GIT_SEMVER_TAG ?= $(shell (git describe --tags --exact-match --match 'v*.*.*' 2>
 FT_BIN_URL ?= http://$(shell hostname --fqdn):9944/artefacts/
 FT_LOG_URL ?= http://$(shell hostname --fqdn):9944/log/
 REST_DISTRIBUTOR_BASE_URL ?= https://api.transparency.dev
+BASTION_ADDR ?= 
 
 TAMAGO_SEMVER = $(shell [ -n "${TAMAGO}" -a -x "${TAMAGO}" ] && ${TAMAGO} version | sed 's/.*go\([0-9]\.[0-9]*\.[0-9]*\).*/\1/')
 MINIMUM_TAMAGO_VERSION=1.22.0
@@ -42,6 +43,7 @@ GOFLAGS = -tags ${BUILD_TAGS} -trimpath -buildvcs=false -buildmode=exe \
         -ldflags "-T ${TEXT_START} -E ${ENTRY_POINT} -R 0x1000 \
                   -X 'main.Revision=${REV}' -X 'main.Version=${GIT_SEMVER_TAG}' \
                   -X 'main.RestDistributorBaseURL=${REST_DISTRIBUTOR_BASE_URL}' \
+                  -X 'main.BastionAddr=${BASTION_ADDR}' \
                   -X 'main.updateBinariesURL=${FT_BIN_URL}' \
                   -X 'main.updateLogURL=${FT_LOG_URL}' \
                   -X 'main.updateLogOrigin=${LOG_ORIGIN}' \

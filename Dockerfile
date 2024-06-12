@@ -10,6 +10,7 @@ ARG OS_PUBLIC_KEY1
 ARG OS_PUBLIC_KEY2
 ARG GIT_SEMVER_TAG
 ARG REST_DISTRIBUTOR_BASE_URL
+ARG BASTION_ADDR
 # Build environment variables. In addition to routing these through to the make
 # command, they MUST also be committed to in the manifest.
 ARG BEE
@@ -43,6 +44,7 @@ ENV FT_LOG_URL=${FT_LOG_URL} \
     OS_PUBLIC_KEY2="/tmp/os2.pub" \
     GIT_SEMVER_TAG=${GIT_SEMVER_TAG} \
     REST_DISTRIBUTOR_BASE_URL=${REST_DISTRIBUTOR_BASE_URL} \
+    BASTION_ADDR=${BASTION_ADDR} \
     BEE=${BEE}
 
 RUN make trusted_applet_nosign
