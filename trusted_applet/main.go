@@ -78,6 +78,7 @@ var (
 	Version  string
 
 	RestDistributorBaseURL string
+	BastionAddr            string
 
 	cfg *api.Configuration
 
@@ -343,6 +344,11 @@ func runWithNetworking(ctx context.Context) error {
 		RestDistributorBaseURL: RestDistributorBaseURL,
 		FeedInterval:           30 * time.Second,
 		DistributeInterval:     5 * time.Second,
+	}
+	if BastionAddr != "" {
+		klog.Infof("Bastion host %q configured", BastionAddr)
+		opConfig.BastionAddr = BastionAddr
+		opConfig.BastionKey = bastionSigningKey
 	}
 	mainListener, err := listenCfg.Listen(ctx, "tcp", ":80")
 	if err != nil {
