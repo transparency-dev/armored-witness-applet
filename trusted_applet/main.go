@@ -364,7 +364,6 @@ func runWithNetworking(ctx context.Context) error {
 		opConfig.BastionAddr = BastionAddr
 		opConfig.BastionKey = bastionSigningKey
 		opConfig.BastionRateLimit = bastionRateLimit
-
 	}
 	mainListener, err := listenCfg.Listen(ctx, "tcp", ":80")
 	if err != nil {
