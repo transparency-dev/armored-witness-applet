@@ -71,6 +71,9 @@ const (
 	// updateCheckInterval is the time between checking the FT Log for firmware
 	// updates.
 	updateCheckInterval = 5 * time.Minute
+
+	// bastionRateLimit is the maximum number of bastion requests per second to serve.
+	bastionRateLimit = float64(10)
 )
 
 var (
@@ -360,6 +363,8 @@ func runWithNetworking(ctx context.Context) error {
 		klog.Infof("Bastion host %q configured", BastionAddr)
 		opConfig.BastionAddr = BastionAddr
 		opConfig.BastionKey = bastionSigningKey
+		opConfig.BastionRateLimit = bastionRateLimit
+
 	}
 	mainListener, err := listenCfg.Listen(ctx, "tcp", ":80")
 	if err != nil {
