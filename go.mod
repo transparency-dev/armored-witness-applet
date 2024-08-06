@@ -21,7 +21,7 @@ require (
 	go.mercari.io/go-dnscache v0.3.0
 	golang.org/x/crypto v0.25.0
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
-	golang.org/x/mod v0.19.0
+	golang.org/x/mod v0.20.0
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v3 v3.0.1
