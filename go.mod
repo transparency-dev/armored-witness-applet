@@ -1,6 +1,6 @@
 module github.com/transparency-dev/armored-witness-applet
 
-go 1.22.4
+go 1.22.6
 
 require (
 	github.com/beevik/ntp v1.4.3
