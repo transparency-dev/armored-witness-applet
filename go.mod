@@ -8,7 +8,7 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e
 	github.com/machinebox/progress v0.2.0
-	github.com/prometheus/client_golang v1.20.2
+	github.com/prometheus/client_golang v1.20.3
 	github.com/transparency-dev/armored-witness-boot v0.1.0
 	github.com/transparency-dev/armored-witness-common v0.0.0-20240313170947-0b19d0fb8b95
 	github.com/transparency-dev/armored-witness-os v0.2.0
@@ -19,10 +19,10 @@ require (
 	github.com/usbarmory/imx-enet v0.0.0-20240304151238-5b3010d57ea3
 	github.com/usbarmory/tamago v0.0.0-20240321170635-3bf2d607eccb
 	go.mercari.io/go-dnscache v0.3.0
-	golang.org/x/crypto v0.26.0
+	golang.org/x/crypto v0.27.0
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
-	golang.org/x/mod v0.20.0
-	google.golang.org/grpc v1.66.0
+	golang.org/x/mod v0.21.0
+	google.golang.org/grpc v1.66.1
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v3 v3.0.1
 	gvisor.dev/gvisor v0.0.0-20240303010120-901d232cd101
@@ -49,8 +49,8 @@ require (
 	github.com/transparency-dev/merkle v0.0.2 // indirect
 	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.23.0 // indirect
-	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
+	golang.org/x/text v0.18.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240604185151-ef581f913117 // indirect
 )
