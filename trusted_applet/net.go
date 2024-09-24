@@ -78,7 +78,7 @@ var (
 )
 
 func init() {
-	net.DefaultNS = []string{DefaultResolver}
+	net.SetDefaultNS([]string{DefaultResolver})
 }
 
 // runDHCP starts the dhcp client.
@@ -187,7 +187,7 @@ func configureNetFromDHCP(newAddr tcpip.AddressWithPrefix, cfg dhcp.Config) {
 			resolvers = append(resolvers, resolver)
 		}
 		klog.Infof("DHCPC: Using DNS server(s) %v", resolvers)
-		net.DefaultNS = resolvers
+		net.SetDefaultNS(resolvers)
 	}
 	// Set up routing for new address
 	// Start with the implicit route to local segment
@@ -333,7 +333,7 @@ func mac(serial string) string {
 
 func startNetworking() (err error) {
 	// Set the default resolver from the config, if we're using DHCP this may be updated.
-	net.DefaultNS = []string{cfg.Resolver}
+	net.SetDefaultNS([]string{cfg.Resolver})
 
 	var status api.Status
 	if err := syscall.Call("RPC.Status", nil, &status); err != nil {

@@ -110,7 +110,7 @@ func initMetrics() {
 }
 
 func init() {
-	runtime.Exit = applet.Exit
+	runtime.Exit = func(_ int32) { applet.Exit() }
 }
 
 func main() {
@@ -280,7 +280,7 @@ func runWithNetworking(ctx context.Context) error {
 	if tcpErr != nil {
 		return fmt.Errorf("runWithNetworking has no network configured: %v", tcpErr)
 	}
-	klog.Infof("TA Version:%s MAC:%s IP:%s GW:%s DNS:%s", Version, iface.NIC.MAC.String(), addr, iface.Stack.GetRouteTable(), net.DefaultNS)
+	klog.Infof("TA Version:%s MAC:%s IP:%s GW:%s DefaultDNS:%s", Version, iface.NIC.MAC.String(), addr, iface.Stack.GetRouteTable(), DefaultResolver)
 	// Update status with latest IP address too.
 	syscall.Call("RPC.SetWitnessStatus", rpc.WitnessStatus{
 		Identity:          witnessPublicKey,
