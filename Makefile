@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-BUILD_EPOCH := $(shell /bin/date -u "+%s")
+BUILD_EPOCH := $(shell date -u "+%s")
 BUILD_TAGS = linkramsize,linkramstart,disable_fr_auth,linkprintk,nostatfs
 REV = $(shell git rev-parse --short HEAD 2> /dev/null)
 GIT_SEMVER_TAG ?= $(shell (git describe --tags --exact-match --match 'v*.*.*' 2>/dev/null || git describe --match 'v*.*.*' --tags 2>/dev/null || git describe --tags 2>/dev/null || echo -n v0.0.${BUILD_EPOCH}+`git rev-parse HEAD`) | tail -c +2 )
@@ -22,9 +22,9 @@ REST_DISTRIBUTOR_BASE_URL ?= https://api.transparency.dev
 BASTION_ADDR ?= 
 
 TAMAGO_SEMVER = $(shell [ -n "${TAMAGO}" -a -x "${TAMAGO}" ] && ${TAMAGO} version | sed 's/.*go\([0-9]\.[0-9]*\.[0-9]*\).*/\1/')
-MINIMUM_TAMAGO_VERSION=1.22.4
+MINIMUM_TAMAGO_VERSION=1.23.1
 
-SHELL = /bin/bash
+SHELL = /usr/bin/env bash
 
 APP := ""
 TEXT_START = 0x90010000 # ramStart (defined in mem.go under relevant tamago/soc package) + 0x10000
