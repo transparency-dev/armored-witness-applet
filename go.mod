@@ -8,10 +8,10 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e
 	github.com/machinebox/progress v0.2.0
-	github.com/prometheus/client_golang v1.20.4
+	github.com/prometheus/client_golang v1.20.5
 	github.com/transparency-dev/armored-witness-boot v0.1.0
 	github.com/transparency-dev/armored-witness-common v0.0.0-20240313170947-0b19d0fb8b95
-	github.com/transparency-dev/armored-witness-os v0.2.0
+	github.com/transparency-dev/armored-witness-os v0.3.0
 	github.com/transparency-dev/formats v0.0.0-20241003145927-a04dcc2a37e4
 	github.com/transparency-dev/serverless-log v0.0.0-20240408141044-5d483a81bdb7
 	github.com/transparency-dev/witness v0.0.0-20241016152256-c8230698319e
