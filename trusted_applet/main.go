@@ -357,7 +357,7 @@ func runWithNetworking(ctx context.Context) error {
 		WitnessKey:             witnessSigningKey,
 		RestDistributorBaseURL: RestDistributorBaseURL,
 		FeedInterval:           30 * time.Second,
-		DistributeInterval:     5 * time.Second,
+		DistributeInterval:     30 * time.Second,
 	}
 	if BastionAddr != "" {
 		klog.Infof("Bastion host %q configured", BastionAddr)
