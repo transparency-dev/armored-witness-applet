@@ -73,7 +73,7 @@ const (
 	updateCheckInterval = 5 * time.Minute
 
 	// bastionRateLimit is the maximum number of bastion requests per second to serve.
-	bastionRateLimit = float64(10)
+	bastionRateLimit = float64(30)
 )
 
 var (
