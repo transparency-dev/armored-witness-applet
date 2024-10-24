@@ -71,8 +71,8 @@ github.com/transparency-dev/merkle v0.0.3-0.20240919113952-3c979d16ee14 h1:K8JqF
 github.com/transparency-dev/merkle v0.0.3-0.20240919113952-3c979d16ee14/go.mod h1:EoKPjljyIALg1rldsJwRQVKOJO7sLd6eUqki19ruI80=
 github.com/transparency-dev/serverless-log v0.0.0-20240408141044-5d483a81bdb7 h1:Caqvx+/b2hpuK5dHLMtKxoNsNhSf6JsT9m+7Xgk1z6Y=
 github.com/transparency-dev/serverless-log v0.0.0-20240408141044-5d483a81bdb7/go.mod h1:A+cQ9EQeah/Ua7JaMOAAKkCfyDZPsq74o+UgwqQEPsQ=
-github.com/transparency-dev/witness v0.0.0-20241023110819-d1b22ee5e29f h1:hNK9/XQ5FYwj4jKNzInTiLbMszMlz9+Ed+PrB1Imh7Y=
-github.com/transparency-dev/witness v0.0.0-20241023110819-d1b22ee5e29f/go.mod h1:vvM7SPr5Jb7U9K+XILcuuWrPJPhe1lTMZg7Db/NtuEI=
+github.com/transparency-dev/witness v0.0.0-20241023163554-64080ccf0dfe h1:V18Cek3iHHaR5VPJVDmYh3Mvl/6GF26o+JbwiQLA9C0=
+github.com/transparency-dev/witness v0.0.0-20241023163554-64080ccf0dfe/go.mod h1:vvM7SPr5Jb7U9K+XILcuuWrPJPhe1lTMZg7Db/NtuEI=
 github.com/usbarmory/GoTEE v0.0.0-20240913144333-7e62563c0628 h1:PGlLJYe1YMmzmSYXhEkOSXSrQjV/mXk6CNk5LTgnndM=
 github.com/usbarmory/GoTEE v0.0.0-20240913144333-7e62563c0628/go.mod h1:solbXmDpRv6u6CmfHiFi3rwsYoTlZXToith669WnvgM=
 github.com/usbarmory/imx-enet v0.0.0-20240304151238-5b3010d57ea3 h1:o6ixndtlZMRKOXcDCc2Mw6lSu1f79jmIaSY0wyzkmq4=
