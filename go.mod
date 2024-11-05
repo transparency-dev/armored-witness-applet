@@ -14,7 +14,7 @@ require (
 	github.com/transparency-dev/armored-witness-os v0.3.0
 	github.com/transparency-dev/formats v0.0.0-20241003145927-a04dcc2a37e4
 	github.com/transparency-dev/serverless-log v0.0.0-20240408141044-5d483a81bdb7
-	github.com/transparency-dev/witness v0.0.0-20241024162328-de182c828504
+	github.com/transparency-dev/witness v0.0.0-20241104170145-1b7aedbc4a2b
 	github.com/usbarmory/GoTEE v0.0.0-20240913144333-7e62563c0628
 	github.com/usbarmory/imx-enet v0.0.0-20240304151238-5b3010d57ea3
 	github.com/usbarmory/tamago v0.0.0-20240924114619-273d67cd811d
