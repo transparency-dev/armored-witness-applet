@@ -161,46 +161,44 @@ type logRecord struct {
 	Proof      []byte
 }
 
-// GetLatest returns the latest checkpoint and its compact range (if applicable).
+// GetLatest returns the latest checkpoint.
 // If no checkpoint exists, it must return codes.NotFound.
-func (s *slotOps) GetLatest() ([]byte, []byte, error) {
+func (s *slotOps) GetLatest() ([]byte, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	// TODO(al): workaround for storage assumption - see comment in ReadOps above.
 	if s.slot == nil {
-		return nil, nil, status.Error(codes.NotFound, "no checkpoint for log")
+		return nil, status.Error(codes.NotFound, "no checkpoint for log")
 	}
 
 	b, t, err := s.slot.Read()
 	if err != nil {
 		klog.Warningf("Read failed: %v", err)
-		return nil, nil, fmt.Errorf("failed to read data: %v", err)
+		return nil, fmt.Errorf("failed to read data: %v", err)
 	}
 	s.writeToken = t
 	if len(b) == 0 {
 		klog.Warningf("No checkpoint")
-		return nil, nil, status.Error(codes.NotFound, "no checkpoint for log")
+		return nil, status.Error(codes.NotFound, "no checkpoint for log")
 	}
 	lr := logRecord{}
 	if err := yaml.Unmarshal(b, &lr); err != nil {
 		klog.Warningf("Unmarshal failed: %v", err)
-		return nil, nil, fmt.Errorf("failed to unmarshal data: %v", err)
+		return nil, fmt.Errorf("failed to unmarshal data: %v", err)
 	}
 	klog.V(2).Infof("read:\n%s", lr.Checkpoint)
-	return lr.Checkpoint, lr.Proof, nil
+	return lr.Checkpoint, nil
 }
 
-// Set sets a new checkpoint and (optional) compact range
-// for the log. This commits the state to persistence.
+// Set sets a new checkpoint for the log. This commits the state to persistence.
 // After this call, only Close() should be called on this object.
-func (s *slotOps) Set(checkpointRaw []byte, compactRange []byte) error {
+func (s *slotOps) Set(checkpointRaw []byte) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	lr := logRecord{
 		Checkpoint: checkpointRaw,
-		Proof:      compactRange,
 	}
 
 	klog.V(2).Infof("writing with token %d:\n%s", s.writeToken, lr.Checkpoint)
