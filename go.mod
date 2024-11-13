@@ -14,7 +14,7 @@ require (
 	github.com/transparency-dev/armored-witness-os v0.3.0
 	github.com/transparency-dev/formats v0.0.0-20241003145927-a04dcc2a37e4
 	github.com/transparency-dev/serverless-log v0.0.0-20240408141044-5d483a81bdb7
-	github.com/transparency-dev/witness v0.0.0-20241104170145-1b7aedbc4a2b
+	github.com/transparency-dev/witness v0.0.0-20241112120223-bd45d190b37b
 	github.com/usbarmory/GoTEE v0.0.0-20240913144333-7e62563c0628
 	github.com/usbarmory/imx-enet v0.0.0-20240304151238-5b3010d57ea3
 	github.com/usbarmory/tamago v0.0.0-20240924114619-273d67cd811d
@@ -46,10 +46,10 @@ require (
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/transparency-dev/merkle v0.0.3-0.20240919113952-3c979d16ee14 // indirect
-	golang.org/x/net v0.30.0 // indirect
+	golang.org/x/net v0.31.0 // indirect
 	golang.org/x/sync v0.9.0 // indirect
 	golang.org/x/sys v0.27.0 // indirect
 	golang.org/x/text v0.20.0 // indirect
-	golang.org/x/time v0.7.0 // indirect
+	golang.org/x/time v0.8.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240903143218-8af14fe29dc1 // indirect
 )
