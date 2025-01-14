@@ -31,6 +31,7 @@ import (
 	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	f_note "github.com/transparency-dev/formats/note"
 
 	"github.com/usbarmory/GoTEE/applet"
 	"github.com/usbarmory/GoTEE/syscall"
@@ -43,11 +44,11 @@ import (
 	"github.com/transparency-dev/armored-witness-common/release/firmware/update"
 	"github.com/transparency-dev/armored-witness-os/api"
 	"github.com/transparency-dev/armored-witness-os/api/rpc"
-	"github.com/transparency-dev/formats/note"
 
 	"github.com/transparency-dev/witness/monitoring"
 	"github.com/transparency-dev/witness/monitoring/prometheus"
 	"github.com/transparency-dev/witness/omniwitness"
+	sumdb_note "golang.org/x/mod/sumdb/note"
 	"k8s.io/klog/v2"
 
 	_ "golang.org/x/crypto/x509roots/fallback"
@@ -241,7 +242,7 @@ func main() {
 	// Wait for a DHCP address to be assigned if that's what we're configured to do
 	if cfg.DHCP {
 		hostname := "armoredwitness"
-		if v, err := note.NewVerifier(witnessPublicKey); err == nil {
+		if v, err := f_note.NewVerifier(witnessPublicKey); err == nil {
 			hostname = cleanForDNS(v.Name())
 		}
 		runDHCP(ctx, nicID, fmt.Sprintf("AW-%s", status.Serial), hostname, runWithNetworking)
@@ -352,9 +353,19 @@ func runWithNetworking(ctx context.Context) error {
 		}
 	}()
 
+	signerLegacy, err := sumdb_note.NewSigner(witnessSigningKey)
+	if err != nil {
+		klog.Exitf("Failed to init signer v0: %v", err)
+	}
+	signerCosigV1, err := f_note.NewSignerForCosignatureV1(witnessSigningKey)
+	if err != nil {
+		klog.Exitf("Failed to init signer v1: %v", err)
+	}
+
 	// Set up and start omniwitness
 	opConfig := omniwitness.OperatorConfig{
-		WitnessKey:             witnessSigningKey,
+		WitnessKeys:            []sumdb_note.Signer{signerLegacy, signerCosigV1},
+		WitnessVerifier:        signerCosigV1.Verifier(),
 		RestDistributorBaseURL: RestDistributorBaseURL,
 		FeedInterval:           30 * time.Second,
 		DistributeInterval:     30 * time.Second,
