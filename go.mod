@@ -11,7 +11,7 @@ require (
 	github.com/prometheus/client_golang v1.20.5
 	github.com/transparency-dev/armored-witness-boot v0.1.0
 	github.com/transparency-dev/armored-witness-common v0.0.0-20240313170947-0b19d0fb8b95
-	github.com/transparency-dev/armored-witness-os v0.3.0
+	github.com/transparency-dev/armored-witness-os v0.3.1
 	github.com/transparency-dev/formats v0.0.0-20241003145927-a04dcc2a37e4
 	github.com/transparency-dev/serverless-log v0.0.0-20240408141044-5d483a81bdb7
 	github.com/transparency-dev/witness v0.0.0-20250113194647-353e718338ce
@@ -23,7 +23,7 @@ require (
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
 	golang.org/x/mod v0.22.0
 	google.golang.org/grpc v1.69.4
-	google.golang.org/protobuf v1.36.2
+	google.golang.org/protobuf v1.36.3
 	gopkg.in/yaml.v3 v3.0.1
 	gvisor.dev/gvisor v0.0.0-20240303010120-901d232cd101
 	k8s.io/klog/v2 v2.130.1
