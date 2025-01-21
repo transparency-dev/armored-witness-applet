@@ -68,8 +68,8 @@ github.com/transparency-dev/armored-witness-boot v0.1.0 h1:OBlz71PCmPju9cDI1VEmy
 github.com/transparency-dev/armored-witness-boot v0.1.0/go.mod h1:XpiSLWNiDplWVYjtR1FY/wyFqiWK++5pLCiYe3PZZC8=
 github.com/transparency-dev/armored-witness-common v0.0.0-20240313170947-0b19d0fb8b95 h1:qOh9vp/TLfJ1X46bk756se0wdlKHSV2TrGUMa3kz91w=
 github.com/transparency-dev/armored-witness-common v0.0.0-20240313170947-0b19d0fb8b95/go.mod h1:cb6aKsLVU2OUk8+UjD8xvzxU84miHXLMHJaxO2gHDus=
-github.com/transparency-dev/armored-witness-os v0.3.0 h1:h3JM/w4EY7kyVhNHc/g0/B1uy1/hzbX8AQm9VJQ7FKY=
-github.com/transparency-dev/armored-witness-os v0.3.0/go.mod h1:1ThiAqCpGesnsGPo75B+pnc6tIqHMxYLmQgXMm1lI6g=
+github.com/transparency-dev/armored-witness-os v0.3.1 h1:dQmCmqEztHAqLD4znuNxxAllt52C5Ye4k6PATPptCb4=
+github.com/transparency-dev/armored-witness-os v0.3.1/go.mod h1:7LrFwn8LSaOJvgPZmY2djjIJNsKhnU7+aFl2yreMrh0=
 github.com/transparency-dev/formats v0.0.0-20241003145927-a04dcc2a37e4 h1:vu5vGPlSxEzekLWXc+yyBcYEFKxwkqOpX7bBAPOMEac=
 github.com/transparency-dev/formats v0.0.0-20241003145927-a04dcc2a37e4/go.mod h1:fkW2EYAOhcdBm1kc9hvf5cb0SptbyM/0OUvdFNnVCEE=
 github.com/transparency-dev/merkle v0.0.3-0.20240919113952-3c979d16ee14 h1:K8JqF1HyGDXfTdDHtHe7VsIzeuFEcfLhioOXaupKB+Q=
@@ -109,8 +109,8 @@ google.golang.org/genproto/googleapis/rpc v0.0.0-20241113202542-65e8d215514f h1:
 google.golang.org/genproto/googleapis/rpc v0.0.0-20241113202542-65e8d215514f/go.mod h1:GX3210XPVPUjJbTUbvwI8f2IpZDMZuPJWDzDuebbviI=
 google.golang.org/grpc v1.69.4 h1:MF5TftSMkd8GLw/m0KM6V8CMOCY6NZ1NQDPGFgbTt4A=
 google.golang.org/grpc v1.69.4/go.mod h1:vyjdE6jLBI76dgpDojsFGNaHlxdjXN9ghpnd2o7JGZ4=
-google.golang.org/protobuf v1.36.2 h1:R8FeyR1/eLmkutZOM5CWghmo5itiG9z0ktFlTVLuTmU=
-google.golang.org/protobuf v1.36.2/go.mod h1:9fA7Ob0pmnwhb644+1+CVWFRbNajQ6iRojtC/QF5bRE=
+google.golang.org/protobuf v1.36.3 h1:82DV7MYdb8anAVi3qge1wSnMDrnKK7ebr+I0hHRN1BU=
+google.golang.org/protobuf v1.36.3/go.mod h1:9fA7Ob0pmnwhb644+1+CVWFRbNajQ6iRojtC/QF5bRE=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntNwaWcugrBjAiHlqqRiVk=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c/go.mod h1:JHkPIbrfpd72SG/EVd6muEfDQjcINNoR0C8j2r3qZ4Q=
