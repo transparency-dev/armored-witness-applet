@@ -8,7 +8,7 @@ require (
 	github.com/google/go-cmp v0.7.0
 	github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e
 	github.com/machinebox/progress v0.2.0
-	github.com/prometheus/client_golang v1.21.1
+	github.com/prometheus/client_golang v1.22.0
 	github.com/transparency-dev/armored-witness-boot v0.1.0
 	github.com/transparency-dev/armored-witness-common v0.0.0-20240313170947-0b19d0fb8b95
 	github.com/transparency-dev/armored-witness-os v0.4.0
@@ -37,7 +37,6 @@ require (
 	github.com/google/btree v1.1.2 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gsora/fidati v0.0.0-20230806170658-ab651720d7c3 // indirect
-	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/matryer/is v1.4.1 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
