@@ -73,8 +73,8 @@ const (
 	// updates.
 	updateCheckInterval = 5 * time.Minute
 
-	// bastionRateLimit is the maximum number of bastion requests per second to serve.
-	bastionRateLimit = float64(30)
+	// rateLimit is the maximum number of requests per second to serve.
+	rateLimit = float64(30)
 )
 
 var (
@@ -374,7 +374,7 @@ func runWithNetworking(ctx context.Context) error {
 		klog.Infof("Bastion host %q configured", BastionAddr)
 		opConfig.BastionAddr = BastionAddr
 		opConfig.BastionKey = bastionSigningKey
-		opConfig.BastionRateLimit = bastionRateLimit
+		opConfig.RateLimit = rateLimit
 	}
 	mainListener, err := listenCfg.Listen(ctx, "tcp", ":80")
 	if err != nil {

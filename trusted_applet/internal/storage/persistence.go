@@ -20,7 +20,6 @@ import (
 	"sync"
 
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/storage/slots"
-	"github.com/transparency-dev/witness/omniwitness"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gopkg.in/yaml.v3"
@@ -101,85 +100,25 @@ func (p *SlotPersistence) Logs() ([]string, error) {
 	return r, nil
 }
 
-// ReadOps returns read-only operations for the given log ID. This
-// method only makes sense for IDs returned by Logs().
-func (p *SlotPersistence) ReadOps(logID string) (omniwitness.LogStateReadOps, error) {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-	i, ok := p.idToSlot[logID]
-	if !ok {
-		// TODO(al): work around undocumented assumptions in the storage interface;
-		// we have to return a ReadOp even if we don't know about the specified logID.
-		// the ReadOps we return must then return an error of codes.NotFound when GetLatest
-		// is called so that the witness will eventually call WriteOps/Update with the
-		// same logID and create the record.
-		return &slotOps{}, nil
+// Latest returns the last recorded checkpoint for the given logID, or an
+// `codes.NotFound` error if no such checkpoint has been recorded.
+//
+// Implements the omniwitness LogPersistence interface.
+func (p *SlotPersistence) Latest(logID string) ([]byte, error) {
+	i, err := p.logSlot(logID, false)
+	if err != nil {
+		return nil, err
 	}
 	s, err := p.part.Open(i)
 	if err != nil {
 		return nil, fmt.Errorf("internal error opening slot %d associated with log ID %q: %v", i, logID, err)
 	}
-	return &slotOps{slot: s}, nil
-}
-
-// WriteOps shows intent to write data for the given logID. The
-// returned operations must have Close() called when the intent
-// is complete.
-// There is no requirement that the ID is present in Logs(); if
-// the ID is not there and this operation succeeds in committing
-// a checkpoint, then Logs() will return the new ID afterwards.
-func (p *SlotPersistence) WriteOps(logID string) (omniwitness.LogStateWriteOps, error) {
-	// Lock rather than RLock because we might add a new log mapping here.
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	i, ok := p.idToSlot[logID]
-	if !ok {
-		var err error
-		i, err = p.addLog(logID)
-		if err != nil {
-			klog.Warningf("Failed to add mapping: %q", err)
-			return nil, fmt.Errorf("unable to assign slot for log ID %q: %v", logID, err)
-		}
-	}
-	klog.V(2).Infof("mapping %q -> %d", logID, i)
-	s, err := p.part.Open(i)
-	if err != nil {
-		klog.Warningf("failed to open %d: %v", i, err)
-		return nil, fmt.Errorf("internal error opening slot %d associated with log ID %q: %v", i, logID, err)
-	}
-	return &slotOps{slot: s}, nil
-}
-
-type slotOps struct {
-	mu         sync.RWMutex
-	slot       *slots.Slot
-	writeToken uint32
-}
-
-type logRecord struct {
-	Checkpoint []byte
-	Proof      []byte
-}
-
-// GetLatest returns the latest checkpoint.
-// If no checkpoint exists, it must return codes.NotFound.
-func (s *slotOps) GetLatest() ([]byte, error) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	// TODO(al): workaround for storage assumption - see comment in ReadOps above.
-	if s.slot == nil {
-		return nil, status.Error(codes.NotFound, "no checkpoint for log")
-	}
-
-	b, t, err := s.slot.Read()
+	b, _, err := s.Read()
 	if err != nil {
 		klog.Warningf("Read failed: %v", err)
 		return nil, fmt.Errorf("failed to read data: %v", err)
 	}
-	s.writeToken = t
 	if len(b) == 0 {
-		klog.Warningf("No checkpoint")
 		return nil, status.Error(codes.NotFound, "no checkpoint for log")
 	}
 	lr := logRecord{}
@@ -187,42 +126,80 @@ func (s *slotOps) GetLatest() ([]byte, error) {
 		klog.Warningf("Unmarshal failed: %v", err)
 		return nil, fmt.Errorf("failed to unmarshal data: %v", err)
 	}
-	klog.V(2).Infof("read:\n%s", lr.Checkpoint)
 	return lr.Checkpoint, nil
 }
 
-// Set sets a new checkpoint for the log. This commits the state to persistence.
-// After this call, only Close() should be called on this object.
-func (s *slotOps) Set(checkpointRaw []byte) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	lr := logRecord{
-		Checkpoint: checkpointRaw,
+// Update allows for storing a new checkpoint for a given LogID.
+//
+// Implements the omniwitness LogPersistence interface.
+func (p *SlotPersistence) Update(logID string, f func(current []byte) ([]byte, error)) error {
+	i, err := p.logSlot(logID, true)
+	if err != nil {
+		return err
+	}
+	s, err := p.part.Open(i)
+	if err != nil {
+		return fmt.Errorf("internal error opening slot %d associated with log ID %q: %v", i, logID, err)
+	}
+	b, t, err := s.Read()
+	if err != nil {
+		klog.Warningf("Read failed: %v", err)
+		return fmt.Errorf("failed to read data: %v", err)
 	}
 
-	klog.V(2).Infof("writing with token %d:\n%s", s.writeToken, lr.Checkpoint)
+	var currCP []byte
+	if len(b) > 0 {
+		lr := logRecord{}
+		if err := yaml.Unmarshal(b, &lr); err != nil {
+			klog.Warningf("Unmarshal failed: %v", err)
+			return fmt.Errorf("failed to unmarshal data: %v", err)
+		}
+		currCP = lr.Checkpoint
+	}
 
-	lrRaw, err := yaml.Marshal(&lr)
+	newCP, err := f(currCP)
+	if err != nil {
+		return err
+	}
+
+	lrRaw, err := yaml.Marshal(&logRecord{Checkpoint: newCP})
 	if err != nil {
 		klog.Warningf("marshal failed: %v", err)
 		return fmt.Errorf("failed to marshal data: %v", err)
 	}
 
-	if err := s.slot.CheckAndWrite(s.writeToken, lrRaw); err != nil {
+	if err := s.CheckAndWrite(t, lrRaw); err != nil {
 		klog.Warningf("Write failed: %v", err)
 		return fmt.Errorf("failed to write data: %v", err)
 	}
 	return nil
 }
 
-// Terminates the write operation, freeing all resources.
-// This method MUST be called.
-func (s *slotOps) Close() error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.slot = nil
-	return nil
+// logSlot looks up the slot assigned to a given logID, optionally creating a mapping if there isn't
+// a slot currently assigned.
+func (p *SlotPersistence) logSlot(logID string, create bool) (uint, error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	i, ok := p.idToSlot[logID]
+	if !ok {
+		if !create {
+			return 0, status.Error(codes.NotFound, "no slot for log")
+		}
+		var err error
+		i, err = p.addLog(logID)
+		if err != nil {
+			klog.Warningf("Failed to add mapping: %q", err)
+			return 0, fmt.Errorf("unable to assign slot for log ID %q: %v", logID, err)
+		}
+		klog.V(2).Infof("Added mapping %q -> %d", logID, i)
+	}
+	return i, nil
+}
+
+// TODO(al): get rid of this.
+type logRecord struct {
+	Checkpoint []byte
+	Proof      []byte
 }
 
 // populateMap reads the logID -> slot mapping from storage.
