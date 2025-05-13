@@ -100,8 +100,10 @@ func (p *SlotPersistence) Logs() ([]string, error) {
 	return r, nil
 }
 
-// ReadOps returns read-only operations for the given log ID. This
-// method only makes sense for IDs returned by Logs().
+// Latest returns the last recorded checkpoint for the given logID, or an
+// `codes.NotFound` error if no such checkpoint has been recorded.
+//
+// Implements the omniwitness LogPersistence interface.
 func (p *SlotPersistence) Latest(logID string) ([]byte, error) {
 	i, err := p.logSlot(logID, false)
 	if err != nil {
@@ -127,12 +129,9 @@ func (p *SlotPersistence) Latest(logID string) ([]byte, error) {
 	return lr.Checkpoint, nil
 }
 
-// WriteOps shows intent to write data for the given logID. The
-// returned operations must have Close() called when the intent
-// is complete.
-// There is no requirement that the ID is present in Logs(); if
-// the ID is not there and this operation succeeds in committing
-// a checkpoint, then Logs() will return the new ID afterwards.
+// Update allows for storing a new checkpoint for a given LogID.
+//
+// Implements the omniwitness LogPersistence interface.
 func (p *SlotPersistence) Update(logID string, f func(current []byte) ([]byte, error)) error {
 	i, err := p.logSlot(logID, true)
 	if err != nil {
