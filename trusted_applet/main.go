@@ -353,10 +353,6 @@ func runWithNetworking(ctx context.Context) error {
 		}
 	}()
 
-	signerLegacy, err := sumdb_note.NewSigner(witnessSigningKey)
-	if err != nil {
-		klog.Exitf("Failed to init signer v0: %v", err)
-	}
 	signerCosigV1, err := f_note.NewSignerForCosignatureV1(witnessSigningKey)
 	if err != nil {
 		klog.Exitf("Failed to init signer v1: %v", err)
@@ -364,7 +360,7 @@ func runWithNetworking(ctx context.Context) error {
 
 	// Set up and start omniwitness
 	opConfig := omniwitness.OperatorConfig{
-		WitnessKeys:            []sumdb_note.Signer{signerLegacy, signerCosigV1},
+		WitnessKeys:            []sumdb_note.Signer{signerCosigV1},
 		WitnessVerifier:        signerCosigV1.Verifier(),
 		RestDistributorBaseURL: RestDistributorBaseURL,
 		FeedInterval:           30 * time.Second,
