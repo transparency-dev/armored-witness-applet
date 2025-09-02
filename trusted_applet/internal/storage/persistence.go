@@ -15,6 +15,7 @@
 package storage
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"sync"
@@ -72,7 +73,7 @@ func NewSlotPersistence(part *slots.Partition) *SlotPersistence {
 
 // Init sets up the persistence layer. This should be idempotent,
 // and will be called once per process startup.
-func (p *SlotPersistence) Init() error {
+func (p *SlotPersistence) Init(_ context.Context) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -89,7 +90,7 @@ func (p *SlotPersistence) Init() error {
 
 // Logs returns the IDs of all logs that have checkpoints that can
 // be read.
-func (p *SlotPersistence) Logs() ([]string, error) {
+func (p *SlotPersistence) Logs(_ context.Context) ([]string, error) {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 
@@ -104,7 +105,7 @@ func (p *SlotPersistence) Logs() ([]string, error) {
 // `codes.NotFound` error if no such checkpoint has been recorded.
 //
 // Implements the omniwitness LogPersistence interface.
-func (p *SlotPersistence) Latest(logID string) ([]byte, error) {
+func (p *SlotPersistence) Latest(_ context.Context, logID string) ([]byte, error) {
 	i, err := p.logSlot(logID, false)
 	if err != nil {
 		return nil, err
@@ -132,7 +133,7 @@ func (p *SlotPersistence) Latest(logID string) ([]byte, error) {
 // Update allows for storing a new checkpoint for a given LogID.
 //
 // Implements the omniwitness LogPersistence interface.
-func (p *SlotPersistence) Update(logID string, f func(current []byte) ([]byte, error)) error {
+func (p *SlotPersistence) Update(_ context.Context, logID string, f func(current []byte) ([]byte, error)) error {
 	i, err := p.logSlot(logID, true)
 	if err != nil {
 		return err

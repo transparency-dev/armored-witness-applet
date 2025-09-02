@@ -234,10 +234,9 @@ func main() {
 	}
 
 	persistence = storage.NewSlotPersistence(part)
-	if err := persistence.Init(); err != nil {
+	if err := persistence.Init(ctx); err != nil {
 		klog.Exitf("Failed to create persistence layer: %v", err)
 	}
-	persistence.Init()
 
 	// Wait for a DHCP address to be assigned if that's what we're configured to do
 	if cfg.DHCP {
