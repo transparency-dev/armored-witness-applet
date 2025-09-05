@@ -15,9 +15,9 @@ require (
 	github.com/transparency-dev/formats v0.0.0-20250421220931-bb8ad4d07c26
 	github.com/transparency-dev/serverless-log v0.0.0-20250425165558-64e1d2007a10
 	github.com/transparency-dev/witness v0.0.0-20250902131130-32de9adb0c96
-	github.com/usbarmory/GoTEE v0.0.0-20250318141819-064601644998
+	github.com/usbarmory/GoTEE v0.0.0-20250828084517-82e4c7269447
 	github.com/usbarmory/imx-enet v0.0.0-20240304151238-5b3010d57ea3
-	github.com/usbarmory/tamago v0.0.0-20250507084546-5652946876c4
+	github.com/usbarmory/tamago v0.0.0-20250817112432-96c980fc2b68
 	go.mercari.io/go-dnscache v0.3.0
 	golang.org/x/crypto v0.41.0
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
