@@ -1,6 +1,6 @@
 module github.com/transparency-dev/armored-witness-applet
 
-go 1.24.6
+go 1.25.0
 
 require (
 	github.com/beevik/ntp v1.4.3
@@ -17,7 +17,7 @@ require (
 	github.com/transparency-dev/witness v0.0.0-20250908091815-8e1ce7f27aee
 	github.com/usbarmory/GoTEE v0.0.0-20250828084517-82e4c7269447
 	github.com/usbarmory/imx-enet v0.0.0-20250828084924-7bcc4d4a4518
-	github.com/usbarmory/tamago v0.0.0-20250817112432-96c980fc2b68
+	github.com/usbarmory/tamago v0.0.0-20250828093603-d8ac0d8fb083
 	go.mercari.io/go-dnscache v0.3.0
 	golang.org/x/crypto v0.41.0
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
