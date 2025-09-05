@@ -242,7 +242,7 @@ func runNTP(ctx context.Context) chan bool {
 				klog.Errorf("got invalid time from NTP server: %v", err)
 				continue
 			}
-			applet.ARM.SetTimer(ntpR.Time.UnixNano())
+			applet.ARM.SetTime(ntpR.Time.UnixNano())
 
 			// We've got some sort of sensible time set now, so check in with NTP
 			// much less frequently.
