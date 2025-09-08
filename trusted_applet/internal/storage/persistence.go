@@ -88,19 +88,6 @@ func (p *SlotPersistence) Init(_ context.Context) error {
 	return nil
 }
 
-// Logs returns the IDs of all logs that have checkpoints that can
-// be read.
-func (p *SlotPersistence) Logs(_ context.Context) ([]string, error) {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-
-	r := make([]string, 0, len(p.idToSlot))
-	for k := range p.idToSlot {
-		r = append(r, k)
-	}
-	return r, nil
-}
-
 // Latest returns the last recorded checkpoint for the given logID, or an
 // `codes.NotFound` error if no such checkpoint has been recorded.
 //
