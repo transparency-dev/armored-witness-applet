@@ -290,7 +290,7 @@ func rx(buf []byte) {
 func tx() (buf []byte) {
 	var pkt *stack.PacketBuffer
 
-	if pkt = iface.NIC.Link.Read(); pkt.IsNil() {
+	if pkt = iface.NIC.Link.Read(); pkt == nil {
 		return
 	}
 
