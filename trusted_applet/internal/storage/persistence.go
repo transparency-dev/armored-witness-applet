@@ -15,6 +15,7 @@
 package storage
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -29,6 +30,14 @@ import (
 
 const (
 	mappingConfigSlot = 0
+)
+
+var (
+	// rawRecordMagic is a prefix which denotes that the bytes following it are stored "raw",
+	// as opposed to in a YAML serialised logRecord struct.
+	// The magic string contains a "control" character which the YAML spec explicitly forbids,
+	// protecting against misinterpretation.
+	rawRecordMagic = []byte("\x01RAW")
 )
 
 // SlotPersistence is an implementation of the witness Persistence
@@ -88,6 +97,37 @@ func (p *SlotPersistence) Init(_ context.Context) error {
 	return nil
 }
 
+// marshalCheckpoint knows how to serialise a checkpoint for storage by the
+// persistence.
+func marshalCheckpoint(cpRaw []byte) []byte {
+	// Return a new slice which contains the magic raw prefix followed directly by the checkpoint bytes.
+	return append(append(make([]byte, 0, len(rawRecordMagic)+len(cpRaw)), rawRecordMagic...), cpRaw...)
+}
+
+// unmarchalCheckpoint knows how to unmarshal a checkpoint which has been
+// stored by the persistence.
+//
+// Think very carefully before removing this method - there _could_ be a checkpoint which
+// was stored back when the YAML encoding was used, and then never updated (e.g. because
+// the log never grew), until suddenly it _did_ grow.
+func unmarshalCheckpoint(b []byte) ([]byte, error) {
+	// Optimistically check whether this record has been updated to not use YAML,
+	// and simply return the bytes as-is if so:
+	if b, ok := bytes.CutPrefix(b, rawRecordMagic); ok {
+		return b, nil
+	}
+	// Othersize fall-back to reading legacy encoding.
+	lr := struct {
+		Checkpoint []byte
+		Proof      []byte
+	}{}
+	if err := yaml.Unmarshal(b, &lr); err != nil {
+		klog.Warningf("Unmarshal failed: %v", err)
+		return nil, fmt.Errorf("failed to unmarshal data: %v", err)
+	}
+	return lr.Checkpoint, nil
+}
+
 // Latest returns the last recorded checkpoint for the given logID, or an
 // `codes.NotFound` error if no such checkpoint has been recorded.
 //
@@ -109,12 +149,7 @@ func (p *SlotPersistence) Latest(_ context.Context, logID string) ([]byte, error
 	if len(b) == 0 {
 		return nil, status.Error(codes.NotFound, "no checkpoint for log")
 	}
-	lr := logRecord{}
-	if err := yaml.Unmarshal(b, &lr); err != nil {
-		klog.Warningf("Unmarshal failed: %v", err)
-		return nil, fmt.Errorf("failed to unmarshal data: %v", err)
-	}
-	return lr.Checkpoint, nil
+	return unmarshalCheckpoint(b)
 }
 
 // Update allows for storing a new checkpoint for a given LogID.
@@ -135,28 +170,16 @@ func (p *SlotPersistence) Update(_ context.Context, logID string, f func(current
 		return fmt.Errorf("failed to read data: %v", err)
 	}
 
-	var currCP []byte
-	if len(b) > 0 {
-		lr := logRecord{}
-		if err := yaml.Unmarshal(b, &lr); err != nil {
-			klog.Warningf("Unmarshal failed: %v", err)
-			return fmt.Errorf("failed to unmarshal data: %v", err)
-		}
-		currCP = lr.Checkpoint
+	currCP, err := unmarshalCheckpoint(b)
+	if err != nil {
+		return fmt.Errorf("unmarshalCheckpoint: %v", err)
 	}
 
 	newCP, err := f(currCP)
 	if err != nil {
 		return err
 	}
-
-	lrRaw, err := yaml.Marshal(&logRecord{Checkpoint: newCP})
-	if err != nil {
-		klog.Warningf("marshal failed: %v", err)
-		return fmt.Errorf("failed to marshal data: %v", err)
-	}
-
-	if err := s.CheckAndWrite(t, lrRaw); err != nil {
+	if err := s.CheckAndWrite(t, marshalCheckpoint(newCP)); err != nil {
 		klog.Warningf("Write failed: %v", err)
 		return fmt.Errorf("failed to write data: %v", err)
 	}
@@ -182,12 +205,6 @@ func (p *SlotPersistence) logSlot(logID string, create bool) (uint, error) {
 		klog.V(2).Infof("Added mapping %q -> %d", logID, i)
 	}
 	return i, nil
-}
-
-// TODO(al): get rid of this.
-type logRecord struct {
-	Checkpoint []byte
-	Proof      []byte
 }
 
 // populateMap reads the logID -> slot mapping from storage.

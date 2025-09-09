@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package storage provides support for accessing the SD/eMMC storage provided
+// Package mmc provides support for accessing the SD/eMMC storage provided
 // by the USB Armory.
 // Note that these are very low-level primitives, and care must be taken when
 // using them not to overwrite existing data (e.g. the unikernel itself!)
-package storage
+package mmc
 
 import (
 	"runtime"

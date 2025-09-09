@@ -40,6 +40,7 @@ import (
 	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
 
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/storage"
+	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/storage/mmc"
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/storage/slots"
 	"github.com/transparency-dev/armored-witness-common/release/firmware/update"
 	"github.com/transparency-dev/armored-witness-os/api"
@@ -452,7 +453,7 @@ func openStorage() *slots.Partition {
 	}
 	klog.Infof("CardInfo: %+v", info)
 	// dev is our access to the MMC storage.
-	dev := &storage.Device{CardInfo: &info}
+	dev := &mmc.Device{CardInfo: &info}
 	bs := dev.BlockSize()
 	geo := slots.Geometry{
 		Start:  slotsPartitionStartBlock,
