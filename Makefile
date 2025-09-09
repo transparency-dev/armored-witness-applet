@@ -22,7 +22,7 @@ REST_DISTRIBUTOR_BASE_URL ?= https://api.transparency.dev
 BASTION_ADDR ?= 
 
 TAMAGO_SEMVER = $(shell [ -n "${TAMAGO}" -a -x "${TAMAGO}" ] && ${TAMAGO} version | sed 's/.*go\([0-9]\.[0-9]*\.[0-9]*\).*/\1/')
-MINIMUM_TAMAGO_VERSION=1.24.6
+MINIMUM_TAMAGO_VERSION=1.25.0
 
 SHELL = /usr/bin/env bash
 
