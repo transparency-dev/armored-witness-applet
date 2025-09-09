@@ -101,7 +101,7 @@ func (p *SlotPersistence) Init(_ context.Context) error {
 // persistence.
 func marshalCheckpoint(cpRaw []byte) []byte {
 	// Return a new slice which contains the magic raw prefix followed directly by the checkpoint bytes.
-	return append(append([]byte{}, rawRecordMagic...), cpRaw...)
+	return append(append(make([]byte, 0, len(rawRecordMagic)+len(cpRaw)), rawRecordMagic...), cpRaw...)
 }
 
 // unmarchalCheckpoint knows how to unmarshal a checkpoint which has been
