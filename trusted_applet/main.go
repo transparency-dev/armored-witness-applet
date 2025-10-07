@@ -365,6 +365,7 @@ func runWithNetworking(ctx context.Context) error {
 		RestDistributorBaseURL: RestDistributorBaseURL,
 		FeedInterval:           30 * time.Second,
 		DistributeInterval:     30 * time.Second,
+		DistributeRateLimit:    0.1,
 	}
 	if BastionAddr != "" {
 		klog.Infof("Bastion host %q configured", BastionAddr)
