@@ -22,6 +22,7 @@ import (
 	"sync"
 
 	"github.com/transparency-dev/armored-witness-applet/trusted_applet/internal/storage/slots"
+	logfmt "github.com/transparency-dev/formats/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gopkg.in/yaml.v3"
@@ -132,7 +133,8 @@ func unmarshalCheckpoint(b []byte) ([]byte, error) {
 // `codes.NotFound` error if no such checkpoint has been recorded.
 //
 // Implements the omniwitness LogPersistence interface.
-func (p *SlotPersistence) Latest(_ context.Context, logID string) ([]byte, error) {
+func (p *SlotPersistence) Latest(_ context.Context, origin string) ([]byte, error) {
+	logID := logfmt.ID(origin)
 	i, err := p.logSlot(logID, false)
 	if err != nil {
 		return nil, err
@@ -155,7 +157,8 @@ func (p *SlotPersistence) Latest(_ context.Context, logID string) ([]byte, error
 // Update allows for storing a new checkpoint for a given LogID.
 //
 // Implements the omniwitness LogPersistence interface.
-func (p *SlotPersistence) Update(_ context.Context, logID string, f func(current []byte) ([]byte, error)) error {
+func (p *SlotPersistence) Update(_ context.Context, origin string, f func(current []byte) ([]byte, error)) error {
+	logID := logfmt.ID(origin)
 	i, err := p.logSlot(logID, true)
 	if err != nil {
 		return err
