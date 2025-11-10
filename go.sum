@@ -89,8 +89,8 @@ github.com/usbarmory/GoTEE v0.0.0-20250828084517-82e4c7269447/go.mod h1:Bti6xLAo
 github.com/usbarmory/imx-enet v0.0.0-20250828084924-7bcc4d4a4518 h1:AyH/LDHBZFBqBN+nUYyxaP3ThVVXZqyX7ZUN/ClU5Qk=
 github.com/usbarmory/imx-enet v0.0.0-20250828084924-7bcc4d4a4518/go.mod h1:xv0Cs172SG66RZYFUX7XuZCuvHpiyE9Jgbz08Pwobqk=
 github.com/usbarmory/tamago v0.0.0-20220823080407-04f05cf2a5a3/go.mod h1:Lok79mjbJnhoBGqhX5cCUsZtSemsQF5FNZW+2R1dRr8=
-github.com/usbarmory/tamago v1.25.1 h1:lZPvmWttOyBgmt75J2/drxtMh1oicFBR8xYOk5ZHsiI=
-github.com/usbarmory/tamago v1.25.1/go.mod h1:F10GriCplrO5/E/B4HFdtIN1nZ3LsjDdwM/GBiH8o+o=
+github.com/usbarmory/tamago v1.25.4 h1:uskAc2ROOhlIpQugG0f13fvYyEZjna2J35JiLKQY+iE=
+github.com/usbarmory/tamago v1.25.4/go.mod h1:CySGMX26pVXp1CMBxA5bq52eXEWqXqr+mWcZQW2e54c=
 go.mercari.io/go-dnscache v0.3.0 h1:x5CLQvIHHPm7uq1A3ihAHAyynpUnEpHmj+sfbPjK7ec=
 go.mercari.io/go-dnscache v0.3.0/go.mod h1:k+iiZhIW/8Lykwr05O5Xms5tOfo42Rz8Hwnts1JUYNE=
 go.opentelemetry.io/auto/sdk v1.1.0 h1:cH53jehLUN6UFLY71z+NDOiNJqDdPRaXzTel0sJySYA=
