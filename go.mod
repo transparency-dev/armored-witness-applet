@@ -19,7 +19,7 @@ require (
 	github.com/usbarmory/imx-enet v0.0.0-20250828084924-7bcc4d4a4518
 	github.com/usbarmory/tamago v1.25.1
 	go.mercari.io/go-dnscache v0.3.0
-	golang.org/x/crypto v0.51.0
+	golang.org/x/crypto v0.52.0
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20230623170555-183630ada7e0
 	golang.org/x/mod v0.35.0
 	google.golang.org/grpc v1.79.3
